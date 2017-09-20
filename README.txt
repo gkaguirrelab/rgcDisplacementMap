@@ -1,9 +1,9 @@
-This directory contains code that calculates functions for retinal ganglion cell displacement based upon empirical measurements of cone and RGC density.
+A set of analysis routines to model the displacement of retinal ganglion cells from their receptive field centers.
 
-The primary function is:
+This repository contains the routine:
 
-	makeDisplacementMap.m
+	PolarToIm.m
 
-A demo script is available that creates figures for all the primary functions:
+which was written by Prakash Manandhar and is part of a matlab central repository:
 
-	demoAndDiagnostics.m
+	https://www.mathworks.com/matlabcentral/fileexchange/17933-polar-to-from-rectangular-transform-of-images
