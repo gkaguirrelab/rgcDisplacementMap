@@ -8,7 +8,7 @@
 	"pathPlacement": "append",
 	"subfolder": "code",
 	"toolboxRoot": "",
-	"type": "include",
+	"type": "git",
 	"update": "",
 	"url": "https://github.com/gkaguirrelab/rgcDisplacementMap.git"
 	}
