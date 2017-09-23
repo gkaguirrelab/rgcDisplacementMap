@@ -26,27 +26,8 @@ if (ispref(toolboxName))
 end
  
 %% Specify project location
-toolboxBaseDir = tbLocateProject(toolboxName);
+toolboxBaseDir = tbLocateToolbox(toolboxName);
 
-% Obtain the Dropbox path
-[~, userID] = system('whoami');
-userID = strtrim(userID);
-switch userID
-    case {'melanopsin' 'pupillab'}
-        dropboxBaseDir = ['/Users/' userID '/Dropbox (Aguirre-Brainard Lab)/'];
-        dataPath = ['/Users/' userID '/Dropbox (Aguirre-Brainard Lab)/MELA_data/'];
-    case {'dhb'}
-        dropboxBaseDir = ['/Users1'  '/Dropbox (Aguirre-Brainard Lab)/'];
-        dataPath = ['/Users1/' '/Dropbox (Aguirre-Brainard Lab)/MELA_data/'];        
-    otherwise
-        dropboxBaseDir = ['/Users/' userID '/Dropbox (Aguirre-Brainard Lab)'];
-        DropBoxDataPath = [dropboxBaseDir '/retData/'];
-        LocalDataPath = [toolboxBaseDir '/data'];
-end
- 
 %% Set preferences for project output
-
-setpref(toolboxName,'mainDir',toolboxBaseDir); % main directory path 
-setpref(toolboxName,'DropBoxDataPath',DropBoxDataPath); % path to data stroed on dropbox
-setpref(toolboxName,'LocalDataPath',LocalDataPath); % path to small file within the git repo 
+setpref(toolboxName,'LocalDataPath',fullfile(toolboxBaseDir,'data')); % path to small file within the git repo 
 end
