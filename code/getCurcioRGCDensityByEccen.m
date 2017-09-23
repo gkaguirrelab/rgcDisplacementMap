@@ -29,7 +29,7 @@ end
 
 % Load the RGC Density Data from Curcio and Allen 1990:
 curcioDataFileName = ...
-    fullfile([getpref('octAnalysisForTOME','LocalDataPath') , '/Curcio_1990_JCompNeurol_GanglionCellTopography/curcio_4meridian.mat']);
+    fullfile([getpref('rgcDisplacementMap','LocalDataPath') , '/Curcio_1990_JCompNeurol_GanglionCellTopography/curcio_4meridian.mat']);
 dataLoad=load(curcioDataFileName);
 curcioRGCdensity_mm = dataLoad.data;
 

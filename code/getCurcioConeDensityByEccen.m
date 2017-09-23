@@ -28,7 +28,7 @@ end
 % Loading this matlab brings the variable "curcioConeDensityPerSqMm" into
 % memory
 curcioConeDataFile = ...
-    fullfile([getpref('octAnalysisForTOME','LocalDataPath') , '/Curcio_1990_JCompNeurol_HumanPhotoreceptorTopography/curcioConeDensityPerSqMm.mat']);
+    fullfile([getpref('rgcDisplacementMap','LocalDataPath') , '/Curcio_1990_JCompNeurol_HumanPhotoreceptorTopography/curcioConeDensityPerSqMm.mat']);
 load(curcioConeDataFile);
 
 meridianNames = {'superior','inferior','temporal','nasal'};

@@ -15,18 +15,18 @@ function OLFlickerSensitivityLocalHook
 
  
 %% Define project
-projectName = 'octAnalysisForTOME';
+toolboxName = 'rgcDisplacementMap';
  
 %% Say hello
-fprintf('Running % local hook\n',projectName);
+fprintf('Running % local hook\n',toolboxName);
  
 %% Clear out old preferences
-if (ispref(projectName))
-    rmpref(projectName);
+if (ispref(toolboxName))
+    rmpref(toolboxName);
 end
  
 %% Specify project location
-projectBaseDir = tbLocateProject(projectName);
+toolboxBaseDir = tbLocateProject(toolboxName);
 
 % Obtain the Dropbox path
 [~, userID] = system('whoami');
@@ -41,12 +41,12 @@ switch userID
     otherwise
         dropboxBaseDir = ['/Users/' userID '/Dropbox (Aguirre-Brainard Lab)'];
         DropBoxDataPath = [dropboxBaseDir '/retData/'];
-        LocalDataPath = [projectBaseDir '/data'];
+        LocalDataPath = [toolboxBaseDir '/data'];
 end
  
 %% Set preferences for project output
 
-setpref(projectName,'mainDir',projectBaseDir); % main directory path 
-setpref(projectName,'DropBoxDataPath',DropBoxDataPath); % path to data stroed on dropbox
-setpref(projectName,'LocalDataPath',LocalDataPath); % path to small file within the git repo 
+setpref(toolboxName,'mainDir',toolboxBaseDir); % main directory path 
+setpref(toolboxName,'DropBoxDataPath',DropBoxDataPath); % path to data stroed on dropbox
+setpref(toolboxName,'LocalDataPath',LocalDataPath); % path to small file within the git repo 
 end
