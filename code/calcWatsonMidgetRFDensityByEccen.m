@@ -3,6 +3,10 @@ function [ midgetRFDensity_degSq ] = calcWatsonMidgetRFDensityByEccen(supportPos
 %
 % This function implements Equation 8 of Watson 2014.
 %
+% NOTE: Watson's paper has the labels for the nasal and temporal retina
+% switched. In this routine we return the values that Watson labeled
+% "nasal" as the temporal retina, and vice-a-versa.
+%
 % Inputs
 %   supportPosDeg - the positions (in degrees of visual angle) from the
 %       fovea at which to calculate the midget receptive field density
@@ -23,20 +27,20 @@ end
 
 % Taken from Table 1 of Watson
 switch polarAngle
-    case 0 % nasal
-        a = 0.9729;
-        r2 = 1.084;
-        re = 7.633;        
+    case 0 % actual nasal (labeled temporal in Watson 2014)
+        a = 0.9851;
+        r2 = 1.058;
+        re = 22.14;        
         
     case 90 % superior
         a = 0.9935;
         r2 = 1.035;
         re = 16.35;        
         
-    case 180 % temporal
-        a = 0.9851;
-        r2 = 1.058;
-        re = 22.14;        
+    case 180 % actual temporal (labeled nasal in Watson 2014)
+        a = 0.9729;
+        r2 = 1.084;
+        re = 7.633;        
         
     case 270 % inferior
         a = 0.996;
