@@ -145,7 +145,7 @@ for mm = 1:length(meridianAngles)
     mRGCDensityOverRegularSupport = ...
         @(fitParams) transformRGCToMidgetRGCDensity(regularSupportPosDeg,RGCDensityFit(regularSupportPosDeg)',...
         'recipFitParams',fitParams(3:5));
-    % Define anonymous function for the cumulative sum of mRF density
+    % Define anonymous function for the cumulative sum of mRGC density
     mRGC_cumulative = @(fitParams) calcCumulative(regularSupportPosDeg, mRGCDensityOverRegularSupport(fitParams));
     
     
