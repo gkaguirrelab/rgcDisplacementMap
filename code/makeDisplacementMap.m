@@ -103,8 +103,6 @@ angleBase = [p.Results.cardinalMeridianAngles 360];
 targetByAngleFit = fit(angleBase',targetValues','pchipinterp');
 targetDisplacementDegByMeridian = targetByAngleFit(meridianAngles);
 
-%% NEED TO CREATE HERE A SET OF INTERPOLATED DISPLACEMENT TARGET VALUES
-
 
 %% Derive parameters for the transformation of RGC density to mRGC density
 [ rgcInitialTransformParams ] = developMidgetRGCFractionModel();
@@ -139,11 +137,11 @@ for mm = 1:length(meridianAngles)
     % density.
     
     % Obtain a spline fit to the empirical RGC density data of Curcio 1990
-    RGCDensityFit = getSplineFitToRGCDensity(meridianAngles(mm));
+    rgcDensityFit = getSplineFitToRGCDensity(meridianAngles(mm));
     % Create an anonymous function that returns mRGC density as a function of
     % RGC density, with the transform defined by the last three fitParams
     mRGCDensityOverRegularSupport = ...
-        @(fitParams) transformRGCToMidgetRGCDensity(regularSupportPosDeg,RGCDensityFit(regularSupportPosDeg)',...
+        @(fitParams) transformRGCToMidgetRGCDensity(regularSupportPosDeg,rgcDensityFit(regularSupportPosDeg)',...
         'recipFitParams',fitParams(3:5));
     % Define anonymous function for the cumulative sum of mRGC density
     mRGC_cumulative = @(fitParams) calcCumulative(regularSupportPosDeg, mRGCDensityOverRegularSupport(fitParams));
