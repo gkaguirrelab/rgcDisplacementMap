@@ -7,7 +7,7 @@ clc
 % make the displacement map using the default params
 fprintf('*** makeDisplacementMap\n');
 
-[ displacementMapDeg, fitParams, meridianAngles, rgcDisplacementEachMeridian, mRGC_cumulativeEachMeridian, mRF_cumulativeEachMeridian ] = ...
+[ displacementMapDeg, fitParams, meridianAngles, rgcDisplacementEachMeridian, mRGC_cumulativeEachMeridian, mRF_cumulativeEachMeridian, convergenceEccen] = ...
     makeDisplacementMap('verbose',true);
 
 fprintf('*** done\n');
