@@ -1,4 +1,4 @@
-function [ displacementMapDeg, fitParams, meridianAngles, rgcDisplacementEachMeridian, mRGC_cumulativeEachMeridian, mRF_cumulativeEachMeridian ] = makeDisplacementMap( varargin )
+function [ displacementMapDeg, fitParams, meridianAngles, rgcDisplacementEachMeridian, mRGC_cumulativeEachMeridian, mRF_cumulativeEachMeridian, convergenceEccen] = makeDisplacementMap( varargin )
 % makeDisplacementMap( varargin )
 %
 % This routine models retinal ganglion cell displacement.
@@ -182,8 +182,8 @@ for mm = 1:length(meridianAngles)
     if p.Results.verbose
         zeroPoints = find(rgcDisplacementEachMeridian(mm,:)==0);
         convergenceIdx = find(regularSupportPosDeg(zeroPoints) > 2,1);
-        convergenceEccen = regularSupportPosDeg(zeroPoints(convergenceIdx));
-        outLine = ['Polar angle: ' num2str(meridianAngles(mm)) ', max RGC displacement: ' num2str(max(rgcDisplacementEachMeridian(mm,:))) ', target convergence: ' num2str(targetDisplacementDegByMeridian(mm)) ', found convergence: ' num2str(convergenceEccen) '\n'];
+        convergenceEccen(mm) = regularSupportPosDeg(zeroPoints(convergenceIdx));
+        outLine = ['Polar angle: ' num2str(meridianAngles(mm)) ', max RGC displacement: ' num2str(max(rgcDisplacementEachMeridian(mm,:))) ', target convergence: ' num2str(targetDisplacementDegByMeridian(mm)) ', found convergence: ' num2str(convergenceEccen(mm)) '\n'];
         fprintf(outLine);
     end
     
