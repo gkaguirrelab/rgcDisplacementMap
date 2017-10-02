@@ -28,7 +28,7 @@ regularSupportPosDeg = ...
     0:p.Results.sampleResolutionDegrees:p.Results.maxModeledEccentricity;
 
 % Get the displacement map
-[ ~, fitParams, meridianAngles, rgcDisplacementEachMeridian, mRGC_cumulativeEachMeridian, mRF_cumulativeEachMeridian ] = makeDisplacementMap(  );
+[ displacementMapDeg, fitParams, meridianAngles, rgcDisplacementEachMeridian, mRGC_cumulativeEachMeridian, mRF_cumulativeEachMeridian ] = makeDisplacementMap(  );
 
 %% Loop over the meridians
 % Create cone density and RGC density polar maps
@@ -69,7 +69,14 @@ figure; imagesc(convertPolarMapToImageMap(rgcDisplacementEachMeridian, imRdim));
 figure; imagesc(convertPolarMapToImageMap(mRGC_cumulativeEachMeridian, imRdim));
 figure; imagesc(convertPolarMapToImageMap(mRF_cumulativeEachMeridian, imRdim));
 
-% create a
+% create a sample space for the maps
+eccenExtent = p.Results.maxModeledEccentricity - (1/p.Results.displacementMapPixelsPerDeg)/2;
+smps = -eccenExtent:1/p.Results.displacementMapPixelsPerDeg:eccenExtent;
+[sampleBaseX,sampleBaseY] = meshgrid(smps,smps);
+
+% warp the mRGCDensityEachMeridian to cone space
+warp_mRGC = warpImage( convertPolarMapToImageMap(rgcDensityEachMeridian./mRFtoConeDensityEachMeridian, imRdim), displacementMapDeg, sampleBaseX, sampleBaseY );
+figure; imagesc(warp_mRGC);
 
 end % function
 
@@ -81,14 +88,3 @@ imR = PolarToIm (imP, 0, 1, imRdim, imRdim);
 imageMap = imrotate(imR .* maxMapDensity,-90);
 end
 
-% function displacedValues = applyDisplacement(originalValues, displacementInDeg, regularSupportPosDeg)
-% 
-% countsPerRing = calcCumulative(regularSupportPosDeg, originalValues);
-% displacedValues=zeros(size(countsPerRing));
-% [~, displacedIdx] = arrayfun(@(x) min(abs(x-regularSupportPosDeg)), regularSupportPosDeg-displacementInDeg);
-% displacedIdx = displacedIdx-1;
-% targetList = unique(displacedIdx);
-% targetList = targetList(targetList > 0);
-% piled = arrayfun(@(x) sum(countsPerRing(displacedIdx==targetList(x))), 1:1:length(targetList));
-% displacedValues(targetList)=piled;
-% end
