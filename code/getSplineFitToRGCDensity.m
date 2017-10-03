@@ -27,9 +27,8 @@ p = inputParser;
 p.addRequired('polarAngle',@isnumeric);
 
 % Optional analysis params
-p.addParameter('meridianNames',{'Nasal' 'Superior' 'Temporal' 'Inferior'},@iscell);
+p.addParameter('meridianNames',{'nasal' 'superior' 'temporal' 'inferior'},@iscell);
 p.addParameter('meridianAngles',[0, 90, 180, 270],@isnumeric);
-p.addParameter('meridianSymbols',{'.','x','o','^'},@iscell);
 p.addParameter('meridiansForKnotDefinition',[3,4],@isnumeric);
 p.addParameter('splineKnots',20,@isnumeric);
 p.addParameter('splineOrder',4,@isnumeric);
@@ -57,8 +56,8 @@ for mm=p.Results.meridiansForKnotDefinition(1):p.Results.meridiansForKnotDefinit
     isvalididx=find(~isnan(rgcDensitySqDeg));
     rgcNativeSupportPosDeg = rgcNativeSupportPosDeg(isvalididx);
     rgcDensitySqDeg = rgcDensitySqDeg(isvalididx);
-    aggregatePosition=[aggregatePosition rgcNativeSupportPosDeg'];
-    aggregateDensity = [aggregateDensity rgcDensitySqDeg'];
+    aggregatePosition=[aggregatePosition rgcNativeSupportPosDeg];
+    aggregateDensity = [aggregateDensity rgcDensitySqDeg];
 end
 
 % perform a least-squares spline fit with the specified knots and order

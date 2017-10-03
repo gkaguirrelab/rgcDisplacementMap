@@ -1,34 +1,50 @@
+function validation_MeridianPlots(varargin)
+% Create plots that illustrate the behavior of the model along the cardinal
+% merdians
 
-% clear out the workspace
+
+%% Parse input and define variables
+p = inputParser; p.KeepUnmatched = true;
+
+% Optional anaysis params
+p.addParameter('sampleResolutionDegrees',0.01,@isnumeric);
+p.addParameter('maxModeledEccentricity',30,@isnumeric);
+p.addParameter('meridianAngleResolutionDeg',90,@isnumeric);
+p.addParameter('displacementMapPixelsPerDeg',10,@isnumeric);
+p.addParameter('pathToPlotOutputDir','~/Desktop/rgcDisplacementMapPlots',@ischar);
+
+% Optional display and ouput params
+p.addParameter('verbose',false,@islogical);
+p.addParameter('savePlots',true,@islogical);
+
+% parse
+p.parse(varargin{:})
+
+
+%% Setup
 close all
-clear all
-clc
 
-% make the displacement map using the default params
-fprintf('*** makeDisplacementMap\n');
+% check or make a directory for output
+if p.Results.savePlots
+    if exist(p.Results.pathToPlotOutputDir,'dir')==0
+        mkdir(p.Results.pathToPlotOutputDir);
+    end
+end
 
-[ displacementMapDeg, fitParams, meridianAngles, rgcDisplacementEachMeridian, mRGC_cumulativeEachMeridian, mRF_cumulativeEachMeridian, convergenceEccen] = ...
-    makeDisplacementMap('verbose',true);
+% Prepare the regular eccentricity support base
+regularSupportPosDeg = ...
+    0:p.Results.sampleResolutionDegrees:p.Results.maxModeledEccentricity;
 
-fprintf('*** done\n');
-
-% Plot the displacement map
-figure
-maxDisplacementDeg = max(displacementMapDeg(:));
-climVals = [0,ceil(maxDisplacementDeg)];
-imagesc(displacementMapDeg, climVals);
-c = colorbar;
-c.Label.String='Radial RGC displacement [deg]';
-xlabel('Position [deg] temporal --> nasal');
-ylabel('Position [deg] inferior --> superior');
-numTicks=length(xticks);
-k=linspace(-1*30,30,numTicks+1);
-xticklabels(string(k(2:end)))
-yticklabels(string(k(2:end)))
+% make the displacement map for the cardinal meridians
+[ ~, fitParams, meridianAngles, rgcDisplacementEachMeridian, mRGC_cumulativeEachMeridian, mRF_cumulativeEachMeridian ] = ...
+    makeDisplacementMap(...
+    'sampleResolutionDegrees', p.Results.sampleResolutionDegrees, ...
+    'maxModeledEccentricity', p.Results.maxModeledEccentricity, ...
+    'meridianAngleResolutionDeg', p.Results.meridianAngleResolutionDeg, ...
+    'displacementMapPixelsPerDeg', p.Results.displacementMapPixelsPerDeg);
 
 % Plot the cumulatives and displacements across meridians
-figure
-regularSupportPosDeg = 0:0.01:30;
+figHandle = figure();
 for mm = 1:length(meridianAngles)
     
     % plot the displacement
@@ -57,17 +73,33 @@ for mm = 1:length(meridianAngles)
     hold off
     drawnow
 end
+if p.Results.savePlots
+    fileOutPath = fullfile(p.Results.pathToPlotOutputDir,'cumulativeAndDisplaceByMeridian.pdf');
+    saveas(figHandle,fileOutPath)
+    close(figHandle);
+end
+
 
 % Show the cone --> mRF model
-developMidgetRFFractionModel( 'makePlots', true );
+[ ~, figHandle ] = developMidgetRFFractionModel( 'makePlots', true );
+if p.Results.savePlots
+    fileOutPath = fullfile(p.Results.pathToPlotOutputDir,'cone --> mRF RatioModel.pdf');
+    saveas(figHandle,fileOutPath)
+    close(figHandle);
+end
 
 % Show the RGC --> mRGC model
-developMidgetRGCFractionModel( 'makePlots', true );
+[ ~, figHandle ] = developMidgetRGCFractionModel( 'makePlots', true );
+if p.Results.savePlots
+    fileOutPath = fullfile(p.Results.pathToPlotOutputDir,'RGC --> mRGC RatioModel.pdf');
+    saveas(figHandle,fileOutPath)
+    close(figHandle);
+end
 
 % Plot the spline cone density fits
-figure
+figHandle = figure();
 cardinalMeridianAngles=[0 90 180 270];
-meridianColors={'k','r','g','b'};
+meridianColors={'r','b','g','k'};
 subplot(1,2,1)
 for mm=1:4
     [coneDensitySqDeg, coneNativeSupportPosDeg] = getCurcioConeDensityByEccen(cardinalMeridianAngles(mm));
@@ -94,12 +126,17 @@ for mm=1:4
     hold on
 end
 legend(num2str(interpolarMeridianAngles),'Location','southwest')
+if p.Results.savePlots
+    fileOutPath = fullfile(p.Results.pathToPlotOutputDir,'coneDensitySplineModel.pdf');
+    saveas(figHandle,fileOutPath)
+    close(figHandle);
+end
 
 
 % Plot the spline RGC density fits
-figure
+figHandle = figure();
 cardinalMeridianAngles=[0 90 180 270];
-meridianColors={'k','r','g','b'};
+meridianColors={'r','b','g','k'};
 subplot(1,2,1)
 for mm=1:4
     [RGCDensitySqDeg, RGCNativeSupportPosDeg] = getCurcioRGCDensityByEccen(cardinalMeridianAngles(mm));
@@ -127,12 +164,17 @@ for mm=1:4
     hold on
 end
 legend(num2str(interpolarMeridianAngles),'Location','southwest')
+if p.Results.savePlots
+    fileOutPath = fullfile(p.Results.pathToPlotOutputDir,'rgcDensitySplineModel.pdf');
+    saveas(figHandle,fileOutPath)
+    close(figHandle);
+end
 
 
 %% Plot the mRGC fraction for the cardinal meridians
-figure
+figHandle = figure();
 cardinalMeridianAngles=[0 90 180 270];
-meridianColors={'k','r','g','b'};
+meridianColors={'r','b','g','k'};
 
 for mm = 1:4
     
@@ -160,7 +202,7 @@ for mm = 1:4
     
     % Plot our midget fraction
     subplot(1,2,2);
-    [ ~, midgetFraction_ours ] = transformRGCToMidgetRGCDensity( RGCNativeSupportPosDeg', RGCDensitySqDeg', 'recipFitParams', fitParams(meridianIdx,3:5) );
+    [ ~, midgetFraction_ours ] = transformRGCToMidgetRGCDensity( RGCNativeSupportPosDeg, RGCDensitySqDeg, 'recipFitParams', fitParams(meridianIdx,3:5) );
     plot(RGCNativeSupportPosDeg,midgetFraction_ours,'-','Color',meridianColors{mm});
     hold on
     ylim([0 1]);
@@ -171,13 +213,17 @@ for mm = 1:4
     pbaspect([2 1 1]);
     drawnow
 end
-
+if p.Results.savePlots
+    fileOutPath = fullfile(p.Results.pathToPlotOutputDir,'mRGCFractionByMeridian.pdf');
+    saveas(figHandle,fileOutPath)
+    close(figHandle);
+end
 
 %% Plots related to midget RF density
 
-figure
+figHandle = figure();
 cardinalMeridianAngles=[0 90 180 270];
-meridianColors={'k','r','g','b'};
+meridianColors={'r','b','g','k'};
 
 for mm = 1:4
     
@@ -242,3 +288,10 @@ for mm = 1:4
     drawnow
     
 end
+if p.Results.savePlots
+    fileOutPath = fullfile(p.Results.pathToPlotOutputDir,'mRFDensityAndRatioByMeridian.pdf');
+    saveas(figHandle,fileOutPath)
+    close(figHandle);
+end
+
+end % function
