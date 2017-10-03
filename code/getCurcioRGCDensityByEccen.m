@@ -1,61 +1,65 @@
-function [ rgcDensitySqDeg, supportPosDeg ] = getCurcioRGCDensityByEccen(polarAngle)
-% getCurcioMidgetRGCDensityByEccen(angle)
+function [rgcDensitySqDeg, supportPosDeg] = getCurcioRGCDensityByEccen(polarAngle)
+% getCurcioRGCDensityByEccen(polarAngle)
 %
+% This routine returns the RGC density data reported in:
+%
+%   Curcio, Christine A., and Kimberly A. Allen. "Topography of ganglion
+%   cells in human retina." Journal of comparative Neurology 300.1 (1990):
+%   5-25.
+% 
 % Curcio and Allen obtained measurements of the density of all RGC classes
 % within 6 human retinas at a set of positions relative to the fovea. These
 % data were provided online in 2013.
-%
+
 % Here, we load these data and convert from mm to degrees.
-% This routine does not adjust for the midget fraction at each eccentricity
 %
-% Curcio and Allen 1990 reference frame is the retinal feild
-%       Data loaded from .xml is in the retinal coordinate frame
-%       No extra steps neded to reference the data.
-%
-% Inputs
-%   polarAngle - the meridian to evaluate. Acceptable values are: 
-%       (0=nasal; 90=superior; 180=temporal; 270=inferior)
-%
-% Outputs
+% Inputs:
+%   polarAngle - The desired angle of the density function on the retinal field.
+%                (0=nasal;90=superior;180=temporal;270=inferior)
+% Outputs:
 %   rgcDensitySqDeg - the density (counts per square
 %       degree) of RGCs at each of the positions
 %   supportPosDeg - the positions (in degrees of visual angle) from the
-%       fovea at which the RGC density is defined
+%       fovea at which the cone density is defined
+%
 
 % Check the input
 if sum([0 90 180 270]==polarAngle) ~= 1
-    error('The Curcio and Allen data are defined only for the cardinal meridia');
+    error('The Curcio RGC data are defined only for the cardinal meridia');
 end
 
-% Load the RGC Density Data from Curcio and Allen 1990:
-curcioDataFileName = ...
-    fullfile([getpref('rgcDisplacementMap','LocalDataPath') , '/Curcio_1990_JCompNeurol_GanglionCellTopography/curcio_4meridian.mat']);
-dataLoad=load(curcioDataFileName);
-curcioRGCdensity_mm = dataLoad.data;
+%% Load the RGC Density Data from Curcio et al 1990:
+% Curcio and Allen obtained measurements of the density of RGCs
+% within 6 human retinas at a set of positions relative to the fovea.
+% Loading this matlab brings the variable "curcioRGCDensityPerSqMm" into
+% memory
+curcioRGCDataFile = ...
+    fullfile([getpref('rgcDisplacementMap','LocalDataPath') , '/Curcio_1990_JCompNeurol_GanglionCellTopography/curcioRGCDensityPerSqMm.mat']);
+load(curcioRGCDataFile);
 
-% The first column of the data  defines the distance in mm from the fovea
-%  along each of the radials for which we have density measurements. Obtain
-%  this and convert to degrees
-supportPosMm  = curcioRGCdensity_mm(:,1);
-supportPosDeg = convert_mm_to_deg(supportPosMm);
+meridianNames = {'nasal','superior','temporal','inferior'};
 
-% The other columns contain the mean (across eyes) measurements. Use a
-% switch statement to grab the column corresponding to the passed angle
+% Convert mm to deg, and mm^2 to deg^2
+curcioRGCDensityPerSqDeg.support = ...
+    convert_mm_to_deg(curcioRGCDensityPerSqMm.support);
+
+for mm = 1:length(meridianNames)
+curcioRGCDensityPerSqDeg.(meridianNames{mm}) = ...
+    convert_mmSq_to_degSq(curcioRGCDensityPerSqDeg.support, curcioRGCDensityPerSqMm.(meridianNames{mm}) );
+end
+
+supportPosDeg = curcioRGCDensityPerSqDeg.support;
 switch polarAngle
-    case 0 % nasal
-        rgcDensitySqDeg = convert_mmSq_to_degSq(supportPosDeg,curcioRGCdensity_mm(:,6));
-        
-    case 90 % superior
-        rgcDensitySqDeg = convert_mmSq_to_degSq(supportPosDeg,curcioRGCdensity_mm(:,4));
-        
-    case 180 % temporal
-        rgcDensitySqDeg = convert_mmSq_to_degSq(supportPosDeg,curcioRGCdensity_mm(:,2));
-        
-    case 270 % inferior
-        rgcDensitySqDeg = convert_mmSq_to_degSq(supportPosDeg,curcioRGCdensity_mm(:,8));
-        
+    case 0
+        rgcDensitySqDeg = curcioRGCDensityPerSqDeg.nasal;
+    case 90
+        rgcDensitySqDeg = curcioRGCDensityPerSqDeg.superior;
+    case 180
+        rgcDensitySqDeg = curcioRGCDensityPerSqDeg.temporal;
+    case 270
+        rgcDensitySqDeg = curcioRGCDensityPerSqDeg.inferior;
 end
 
+end % function
 
-end
 
