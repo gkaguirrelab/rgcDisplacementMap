@@ -164,7 +164,7 @@ climVals = [0, 1e4];
 imagesc(mapImage, climVals);
 axis square
 set(gca,'TickLength',[0 0])
-titleString='mRGCwarped_minus_mRF';
+titleString='mRGC_cumulative_warped_minus_mRF_cumulative';
 c = colorbar;
 c.Label.String= titleString ;
 xlabel('Position [deg] nasal --> temporal');
