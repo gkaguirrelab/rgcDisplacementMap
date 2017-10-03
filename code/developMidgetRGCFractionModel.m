@@ -107,7 +107,7 @@ for mm = 1:length(p.Results.meridianAngles)
     RGCDensitySqDeg = RGCDensitySqDeg(isvalididx);
     
     % Fit a spline to the RGC density data
-    RGCDensityFit = fit(nativeSupportPosDeg,RGCDensitySqDeg,'smoothingspline', 'Exclude',find(isnan(RGCDensitySqDeg)),'SmoothingParam', 1);
+    RGCDensityFit = fit(nativeSupportPosDeg',RGCDensitySqDeg','smoothingspline', 'Exclude',find(isnan(RGCDensitySqDeg)),'SmoothingParam', 1);
     
     % Obtain the cumulative RGC function
     RGC_ringcount = calcCumulative(regularSupportPosDeg,RGCDensityFit(regularSupportPosDeg)');
