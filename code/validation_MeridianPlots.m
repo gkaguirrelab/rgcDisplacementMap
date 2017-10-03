@@ -8,7 +8,7 @@ clc
 fprintf('*** makeDisplacementMap\n');
 
 [ displacementMapDeg, fitParams, meridianAngles, rgcDisplacementEachMeridian, mRGC_cumulativeEachMeridian, mRF_cumulativeEachMeridian, convergenceEccen] = ...
-    makeDisplacementMap('verbose',true);
+    makeDisplacementMap('verbose',true, 'meridianAngleResolutionDeg', 90);
 
 fprintf('*** done\n');
 
@@ -67,7 +67,7 @@ developMidgetRGCFractionModel( 'makePlots', true );
 % Plot the spline cone density fits
 figure
 cardinalMeridianAngles=[0 90 180 270];
-meridianColors={'k','r','g','b'};
+meridianColors={'r','b','g','k'};
 subplot(1,2,1)
 for mm=1:4
     [coneDensitySqDeg, coneNativeSupportPosDeg] = getCurcioConeDensityByEccen(cardinalMeridianAngles(mm));
@@ -99,7 +99,7 @@ legend(num2str(interpolarMeridianAngles),'Location','southwest')
 % Plot the spline RGC density fits
 figure
 cardinalMeridianAngles=[0 90 180 270];
-meridianColors={'k','r','g','b'};
+meridianColors={'r','b','g','k'};
 subplot(1,2,1)
 for mm=1:4
     [RGCDensitySqDeg, RGCNativeSupportPosDeg] = getCurcioRGCDensityByEccen(cardinalMeridianAngles(mm));
@@ -132,7 +132,7 @@ legend(num2str(interpolarMeridianAngles),'Location','southwest')
 %% Plot the mRGC fraction for the cardinal meridians
 figure
 cardinalMeridianAngles=[0 90 180 270];
-meridianColors={'k','r','g','b'};
+meridianColors={'r','b','g','k'};
 
 for mm = 1:4
     
@@ -160,7 +160,7 @@ for mm = 1:4
     
     % Plot our midget fraction
     subplot(1,2,2);
-    [ ~, midgetFraction_ours ] = transformRGCToMidgetRGCDensity( RGCNativeSupportPosDeg', RGCDensitySqDeg', 'recipFitParams', fitParams(meridianIdx,3:5) );
+    [ ~, midgetFraction_ours ] = transformRGCToMidgetRGCDensity( RGCNativeSupportPosDeg, RGCDensitySqDeg, 'recipFitParams', fitParams(meridianIdx,3:5) );
     plot(RGCNativeSupportPosDeg,midgetFraction_ours,'-','Color',meridianColors{mm});
     hold on
     ylim([0 1]);
@@ -177,7 +177,7 @@ end
 
 figure
 cardinalMeridianAngles=[0 90 180 270];
-meridianColors={'k','r','g','b'};
+meridianColors={'r','b','g','k'};
 
 for mm = 1:4
     
