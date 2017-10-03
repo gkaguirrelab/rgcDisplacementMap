@@ -1,5 +1,5 @@
-function [ outputImage ] = warpImage( sourceImage, displacementMap, sampleBaseX, sampleBaseY )
-
+function [ outputImage ] = applyDisplacementMap( sourceImage, displacementMap, sampleBaseX, sampleBaseY )
+% applyDisplacementMap
 % Each point in the displacementMap is the magniude of a vector that is
 % directed towards the origin of the image. For each point in the
 % sourceImage, we calculate the distance (radius) of the point from the
@@ -100,19 +100,10 @@ idx = sub2ind([nr nc], ibin, jbin);
 outputImage = accumarray(idx, hiresOutputImage(:), [nr*nc 1], @nanmean);
 outputImage = reshape(outputImage, nr, nc);
 
-% % Plot the results
-% figure
-% imagesc(sourceImage)
-% figure
-% imagesc(outputImage)
+% Need to mirror and then rotate the outputImage counter-clockwise by 90°
+% to restore it to the same orientation as the input image
+outputImage=fliplr(outputImage);
+outputImage = imrotate(outputImage,90);
 
-% Create x,y,z vectors of the outputImage to allow spline fitting
-% valIdx=find(~isnan(outputImage));
-% x=sampleBaseX(valIdx);
-% y=sampleBaseY(valIdx);
-% z=outputImage(valIdx);
-% sf=fit([x, y], z,'thinplateinterp');
-% figure
-% plot(sf,[x,y],z);
 
 end % warp function
