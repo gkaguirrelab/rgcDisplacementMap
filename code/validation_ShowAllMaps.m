@@ -160,7 +160,7 @@ mapImageB = applyDisplacementMap( ...
     displacementMapDeg, sampleBaseX, sampleBaseY);
 mapImage = mapImageA - mapImageB;
 figHandle = figure();
-climVals = [floor(min(min(warpImage))),ceil(max(max(mapImage)))];
+climVals = [floor(min(min(mapImage))),ceil(max(max(mapImage)))];
 imagesc(mapImage, climVals);
 axis square
 set(gca,'TickLength',[0 0])
