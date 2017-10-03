@@ -152,19 +152,19 @@ for vv = 1:length(warpMapNameList)
     end
 end % loop over maps to warp
 
-% Make an image which is the difference between the mRF_cumulative and the
-% warped mRGC_cumulative maps
+% Make an image which is the difference between the warped mRGC_cumulative
+% map and the mRF_cumulative
 mapImageA = convertPolarMapToImageMap(mRF_cumulativeEachMeridian, imRdim);
 mapImageB = applyDisplacementMap( ...
     convertPolarMapToImageMap(mRGC_cumulativeEachMeridian, imRdim), ...
     displacementMapDeg, sampleBaseX, sampleBaseY);
-mapImage = mapImageA - mapImageB;
+mapImage = mapImageB - mapImageA;
 figHandle = figure();
-climVals = [floor(min(min(mapImage))),ceil(max(max(mapImage)))];
+climVals = [0, 1e4];
 imagesc(mapImage, climVals);
 axis square
 set(gca,'TickLength',[0 0])
-titleString='mRF_minus_mRGCwarped';
+titleString='mRGCwarped_minus_mRF';
 c = colorbar;
 c.Label.String= titleString ;
 xlabel('Position [deg] nasal --> temporal');
