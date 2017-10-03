@@ -43,4 +43,4 @@ rgcDensityMapDeg = imrotate(imR .* maxDensityDeg,-90);
 smps = linspace(-1*maxModeledEccentricity,maxModeledEccentricity,length(xSmps)*2);
 
 [sampleBaseX,sampleBaseY] = meshgrid(smps,smps);
-warpedRGC = warpImage( rgcDensityMapDeg, displacementMapDeg, sampleBaseX, sampleBaseY );
+warpedRGC = applyDisplacementMap( rgcDensityMapDeg, displacementMapDeg, sampleBaseX, sampleBaseY );
