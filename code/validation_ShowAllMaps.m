@@ -14,7 +14,7 @@ p.addParameter('displacementMapPixelsPerDeg',10,@isnumeric);
 p.addParameter('pathToPlotOutputDir','~/Desktop/rgcDisplacementMapPlots',@ischar);
 
 % Optional display and ouput params
-p.addParameter('verbose',false,@islogical);
+p.addParameter('verbose',true,@islogical);
 p.addParameter('savePlots',true,@islogical);
 
 % parse
@@ -41,7 +41,8 @@ regularSupportPosDeg = ...
     'sampleResolutionDegrees', p.Results.sampleResolutionDegrees, ...
     'maxModeledEccentricity', p.Results.maxModeledEccentricity, ...
     'meridianAngleResolutionDeg', p.Results.meridianAngleResolutionDeg, ...
-    'displacementMapPixelsPerDeg', p.Results.displacementMapPixelsPerDeg);
+    'displacementMapPixelsPerDeg', p.Results.displacementMapPixelsPerDeg, ...
+    'verbose', p.Results.verbose);
 
 
 %% Loop over the meridians
@@ -71,7 +72,7 @@ for mm = 1:length(meridianAngles)
 end
 
 % Define the image sample base for transform from polar coords
-imRdim = p.Results.maxModeledEccentricity * p.Results.displacementMapPixelsPerDeg * 2;
+imRdim = (p.Results.maxModeledEccentricity * p.Results.displacementMapPixelsPerDeg * 2) -1;
 
 % Show and save the maps
 polarMapNameList = {...
@@ -93,17 +94,16 @@ for vv = 1:length(polarMapNameList)
     climVals = [0,ceil(max(max(mapImage)))];
     imagesc(mapImage, climVals);
     axis square
-    set(gca,'TickLength',[0 0])
+    %    set(gca,'TickLength',[0 0])
     tmp = strsplit(polarMapNameList{vv},'EachMeridian');
     titleString=tmp{1};
     c = colorbar;
-    c.Label.String=[titleString];
+    c.Label.String=titleString;
     xlabel('Position [deg] nasal --> temporal');
     ylabel('Position [deg] inferior --> superior');
-    numTicks=length(xticks);
-    k=linspace(-1*p.Results.maxModeledEccentricity,p.Results.maxModeledEccentricity,numTicks+1);
-    xticklabels(string(k(2:end)))
-    yticklabels(string(k(2:end)))
+    k=(xticks.*(1/p.Results.displacementMapPixelsPerDeg)) + (-1*p.Results.maxModeledEccentricity);
+    xticklabels(string(k))
+    yticklabels(string(k))
     if p.Results.savePlots
         fileOutPath = fullfile(p.Results.pathToPlotOutputDir,[titleString '.pdf']);
         saveas(figHandle,fileOutPath)
@@ -120,7 +120,7 @@ warpMapNameList = {...
 
 % create a sample space for the warped map
 eccenExtent = p.Results.maxModeledEccentricity - (1/p.Results.displacementMapPixelsPerDeg)/2;
-smps = -eccenExtent:1/p.Results.displacementMapPixelsPerDeg:eccenExtent;
+smps = -eccenExtent+(1/p.Results.displacementMapPixelsPerDeg)/2:1/p.Results.displacementMapPixelsPerDeg:eccenExtent-(1/p.Results.displacementMapPixelsPerDeg)/2;
 [sampleBaseX,sampleBaseY] = meshgrid(smps,smps);
 
 % obtain the displacement map
@@ -141,10 +141,9 @@ for vv = 1:length(warpMapNameList)
     c.Label.String=['warped ' titleString ];
     xlabel('Position [deg] nasal --> temporal');
     ylabel('Position [deg] inferior --> superior');
-    numTicks=length(xticks);
-    k=linspace(-1*p.Results.maxModeledEccentricity,p.Results.maxModeledEccentricity,numTicks+1);
-    xticklabels(string(k(2:end)))
-    yticklabels(string(k(2:end)))
+    k=(xticks.*(1/p.Results.displacementMapPixelsPerDeg)) + (-1*p.Results.maxModeledEccentricity);
+    xticklabels(string(k))
+    yticklabels(string(k))
     if p.Results.savePlots
         fileOutPath = fullfile(p.Results.pathToPlotOutputDir,['warped' titleString '.pdf']);
         saveas(figHandle,fileOutPath)
@@ -169,10 +168,9 @@ c = colorbar;
 c.Label.String= titleString ;
 xlabel('Position [deg] nasal --> temporal');
 ylabel('Position [deg] inferior --> superior');
-numTicks=length(xticks);
-k=linspace(-1*p.Results.maxModeledEccentricity,p.Results.maxModeledEccentricity,numTicks+1);
-xticklabels(string(k(2:end)))
-yticklabels(string(k(2:end)))
+k=(xticks.*(1/p.Results.displacementMapPixelsPerDeg)) + (-1*p.Results.maxModeledEccentricity);
+xticklabels(string(k))
+yticklabels(string(k))
 if p.Results.savePlots
     fileOutPath = fullfile(p.Results.pathToPlotOutputDir,[titleString '.pdf']);
     saveas(figHandle,fileOutPath)
@@ -190,10 +188,9 @@ c = colorbar;
 c.Label.String= titleString ;
 xlabel('Position [deg] nasal --> temporal');
 ylabel('Position [deg] inferior --> superior');
-numTicks=length(xticks);
-k=linspace(-1*p.Results.maxModeledEccentricity,p.Results.maxModeledEccentricity,numTicks+1);
-xticklabels(string(k(2:end)))
-yticklabels(string(k(2:end)))
+k=(xticks.*(1/p.Results.displacementMapPixelsPerDeg)) + (-1*p.Results.maxModeledEccentricity);
+xticklabels(string(k))
+yticklabels(string(k))
 if p.Results.savePlots
     fileOutPath = fullfile(p.Results.pathToPlotOutputDir,[titleString '.pdf']);
     saveas(figHandle,fileOutPath)
