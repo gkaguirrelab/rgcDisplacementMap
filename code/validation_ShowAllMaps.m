@@ -179,7 +179,7 @@ end
 
 mapImage = mapImageA - mapImageB;
 figHandle = figure();
-climVals = [0, 1e3];
+climVals = [0, 1e4];
 imagesc(mapImage, climVals);
 axis square
 set(gca,'TickLength',[0 0])
