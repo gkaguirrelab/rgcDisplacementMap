@@ -20,13 +20,12 @@ function [ mRFDensitySqDeg, mRFtoConeDensityRatio ] = transformConeToMidgetRFDen
 %   mRFtoConeDensityRatio - a vector of midgetRF to cone ratio values
 %
 % OPTIONS
-%   maxConeDensity - The maximum cone density at the fovea (couts / deg^2).
-%       The default value is from Curcio 1990. If set to empty, the maximum
-%       value from coneDensitySqDeg is used.
+%   maxConeDensity - The maximum cone density at the fovea (counts / deg^2).
+%       The default value is derived from Curcio 1990. If set to empty, the
+%       maximum value from coneDensitySqDeg is used.
 %   minRatio - The minimum value of the mRF:cone density ratio. Set to zero
 %       as the functions appear to asymptote close to this value.
-%   maxRatio - The maximuim value of the mRF:cone density ratio. Set to
-%       1.9 following the logic outlined above.
+%   maxRatio - The maximuim value of the mRF:cone density ratio.
 %   logitFitParams - parameters for the logisitic fit, corresponding to the
 %       slope and inflection point. The default values are those found by
 %       fitting the Curcio data from the four meridiansl
@@ -40,7 +39,7 @@ p.addRequired('coneDensitySqDeg',@isnumeric);
 % Optional anaysis params
 p.addParameter('maxConeDensity',1.4806e+04,@(x)(isempty(x) | isnumeric(x)));
 p.addParameter('minRatio',0,@isnumeric);
-p.addParameter('maxRatio',1.9,@isnumeric);
+p.addParameter('maxRatio',1.786,@isnumeric);
 p.addParameter('logitFitParams',[5.9861, -1.0636],@isnumeric);
 
 % parse
