@@ -14,7 +14,7 @@ p.addParameter('displacementMapPixelsPerDeg',10,@isnumeric);
 p.addParameter('pathToPlotOutputDir','~/Desktop/rgcDisplacementMapPlots',@ischar);
 
 % Optional display and ouput params
-p.addParameter('verbose',false,@islogical);
+p.addParameter('verbose',true,@islogical);
 p.addParameter('savePlots',true,@islogical);
 
 % parse
@@ -41,7 +41,8 @@ regularSupportPosDeg = ...
     'sampleResolutionDegrees', p.Results.sampleResolutionDegrees, ...
     'maxModeledEccentricity', p.Results.maxModeledEccentricity, ...
     'meridianAngleResolutionDeg', p.Results.meridianAngleResolutionDeg, ...
-    'displacementMapPixelsPerDeg', p.Results.displacementMapPixelsPerDeg);
+    'displacementMapPixelsPerDeg', p.Results.displacementMapPixelsPerDeg, ...
+    'verbose', p.Results.verbose);
 
 % Plot the cumulatives and displacements across meridians
 figHandle = figure();
