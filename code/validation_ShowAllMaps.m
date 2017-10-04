@@ -179,6 +179,27 @@ if p.Results.savePlots
     close(figHandle);
 end
 
+mapImage = mapImageA - mapImageB;
+figHandle = figure();
+climVals = [0, 1e3];
+imagesc(mapImage, climVals);
+axis square
+set(gca,'TickLength',[0 0])
+titleString='mRF_cumulative_minus_mRGC_cumulative_warped';
+c = colorbar;
+c.Label.String= titleString ;
+xlabel('Position [deg] nasal --> temporal');
+ylabel('Position [deg] inferior --> superior');
+numTicks=length(xticks);
+k=linspace(-1*p.Results.maxModeledEccentricity,p.Results.maxModeledEccentricity,numTicks+1);
+xticklabels(string(k(2:end)))
+yticklabels(string(k(2:end)))
+if p.Results.savePlots
+    fileOutPath = fullfile(p.Results.pathToPlotOutputDir,[titleString '.pdf']);
+    saveas(figHandle,fileOutPath)
+    close(figHandle);
+end
+
 end % function
 
 
