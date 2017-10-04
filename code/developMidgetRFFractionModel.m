@@ -21,8 +21,7 @@ function [ fitParams, figHandle ] = developMidgetRFFractionModel( varargin )
 % fraction (based upon Drasdo) that is in terms of receptive field
 % location. That function has a maximum value of 0.8928 at the fovea.
 % Combining these two suggests that the cone:mRF ratio at the fovea should
-% be 1.786. We observe, however, that a 1.95:1 ratio provides a better fit
-% to the data.
+% be 1.786.
 %
 % For each meridian, We first load the Curcio cone density measurements. At
 % each of the sampled eccentricity values, we obtain the midgetRF density
@@ -62,10 +61,7 @@ function [ fitParams, figHandle ] = developMidgetRFFractionModel( varargin )
 %   maxConeDensity - The maximum cone density at the fovea (couts / deg^2).
 %       The default value is from Curcio 1990. If set to empty, the maximum
 %       value from coneDensitySqDeg is used.
-%   minRatio - The minimum value of the mRF:cone density ratio. While zero
-%       would be the minimum reasonable physiologic value, we adopt a
-%       slightly negative value to better fit the asymptotic range of the
-%       data.
+%   minRatio - The minimum value of the mRF:cone density ratio.
 %   maxRatio - The maximuim value of the mRF:cone density ratio.
 %   logitFitStartPoint - initial values used for the slope and inflection
 %       point parameters of the logisic fit. Informed by examination of
@@ -82,8 +78,8 @@ p.addParameter('meridianNames',{'Nasal' 'Superior' 'Temporal' 'Inferior'},@iscel
 p.addParameter('meridianAngles',[0, 90, 180, 270],@isnumeric);
 p.addParameter('meridianSymbols',{'.','x','o','^'},@cell);
 p.addParameter('maxConeDensity',1.4806e+04,@(x)(isempty(x) | isnumeric(x)));
-p.addParameter('minRatio',-.12,@isnumeric);
-p.addParameter('maxRatio',1.95,@isnumeric);
+p.addParameter('minRatio',0,@isnumeric);
+p.addParameter('maxRatio',1.786,@isnumeric);
 p.addParameter('logitFitStartPoint',[3,-1],@isnumeric);
 
 % Optional display params
