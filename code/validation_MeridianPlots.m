@@ -10,6 +10,7 @@ p = inputParser; p.KeepUnmatched = true;
 p.addParameter('sampleResolutionDegrees',0.01,@isnumeric);
 p.addParameter('maxModeledEccentricity',30,@isnumeric);
 p.addParameter('meridianAngleResolutionDeg',90,@isnumeric);
+p.addParameter('meridianNames',{'nasal','superior','temporal','inferior'},@iscell);
 p.addParameter('displacementMapPixelsPerDeg',10,@isnumeric);
 p.addParameter('pathToPlotOutputDir','~/Desktop/rgcDisplacementMapPlots',@ischar);
 
@@ -43,6 +44,7 @@ regularSupportPosDeg = ...
     'meridianAngleResolutionDeg', p.Results.meridianAngleResolutionDeg, ...
     'displacementMapPixelsPerDeg', p.Results.displacementMapPixelsPerDeg, ...
     'verbose', p.Results.verbose);
+
 
 % Plot the cumulatives and displacements across meridians
 figHandle = figure();
@@ -96,6 +98,30 @@ if p.Results.savePlots
     saveas(figHandle,fileOutPath)
     close(figHandle);
 end
+
+% Show the cone --> mRF model by merdian
+figHandle = figure();
+cardinalMeridianAngles=[0 90 180 270];
+meridianColors={'r','b','g','k'};
+subplot(2,1,1)
+for mm=1:4
+    xFit= 1.4806e+04/100:100:1.4806e+04;
+    tmp_mRFDensity = transformConeToMidgetRFDensity(xFit, 'logitFitParams', fitParams(mm,1:2));
+    plot( log10(xFit ./ 1.4806e+04), tmp_mRFDensity./xFit,'-','Color',meridianColors{mm});
+    hold on
+end
+legend({p.Results.meridianNames{:} 'fit'},'Location','southeast');
+title('midget RF : cone ratio as a function of relative cone density');
+xlabel('log10 proportion max cone density');
+ylabel('mRF density : cone density');
+legend(num2str(cardinalMeridianAngles),'Location','southwest')
+if p.Results.savePlots
+    fileOutPath = fullfile(p.Results.pathToPlotOutputDir,'cone --> mRF model by meridian.pdf');
+    saveas(figHandle,fileOutPath)
+    close(figHandle);
+end
+
+
 
 % Plot the spline cone density fits
 figHandle = figure();
@@ -182,7 +208,7 @@ subplot(2,1,1)
 dispConeNativeSupportPosDeg=coneNativeSupportPosDeg;
 [coneDensityFit] = getSplineFitToConeDensity(cardinalMeridianAngles(mm));
 plot(dispConeNativeSupportPosDeg,coneDensitySqDeg,'x','Color',meridianColors{mm});
-xlim([0,70]);
+xlim([0,30]);
 hold on
 regularSupportPosDeg=0:0.01:70;
 plot(regularSupportPosDeg,coneDensityFit(regularSupportPosDeg),'-','Color',meridianColors{mm});
@@ -193,7 +219,7 @@ subplot(2,1,2)
 dispRGCNativeSupportPosDeg=RGCNativeSupportPosDeg;
 [RGCDensityFit] = getSplineFitToRGCDensity(cardinalMeridianAngles(mm));
 plot(dispRGCNativeSupportPosDeg,RGCDensitySqDeg,'x','Color',meridianColors{mm});
-xlim([0,70]);
+xlim([0,30]);
 hold on
 regularSupportPosDeg=1e-2:0.01:70;
 loglog(regularSupportPosDeg,RGCDensityFit(regularSupportPosDeg),'-','Color',meridianColors{mm});
