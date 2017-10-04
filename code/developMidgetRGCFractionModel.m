@@ -184,7 +184,7 @@ end % loop over meridians
 fitParams=median(fitParams);
 
 if p.Results.makePlots
-    xFit=logspace(-12,0,100);
+    xFit=logspace(-12,0.175,100);
     plot( log10(xFit), ...
         p.Results.watsonEq8_f0-recipFunc(fitParams(1),fitParams(2),fitParams(3),log10(xFit)),'-r')
     legend({p.Results.meridianNames{:} 'fit'},'Location','southwest');
