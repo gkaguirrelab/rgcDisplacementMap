@@ -7,7 +7,7 @@ function [ fitParams, figHandle ] = developMidgetRGCFractionModel( varargin )
 %
 % To solve this problem, we first take the cumulative of the RGC density
 % function along a meridian. We then express this function as a proportion
-% of the cumuluative density value at any point to the cumulative denisty
+% of the cumuluative density value at any point to the cumulative density
 % value at a specific eccentricity location (e.g., at 30 degrees). Thus,
 % the proportional cumulative density of RGCs is equal to unity (1) at the
 % reference eccentricity. The value of the reference eccentricity should be
@@ -20,13 +20,22 @@ function [ fitParams, figHandle ] = developMidgetRGCFractionModel( varargin )
 % observe that a three-component reciprocal function fits this relationship
 % well.
 %
-% We obtain the fit parameters for this relationship for each of the four
-% meridians for which we have data, and take the median fit parameters
-% across merdians. This gives us a functional form that can be used to
-% convert RGC density to midget RGC density knowing only the proportion of
-% the cumulative RGC density function at the location for which the
-% measurement was made. If we term this proportion value x, then the
-% relationship is:
+% We note here a conceptual inconsistency in our approach. Our goal is to
+% model the proportion of RGCs that are midget RGCs at the retinal location
+% that contains these cell bodies. We use the Watson equation (via Drasdo)
+% to set the "ground truth" of the midget fraction, but this function
+% expresses the midget fraction at the receptive field locations of these
+% cells. We would ideally have a measurement of the fraction of midget RGC
+% soma at each of many eccentricities in the human retina, but this is not
+% available.
+%
+% We obtain the fit parameters for the midget fraction expression for each
+% of the four meridians for which we have data, and take the median fit
+% parameters across merdians. This gives us a functional form that can be
+% used to convert RGC density to midget RGC density knowing only the
+% proportion of the cumulative RGC density function at the location for
+% which the measurement was made. If we term this proportion value x, then
+% the relationship is:
 %
 %   midgetFraction =  f0 - [(1./(a+(b.* log10(x) )))+c]
 %
@@ -41,7 +50,10 @@ function [ fitParams, figHandle ] = developMidgetRGCFractionModel( varargin )
 % OPTIONS
 %   referenceEccen - the reference eccentricity for the proportion of
 %       the cumulative RGC density. The proportion function will have a
-%       value of unity at this point.
+%       value of unity at this point. We use 15° here for the practical
+%       reason that this is the maximum extent for which we have OCT
+%       measurements of the RGC layer thickness, and we wish in the future
+%       to model such data using these functions.
 %   supportResolutionDegrees - the resolution (in degrees) for which the
 %       calculations are made.
 %   supportEccenMaxDegrees - the maximum eccentricity used for modeling
@@ -59,7 +71,7 @@ function [ fitParams, figHandle ] = developMidgetRGCFractionModel( varargin )
 p = inputParser;
 
 % Optional anaysis params
-p.addParameter('referenceEccen',30,@isnumeric);
+p.addParameter('referenceEccen',15,@isnumeric);
 p.addParameter('supportResolutionDegrees',0.01,@isnumeric);
 p.addParameter('supportEccenMaxDegrees',30,@isnumeric);
 p.addParameter('meridianNames',{'Nasal' 'Superior' 'Temporal' 'Inferior'},@iscell);

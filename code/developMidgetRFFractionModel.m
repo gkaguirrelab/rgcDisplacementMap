@@ -1,18 +1,32 @@
 function [ fitParams, figHandle ] = developMidgetRFFractionModel( varargin )
 % developMidgetRFFractionModel( varargin )
 %
-% Examine the relationship between cone density and midget
-% receptive field density. Note that the mRF density reflects both the
-% ratio of convergence of cones onto retinal ganglion cells, as well as the
-% fraction of retinal ganglion cells at any one point that are midgets.
+% Examine the relationship between cone density and midget receptive field
+% density. Note that the mRF density reflects both the ratio of convergence
+% of cones onto retinal ganglion cells, as well as the fraction of retinal
+% ganglion cells at any one point that are midgets.
 %
-% Judging from the work of Watson (2014), the ratio at the fovea would be
-% expected to be 1.786 : 1, as there is believed to be a 2:1 cone:RGC
-% ratio, and the midget fraction is modeled as being 0.8928.
+% This function and its companion (developMidgetRGCFractionModel) both
+% incorporate the effect of only a fraction of all RGCs being midget RGCs.
+% However, this function considers that fraction in relation to receptive
+% fields at cone locations, while the companion function expresses the
+% midget fraction in relation to the RGC cell bodies at their displaced
+% positions.
 %
-% For each meridian, We first load the Curcio cone density measurements.
-% At each of the sampled eccentricity values, we obtain the midgetRF
-% density as provided by Eq 8 of Watson 2014.
+% Watson (2014), citing other sources, aserts that the ratio of cones to
+% RGCs at the fovea is 2:1. That is, each RGC with a foveal receptive field
+% location receives input from two cones. It is unclear how to handle the
+% additional fact that a fraction of the RGCs will be midget RGCs, even for
+% those with foveal receptive fields. Watson provides a model of the midget
+% fraction (based upon Drasdo) that is in terms of receptive field
+% location. That function has a maximum value of 0.8928 at the fovea.
+% Combining these two suggests that the cone:mRF ratio at the fovea should
+% be 1.786. We observe, however, that the data are better fit by assuming a
+% maximum cone:mRF ratio of 2:1.
+%
+% For each meridian, We first load the Curcio cone density measurements. At
+% each of the sampled eccentricity values, we obtain the midgetRF density
+% as provided by Eq 8 of Watson 2014.
 %
 % We observe that the ratio of midgetRF density to cone density as a
 % function of log10 cone density is sigmoidal. To support generalization
@@ -37,7 +51,9 @@ function [ fitParams, figHandle ] = developMidgetRFFractionModel( varargin )
 % OPTIONS
 %   referenceEccen - The eccentricity value at which the cumulative cone
 %       density is used to normalize the cumulative value at other
-%       eccentrivities. 
+%       eccentricities. This is set to 15 as a practical matter, as this is
+%       the extent to which we might one day have adaptive optics cone
+%       density measures.
 %   supportEccenMaxDegrees - the maximum eccentricity used for modeling.
 %       This value should be sufficiently high so that we are in the
 %       asymptote range of cone density
