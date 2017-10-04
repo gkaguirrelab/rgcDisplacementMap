@@ -209,6 +209,7 @@ dispConeNativeSupportPosDeg=coneNativeSupportPosDeg;
 [coneDensityFit] = getSplineFitToConeDensity(cardinalMeridianAngles(mm));
 plot(dispConeNativeSupportPosDeg,coneDensitySqDeg,'x','Color',meridianColors{mm});
 xlim([0,30]);
+ylim([0,3e4]);
 hold on
 regularSupportPosDeg=0:0.01:70;
 plot(regularSupportPosDeg,coneDensityFit(regularSupportPosDeg),'-','Color',meridianColors{mm});
@@ -220,6 +221,7 @@ dispRGCNativeSupportPosDeg=RGCNativeSupportPosDeg;
 [RGCDensityFit] = getSplineFitToRGCDensity(cardinalMeridianAngles(mm));
 plot(dispRGCNativeSupportPosDeg,RGCDensitySqDeg,'x','Color',meridianColors{mm});
 xlim([0,30]);
+ylim([0,2500]);
 hold on
 regularSupportPosDeg=1e-2:0.01:70;
 loglog(regularSupportPosDeg,RGCDensityFit(regularSupportPosDeg),'-','Color',meridianColors{mm});
@@ -227,6 +229,35 @@ xlabel('Eccentricity [deg]');
 ylabel('RGC density [counts / deg2]');
 if p.Results.savePlots
     fileOutPath = fullfile(p.Results.pathToPlotOutputDir,'splineFitConeRGCLinearSpace.pdf');
+    saveas(figHandle,fileOutPath)
+    close(figHandle);
+end
+
+%% Plot the mRF and mRGC values for one meridian in linear space
+mm=3;
+figHandle = figure();
+cardinalMeridianAngles=[0 90 180 270];
+meridianColors={'r','b','g','k'};
+subplot(2,1,1)
+[coneDensityFit] = getSplineFitToConeDensity(cardinalMeridianAngles(mm));
+regularSupportPosDeg=0:0.01:70;
+[ mRFDensitySqDeg ] = transformConeToMidgetRFDensity( coneDensityFit(regularSupportPosDeg), 'logitFitParams', fitParams(mm,1:2) );
+plot(regularSupportPosDeg,mRFDensitySqDeg,'-','Color',meridianColors{mm});
+xlim([0,30]);
+ylim([0,3e4]);
+xlabel('Eccentricity [deg]');
+ylabel('mRF density [counts / deg2]');
+
+subplot(2,1,2)
+[RGCDensityFit] = getSplineFitToRGCDensity(cardinalMeridianAngles(mm));
+[ mRGCDensitySqDeg ] = transformRGCToMidgetRGCDensity( regularSupportPosDeg, RGCDensityFit(regularSupportPosDeg)', 'recipFitParams', fitParams(mm,3:5) );
+plot(regularSupportPosDeg,mRGCDensitySqDeg,'-','Color',meridianColors{mm});
+xlim([0,30]);
+ylim([0,2500]);
+xlabel('Eccentricity [deg]');
+ylabel('mRGC density [counts / deg2]');
+if p.Results.savePlots
+    fileOutPath = fullfile(p.Results.pathToPlotOutputDir,'mRGCmRF_linearOneMeridian.pdf');
     saveas(figHandle,fileOutPath)
     close(figHandle);
 end
