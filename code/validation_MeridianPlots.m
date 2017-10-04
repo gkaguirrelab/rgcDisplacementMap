@@ -172,6 +172,40 @@ if p.Results.savePlots
 end
 
 
+%% Plot the spline cone and rgc fits for one meridian in linear space
+mm=3;
+figHandle = figure();
+cardinalMeridianAngles=[0 90 180 270];
+meridianColors={'r','b','g','k'};
+subplot(2,1,1)
+[coneDensitySqDeg, coneNativeSupportPosDeg] = getCurcioConeDensityByEccen(cardinalMeridianAngles(mm));
+dispConeNativeSupportPosDeg=coneNativeSupportPosDeg;
+[coneDensityFit] = getSplineFitToConeDensity(cardinalMeridianAngles(mm));
+plot(dispConeNativeSupportPosDeg,coneDensitySqDeg,'x','Color',meridianColors{mm});
+xlim([0,70]);
+hold on
+regularSupportPosDeg=0:0.01:70;
+plot(regularSupportPosDeg,coneDensityFit(regularSupportPosDeg),'-','Color',meridianColors{mm});
+xlabel('Eccentricity [deg]');
+ylabel('Cone density [counts / deg2]');
+subplot(2,1,2)
+[RGCDensitySqDeg, RGCNativeSupportPosDeg] = getCurcioRGCDensityByEccen(cardinalMeridianAngles(mm));
+dispRGCNativeSupportPosDeg=RGCNativeSupportPosDeg;
+[RGCDensityFit] = getSplineFitToRGCDensity(cardinalMeridianAngles(mm));
+plot(dispRGCNativeSupportPosDeg,RGCDensitySqDeg,'x','Color',meridianColors{mm});
+xlim([0,70]);
+hold on
+regularSupportPosDeg=1e-2:0.01:70;
+loglog(regularSupportPosDeg,RGCDensityFit(regularSupportPosDeg),'-','Color',meridianColors{mm});
+xlabel('Eccentricity [deg]');
+ylabel('RGC density [counts / deg2]');
+if p.Results.savePlots
+    fileOutPath = fullfile(p.Results.pathToPlotOutputDir,'splineFitConeRGCLinearSpace.pdf');
+    saveas(figHandle,fileOutPath)
+    close(figHandle);
+end
+
+
 %% Plot the mRGC fraction for the cardinal meridians
 figHandle = figure();
 cardinalMeridianAngles=[0 90 180 270];
