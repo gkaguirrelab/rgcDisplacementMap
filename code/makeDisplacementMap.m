@@ -190,12 +190,8 @@ for mm = 1:length(meridianAngles)
 end % loop over meridians
 
 % Create the displacement map
-imRdim = p.Results.maxModeledEccentricity * p.Results.displacementMapPixelsPerDeg * 2;
-maxDisplacementDeg = max(rgcDisplacementEachMeridian(:));
-imP=rgcDisplacementEachMeridian'./maxDisplacementDeg;
-imR = PolarToIm (imP, 0, 1, imRdim, imRdim);
-displacementMapDeg = imrotate(imR .* maxDisplacementDeg,-90);
-
+imRdim = (p.Results.maxModeledEccentricity * p.Results.displacementMapPixelsPerDeg * 2)-1;
+displacementMapDeg = convertPolarMapToImageMap(rgcDisplacementEachMeridian, imRdim);
 
 
 end % calcDisplacementMap
