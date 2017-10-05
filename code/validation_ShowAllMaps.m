@@ -9,7 +9,7 @@ p = inputParser; p.KeepUnmatched = true;
 % Optional anaysis params
 p.addParameter('sampleResolutionDegrees',0.01,@isnumeric);
 p.addParameter('maxModeledEccentricity',30,@isnumeric);
-p.addParameter('meridianAngleResolutionDeg',1,@isnumeric);
+p.addParameter('meridianAngleResolutionDeg',15,@isnumeric);
 p.addParameter('displacementMapPixelsPerDeg',10,@isnumeric);
 p.addParameter('pathToPlotOutputDir','~/Desktop/rgcDisplacementMapPlots',@ischar);
 
@@ -130,9 +130,10 @@ displacementMapDeg = convertPolarMapToImageMap( rgcDisplacementEachMeridian, imR
 for vv = 1:length(warpMapNameList)
     mapImage = feval('convertPolarMapToImageMap', eval(warpMapNameList{vv}), imRdim);
     warpImage = applyDisplacementMap( mapImage, displacementMapDeg, sampleBaseX, sampleBaseY );
+    smoothImage = fillAndSmoothMap(warpImage,sampleBaseX,sampleBaseY);
     figHandle = figure();
-    climVals = [0,ceil(max(max(warpImage)))];
-    imagesc(warpImage, climVals);
+    climVals = [0,ceil(max(max(smoothImage)))];
+    imagesc(smoothImage, climVals);
     axis square
     set(gca,'TickLength',[0 0])
     tmp = strsplit(warpMapNameList{vv},'EachMeridian');
@@ -157,7 +158,8 @@ mapImageA = convertPolarMapToImageMap(mRF_cumulativeEachMeridian, imRdim);
 mapImageB = applyDisplacementMap( ...
     convertPolarMapToImageMap(mRGC_cumulativeEachMeridian, imRdim), ...
     displacementMapDeg, sampleBaseX, sampleBaseY);
-mapImage = mapImageB - mapImageA;
+smoothImageB = fillAndSmoothMap(mapImageB,sampleBaseX,sampleBaseY);
+mapImage = smoothImageB - mapImageA;
 figHandle = figure();
 climVals = [0, 1e4];
 imagesc(mapImage, climVals);
@@ -177,7 +179,7 @@ if p.Results.savePlots
     close(figHandle);
 end
 
-mapImage = mapImageA - mapImageB;
+mapImage = mapImageA - smoothImageB;
 figHandle = figure();
 climVals = [0, 1e4];
 imagesc(mapImage, climVals);
