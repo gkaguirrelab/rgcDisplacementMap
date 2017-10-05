@@ -89,7 +89,7 @@ fSpace_filtered = fSpace.* filter;
 imageSpace = fftshift(ifft2(fftshift(fSpace_filtered)));
 
 figure
-surf(real(imageSpace))
+surf(abs(imageSpace))
 
 
 
