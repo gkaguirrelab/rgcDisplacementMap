@@ -94,7 +94,7 @@ for vv = 1:length(polarMapNameList)
     climVals = [0,ceil(max(max(mapImage)))];
     imagesc(mapImage, climVals);
     axis square
-    %    set(gca,'TickLength',[0 0])
+    set(gca,'TickLength',[0 0])
     tmp = strsplit(polarMapNameList{vv},'EachMeridian');
     titleString=tmp{1};
     c = colorbar;
