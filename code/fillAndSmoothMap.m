@@ -1,9 +1,12 @@
 function [smoothMap] = fillAndSmoothMap(Map,sampleBaseX,sampleBaseY,varargin)
-%fillAndSmoothMap - 
+%fillAndSmoothMap - This function takes in a map and interpolates the
+% values and smooths
 %
-%
-%
-% Varargin:
+% INPUTS:
+% Map - a 2D matrix that the interp and smoothing are applied to.
+% sampleBaseX - 2D support fot the X dim.
+% sampleBaseY - 2D support fot the Y dim.
+% varargin:
 %     interpMethod: Type of interpolation to remove holes in mesh 
 %                   Types of interpolation methods for meshdata
 %                       'linear'	Triangulation-based linear interpolation (default) supporting 2-D and 3-D interpolation.	
@@ -18,6 +21,14 @@ function [smoothMap] = fillAndSmoothMap(Map,sampleBaseX,sampleBaseY,varargin)
 %                       'average'
 %     sigma: Standard deviation of smoothing kernel
 %     hsize: Size of the smoothing kernel.
+%     verbose: say stuff
+%
+% OUTPUT: Interpolated and smoothed map.
+%
+% Sample Call:
+%   function [smoothMap] = fillAndSmoothMap(Map,sampleBaseX,sampleBaseY,varargin)
+%
+%mab 2017
 
 
 
