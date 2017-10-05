@@ -25,22 +25,55 @@ for ii = 1:length(angles)
     rgcDensityMatrix(ii,:) = rgcDensityFit(xSmps);
 end
 
-imRdim = length(xSmps) * 2;
-maxDensityDeg = max(rgcDensityMatrix(:));
-imP=rgcDensityMatrix'./maxDensityDeg;
+imRdim = (length(xSmps) * 2)-1;
+
+maxMapDensity = max(rgcDensityMatrix(:));
+imP=rgcDensityMatrix'./maxMapDensity;
 imR = PolarToIm (imP, 0, 1, imRdim, imRdim);
-rgcDensityMapDeg = imrotate(imR .* maxDensityDeg,-90);
+rgcDensityMapDeg = imrotate(imR .* maxMapDensity,-90);
+
+
+
 
 
 %% Get displacement map
+[ ~, fitParams, meridianAngles, rgcDisplacementEachMeridian, mRGC_cumulativeEachMeridian, mRF_cumulativeEachMeridian ] = ...
+    makeDisplacementMap(...
+    'maxModeledEccentricity', maxModeledEccentricity, ...
+    'displacementMapPixelsPerDeg', displacementMapPixelsPerDeg, ...
+    'verbose',true);
 
-[ displacementMapDeg, fitParams, meridianAngles, rgcDisplacementEachMeridian, mRGC_cumulativeEachMeridian, mRF_cumulativeEachMeridian, convergenceEccen] = ...
-    makeDisplacementMap('verbose',true,'maxModeledEccentricity',maxModeledEccentricity, 'displacementMapPixelsPerDeg',displacementMapPixelsPerDeg);
+
+maxMapDensity = max(rgcDisplacementEachMeridian(:));
+imP=rgcDisplacementEachMeridian'./maxMapDensity;
+imR = PolarToIm (imP, 0, 1, imRdim, imRdim);
+displacementMapDeg = imrotate(imR .* maxMapDensity,-90);
 
 
 %% Apply warp
 
-smps = linspace(-1*maxModeledEccentricity,maxModeledEccentricity,length(xSmps)*2);
+smps = linspace(-1*maxModeledEccentricity,maxModeledEccentricity,(length(xSmps)*2)-1);
 
 [sampleBaseX,sampleBaseY] = meshgrid(smps,smps);
 warpedRGC = applyDisplacementMap( rgcDensityMapDeg, displacementMapDeg, sampleBaseX, sampleBaseY );
+
+%% fix tears in warped image
+%// identify indices valid for the warpedRGC
+idxgood=~(isnan(sampleBaseX) | isnan(sampleBaseY) | isnan(warpedRGC)); 
+
+%// re-interpolate scattered data over the sampleBase grid
+warpedRGC_filled = griddata( sampleBaseX(idxgood),sampleBaseY(idxgood),warpedRGC(idxgood), sampleBaseX, sampleBaseY ) ;
+
+
+%% Smooth the final map
+H = fspecial('gaussian',7,2);
+warpedRGC_gaussian = imfilter(warpedRGC_filled,H,'replicate'); 
+
+figure;
+surf(warpedRGC_gaussian)
+
+
+
+
+
+
