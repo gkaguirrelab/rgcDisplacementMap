@@ -73,6 +73,24 @@ figure;
 surf(warpedRGC_gaussian)
 
 
+%% Try filtering
+cutoff = 1;
+warpedRGC_zeros = warpedRGC_gaussian;
+warpedRGC_zeros(isnan(warpedRGC_zeros)) = 0;
+fSpace = fftshift(fft2(fftshift(warpedRGC_zeros)));
+filterBase = sqrt(sampleBaseX.^2 + sampleBaseY.^2);
+filterBase(filterBase <= cutoff)  = 1;
+filterBase(filterBase  > cutoff)  = 0;
+
+h = fspecial('gaussian',70,19);
+filter = imfilter(filterBase,h,'replicate'); 
+
+fSpace_filtered = fSpace.* filter;
+imageSpace = fftshift(ifft2(fftshift(fSpace_filtered)));
+
+figure
+surf(real(imageSpace))
+
 
 
 
