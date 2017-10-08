@@ -9,7 +9,7 @@ p = inputParser; p.KeepUnmatched = true;
 % Optional anaysis params
 p.addParameter('sampleResolutionDegrees',0.01,@isnumeric);
 p.addParameter('maxModeledEccentricity',30,@isnumeric);
-p.addParameter('meridianAngleResolutionDeg',15,@isnumeric);
+p.addParameter('meridianAngleResolutionDeg',1,@isnumeric);
 p.addParameter('displacementMapPixelsPerDeg',10,@isnumeric);
 p.addParameter('pathToPlotOutputDir','~/Desktop/rgcDisplacementMapPlots',@ischar);
 
