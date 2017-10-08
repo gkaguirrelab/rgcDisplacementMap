@@ -13,6 +13,8 @@ p.addParameter('meridianAngleResolutionDeg',90,@isnumeric);
 p.addParameter('meridianNames',{'nasal','superior','temporal','inferior'},@iscell);
 p.addParameter('displacementMapPixelsPerDeg',10,@isnumeric);
 p.addParameter('pathToPlotOutputDir','~/Desktop/rgcDisplacementMapPlots',@ischar);
+p.addParameter('referenceEccen',15,@isnumeric);
+
 
 % Optional display and ouput params
 p.addParameter('verbose',true,@islogical);
@@ -85,6 +87,17 @@ end
 
 % Show the cone --> mRF model
 [ ~, figHandle ] = developMidgetRFFractionModel( 'makePlots', true );
+hold on
+% Add plot lines showing the fit by meridian
+meridianColors={'r','b','g','k'};
+for mm = 1:length(meridianAngles)
+    coneDensityFit = getSplineFitToConeDensity(meridianAngles(mm));
+    coneDensitySqDeg = coneDensityFit(regularSupportPosDeg);
+    [ ~, mRFtoConeDensityRatio ] = transformConeToMidgetRFDensity( coneDensitySqDeg, 'logitFitParams', fitParams(mm,1:2) );
+    xvals = log10(coneDensitySqDeg./max(coneDensitySqDeg));
+    plot(xvals,mRFtoConeDensityRatio,'-','Color',meridianColors{mm});
+end
+hold off
 if p.Results.savePlots
     fileOutPath = fullfile(p.Results.pathToPlotOutputDir,'cone --> mRF RatioModel.pdf');
     saveas(figHandle,fileOutPath)
@@ -93,6 +106,28 @@ end
 
 % Show the RGC --> mRGC model
 [ ~, figHandle ] = developMidgetRGCFractionModel( 'makePlots', true );
+hold on
+% Add plot lines showing the fit by meridian
+meridianColors={'r','b','g','k'};
+for mm = 1:length(meridianAngles)
+    rgcDensityFit = getSplineFitToRGCDensity(meridianAngles(mm));
+    rgcDensitySqDeg = rgcDensityFit(regularSupportPosDeg);
+    RGC_ringcount = calcCumulative(regularSupportPosDeg,rgcDensitySqDeg');
+    refPointIdx= ...
+        find((regularSupportPosDeg-p.Results.referenceEccen)== ...
+        min(abs(regularSupportPosDeg-p.Results.referenceEccen)));
+    % Calculate a proportion of the cumulative RGC density counts, relative
+    % to the reference point (which is assigned a value of unity)
+    propRGC_ringcount=RGC_ringcount./RGC_ringcount(refPointIdx);
+    zeroPoints=find(propRGC_ringcount==0);
+    if ~isempty(zeroPoints)
+        propRGC_ringcount(zeroPoints)=min(propRGC_ringcount(find(propRGC_ringcount~=0)));
+    end
+    [ ~, midgetFraction ] = transformRGCToMidgetRGCDensity( regularSupportPosDeg, rgcDensitySqDeg', 'recipFitParams', fitParams(mm,3:5) );
+    xvals = log10(propRGC_ringcount);
+    plot(xvals,midgetFraction,'-','Color',meridianColors{mm});
+end
+hold off
 if p.Results.savePlots
     fileOutPath = fullfile(p.Results.pathToPlotOutputDir,'RGC --> mRGC RatioModel.pdf');
     saveas(figHandle,fileOutPath)
@@ -358,10 +393,9 @@ for mm = 1:4
     % Plot the mRF : cone ratio for Watson
     subplot(2,2,3);
     loglog(coneNativeSupportPosDeg(2:end),mRFDensitySqDeg_watson(2:end)./coneDensitySqDeg(2:end),'-','Color',meridianColors{mm});
-    ylim([1e-4 1e1]);
+    ylim([1e-2 2]);
     xlabel('log10 eccentricity');
     ylabel('log10 mRF:cone');
-    ylim([1e-4 1e2]);
     title('Watson''s mRF:cone ratio by eccentricity');
     pbaspect([2 1 1]);
     hold on
@@ -371,7 +405,7 @@ for mm = 1:4
     mRFDensitySqDeg_ours = ...
         transformConeToMidgetRFDensity(coneDensityFit(coneNativeSupportPosDeg)','logitFitParams',fitParams(mm,1:2));
     loglog(coneNativeSupportPosDeg(2:end),mRFDensitySqDeg_ours(2:end)./coneDensitySqDeg(2:end),'-','Color',meridianColors{mm});
-    ylim([1e-4 1e2]);
+    ylim([1e-2 2]);
     xlabel('log10 eccentricity');
     ylabel('log10 mRF:cone');
     title('Our mRF:cone ratio by eccentricity');
