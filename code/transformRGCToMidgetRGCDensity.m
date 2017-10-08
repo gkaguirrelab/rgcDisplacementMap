@@ -47,7 +47,7 @@ p.addRequired('regularSupportPosDeg',@isnumeric);
 p.addRequired('rgcDensitySqDeg',@isnumeric);
 
 % Optional anaysis params
-p.addParameter('referenceEccen',30,@isnumeric);
+p.addParameter('referenceEccen',15,@isnumeric);
 p.addParameter('watsonEq8_f0',0.8928,@isnumeric);
 p.addParameter('recipFitParams',[2.4026 -8.0877 -0.0139],@isnumeric);
 
