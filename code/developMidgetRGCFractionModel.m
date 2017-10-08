@@ -110,7 +110,7 @@ end
 
 for mm = 1:length(p.Results.meridianAngles)
     
-    % Load the RGC Density Data from Curcio and Allen 1990:
+    % Load the RGC Density Data from Curcio and Allen 1990
     [ RGCDensitySqDeg, nativeSupportPosDeg ] = getCurcioRGCDensityByEccen( p.Results.meridianAngles(mm) );
     
     % remove nan values
