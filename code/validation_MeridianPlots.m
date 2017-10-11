@@ -393,7 +393,7 @@ for mm = 1:4
     % Plot the mRF : cone ratio for Watson
     subplot(2,2,3);
     loglog(coneNativeSupportPosDeg(2:end),mRFDensitySqDeg_watson(2:end)./coneDensitySqDeg(2:end),'-','Color',meridianColors{mm});
-    ylim([1e-2 2]);
+    ylim([1e-2 10]);
     xlabel('log10 eccentricity');
     ylabel('log10 mRF:cone');
     title('Watson''s mRF:cone ratio by eccentricity');
@@ -405,7 +405,7 @@ for mm = 1:4
     mRFDensitySqDeg_ours = ...
         transformConeToMidgetRFDensity(coneDensityFit(coneNativeSupportPosDeg)','logitFitParams',fitParams(mm,1:2));
     loglog(coneNativeSupportPosDeg(2:end),mRFDensitySqDeg_ours(2:end)./coneDensitySqDeg(2:end),'-','Color',meridianColors{mm});
-    ylim([1e-2 2]);
+    ylim([1e-2 10]);
     xlabel('log10 eccentricity');
     ylabel('log10 mRF:cone');
     title('Our mRF:cone ratio by eccentricity');
