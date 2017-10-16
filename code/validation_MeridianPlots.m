@@ -123,7 +123,7 @@ for mm = 1:length(meridianAngles)
     if ~isempty(zeroPoints)
         propRGC_ringcount(zeroPoints)=min(propRGC_ringcount(find(propRGC_ringcount~=0)));
     end
-    [ ~, midgetFraction ] = transformRGCToMidgetRGCDensity( regularSupportPosDeg, rgcDensitySqDeg', 'recipFitParams', fitParams(mm,3:5) );
+    [ ~, midgetFraction ] = transformRGCToMidgetRGCDensity( regularSupportPosDeg, rgcDensitySqDeg', 'recipFitParams', fitParams(mm,3:4) );
     xvals = log10(propRGC_ringcount);
     plot(xvals,midgetFraction,'-','Color',meridianColors{mm});
 end
@@ -285,7 +285,7 @@ ylabel('mRF density [counts / deg2]');
 
 subplot(2,1,2)
 [RGCDensityFit] = getSplineFitToRGCDensity(cardinalMeridianAngles(mm));
-[ mRGCDensitySqDeg ] = transformRGCToMidgetRGCDensity( regularSupportPosDeg, RGCDensityFit(regularSupportPosDeg)', 'recipFitParams', fitParams(mm,3:5) );
+[ mRGCDensitySqDeg ] = transformRGCToMidgetRGCDensity( regularSupportPosDeg, RGCDensityFit(regularSupportPosDeg)', 'recipFitParams', fitParams(mm,3:4) );
 plot(regularSupportPosDeg,mRGCDensitySqDeg,'-','Color',meridianColors{mm});
 xlim([0,30]);
 ylim([0,2500]);
@@ -329,7 +329,7 @@ for mm = 1:4
     
     % Plot our midget fraction
     subplot(1,2,2);
-    [ ~, midgetFraction_ours ] = transformRGCToMidgetRGCDensity( RGCNativeSupportPosDeg, RGCDensitySqDeg, 'recipFitParams', fitParams(meridianIdx,3:5) );
+    [ ~, midgetFraction_ours ] = transformRGCToMidgetRGCDensity( RGCNativeSupportPosDeg, RGCDensitySqDeg, 'recipFitParams', fitParams(meridianIdx,3:4) );
     plot(RGCNativeSupportPosDeg,midgetFraction_ours,'-','Color',meridianColors{mm});
     hold on
     ylim([0 1]);
