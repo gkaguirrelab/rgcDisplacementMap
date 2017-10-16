@@ -113,7 +113,7 @@ targetDisplacementDegByMeridian = targetByAngleFit(meridianAngles);
 
 
 %% Loop over the meridians
-for mm = 1:2%length(meridianAngles)
+for mm = 1:length(meridianAngles)
     
     %% mRF_cumulative function
     % We build a function that returns the cumulative mRF density, subject
@@ -163,8 +163,8 @@ for mm = 1:2%length(meridianAngles)
     % transform parameters. Set upper and lower bounds on the mRF params
     % to be 1.25x the median values found across meridians (with a bit of
     % sign exponent trickery to handle the direction of negative params)
-    lb = [rfInitialTransformParams./(2.^sign(rfInitialTransformParams)) rgcInitialTransformParams./(2.^sign(rgcInitialTransformParams))];
-    ub = [rfInitialTransformParams.*(2.^sign(rfInitialTransformParams)) rgcInitialTransformParams.*(2.^sign(rgcInitialTransformParams))];
+    lb = [rfInitialTransformParams./(2.^sign(rfInitialTransformParams)) rgcInitialTransformParams./(4.^sign(rgcInitialTransformParams))];
+    ub = [rfInitialTransformParams.*(2.^sign(rfInitialTransformParams)) rgcInitialTransformParams.*(4.^sign(rgcInitialTransformParams))];
     x0 = [rfInitialTransformParams rgcInitialTransformParams];
     
     % Set up the options
