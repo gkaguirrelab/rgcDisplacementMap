@@ -113,7 +113,7 @@ targetDisplacementDegByMeridian = targetByAngleFit(meridianAngles);
 
 
 %% Loop over the meridians
-for mm = 1:length(meridianAngles)
+for mm = 1:2%length(meridianAngles)
     
     %% mRF_cumulative function
     % We build a function that returns the cumulative mRF density, subject
@@ -142,7 +142,7 @@ for mm = 1:length(meridianAngles)
     % RGC density, with the transform defined by the last three fitParams
     mRGCDensityOverRegularSupport = ...
         @(fitParams) transformRGCToMidgetRGCDensity(regularSupportPosDeg,rgcDensityFit(regularSupportPosDeg)',...
-        'recipFitParams',fitParams(3:5));
+        'logitFitParams',fitParams(3:4));
     % Define anonymous function for the cumulative sum of mRGC density
     mRGC_cumulative = @(fitParams) calcCumulative(regularSupportPosDeg, mRGCDensityOverRegularSupport(fitParams));
     
@@ -163,8 +163,8 @@ for mm = 1:length(meridianAngles)
     % transform parameters. Set upper and lower bounds on the mRF params
     % to be 1.25x the median values found across meridians (with a bit of
     % sign exponent trickery to handle the direction of negative params)
-    lb = [rfInitialTransformParams./(2.^sign(rfInitialTransformParams)) rgcInitialTransformParams];
-    ub = [rfInitialTransformParams.*(2.^sign(rfInitialTransformParams)) rgcInitialTransformParams];
+    lb = [rfInitialTransformParams./(2.^sign(rfInitialTransformParams)) rgcInitialTransformParams./(2.^sign(rgcInitialTransformParams))];
+    ub = [rfInitialTransformParams.*(2.^sign(rfInitialTransformParams)) rgcInitialTransformParams.*(2.^sign(rgcInitialTransformParams))];
     x0 = [rfInitialTransformParams rgcInitialTransformParams];
     
     % Set up the options
