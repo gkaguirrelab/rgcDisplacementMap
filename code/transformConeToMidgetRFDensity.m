@@ -39,7 +39,7 @@ p.addRequired('coneDensitySqDeg',@isnumeric);
 % Optional anaysis params
 p.addParameter('maxConeDensity',1.4806e+04,@(x)(isempty(x) | isnumeric(x)));
 p.addParameter('minRatio',0,@isnumeric);
-p.addParameter('maxRatio',1.786,@isnumeric);
+p.addParameter('maxRatio',2,@isnumeric);
 p.addParameter('logitFitParams',[5.9861, -1.0636],@isnumeric);
 
 % parse

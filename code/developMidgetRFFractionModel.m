@@ -14,14 +14,8 @@ function [ fitParams, figHandle ] = developMidgetRFFractionModel( varargin )
 % positions.
 %
 % Watson (2014), citing other sources, aserts that the ratio of cones to
-% RGCs at the fovea is 2:1. That is, each RGC with a foveal receptive field
-% location receives input from two cones. It is unclear how to handle the
-% additional fact that a fraction of the RGCs will be midget RGCs, even for
-% those with foveal receptive fields. Watson provides a model of the midget
-% fraction (based upon Drasdo) that is in terms of receptive field
-% location. That function has a maximum value of 0.8928 at the fovea.
-% Combining these two suggests that the cone:mRF ratio at the fovea should
-% be 1.786.
+% mRFs at the fovea is 2:1. That is, each mRGC with a foveal receptive field
+% location receives input from two cones.
 %
 % For each meridian, We first load the Curcio cone density measurements. At
 % each of the sampled eccentricity values, we obtain the midgetRF density
@@ -79,7 +73,7 @@ p.addParameter('meridianAngles',[0, 90, 180, 270],@isnumeric);
 p.addParameter('meridianSymbols',{'.','x','o','^'},@cell);
 p.addParameter('maxConeDensity',1.4806e+04,@(x)(isempty(x) | isnumeric(x)));
 p.addParameter('minRatio',0,@isnumeric);
-p.addParameter('maxRatio',1.786,@isnumeric);
+p.addParameter('maxRatio',2,@isnumeric);
 p.addParameter('logitFitStartPoint',[3,-1],@isnumeric);
 
 % Optional display params
