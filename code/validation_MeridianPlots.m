@@ -124,7 +124,7 @@ for mm = 1:length(meridianAngles)
         propRGC_ringcount(zeroPoints)=min(propRGC_ringcount(find(propRGC_ringcount~=0)));
     end
     [ ~, midgetFraction ] = transformRGCToMidgetRGCDensity( regularSupportPosDeg, rgcDensitySqDeg', 'logitFitParams', fitParams(mm,3:4) );
-    xvals = log10(propRGC_ringcount);
+    xvals = propRGC_ringcount;
     plot(xvals,midgetFraction,'-','Color',meridianColors{mm});
 end
 hold off
