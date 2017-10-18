@@ -79,6 +79,8 @@ p.addParameter('targetDisplacementAtCardinalMeridiansDeg',[11 17 17 17],@isnumer
 p.addParameter('cardinalMeridianAngles',[0 90 180 270],@isnumeric);
 p.addParameter('meridianAngleResolutionDeg',15,@isnumeric);
 p.addParameter('displacementMapPixelsPerDeg',10,@isnumeric);
+p.addParameter('cone_to_mRF_linkTolerance',1.05,@isnumeric);
+p.addParameter('rgc_to_mRGC_linkTolerance',1.5,@isnumeric);
 
 % Optional display params
 p.addParameter('verbose',false,@islogical);
@@ -104,12 +106,12 @@ targetByAngleFit = fit(angleBase',targetValues','pchipinterp');
 targetDisplacementDegByMeridian = targetByAngleFit(meridianAngles);
 
 
-%% Derive parameters for the transformation of RGC density to mRGC density
-[ rgcInitialTransformParams ] = developMidgetRGCFractionModel();
-
-
 %% Derive parameters for the transformation of cone density to mRF density
 [ rfInitialTransformParams ] = developMidgetRFFractionModel();
+
+
+%% Derive parameters for the transformation of RGC density to mRGC density
+[ rgcInitialTransformParams ] = developDrasdoMidgetRGCFractionModel();
 
 
 %% Loop over the meridians
@@ -126,7 +128,7 @@ for mm = 1:length(meridianAngles)
     % of cone density, with the transform defined by the first two fitParams
     mRFDensityOverRegularSupport = ...
         @(fitParams) transformConeToMidgetRFDensity(coneDensityFit(regularSupportPosDeg), ...
-        'logitFitParams',fitParams(1:2))';
+        'linkingFuncParams',fitParams(1:2))';
     % Define anonymous function for the cumulative sum of mRF density
     mRF_cumulative = @(fitParams) calcCumulative(regularSupportPosDeg, mRFDensityOverRegularSupport(fitParams));
     
@@ -141,8 +143,8 @@ for mm = 1:length(meridianAngles)
     % Create an anonymous function that returns mRGC density as a function of
     % RGC density, with the transform defined by the last three fitParams
     mRGCDensityOverRegularSupport = ...
-        @(fitParams) transformRGCToMidgetRGCDensity(regularSupportPosDeg,rgcDensityFit(regularSupportPosDeg)',...
-        'logitFitParams',fitParams(3:4));
+        @(fitParams) transformRGCToMidgetRGCDensityDrasdo(regularSupportPosDeg,rgcDensityFit(regularSupportPosDeg)',...
+        'linkingFuncParams',fitParams(3:end));
     % Define anonymous function for the cumulative sum of mRGC density
     mRGC_cumulative = @(fitParams) calcCumulative(regularSupportPosDeg, mRGCDensityOverRegularSupport(fitParams));
     
@@ -159,12 +161,12 @@ for mm = 1:length(meridianAngles)
     
     
     %% Perform the fit
-    % We will search over the mRF transform parameters and lock the mRGC
-    % transform parameters. Set upper and lower bounds on the mRF params
-    % to be 1.25x the median values found across meridians (with a bit of
-    % sign exponent trickery to handle the direction of negative params)
-    lb = [rfInitialTransformParams./(1.2.^sign(rfInitialTransformParams)) rgcInitialTransformParams./(1.05.^sign(rgcInitialTransformParams))];
-    ub = [rfInitialTransformParams.*(1.2.^sign(rfInitialTransformParams)) rgcInitialTransformParams.*(1.05.^sign(rgcInitialTransformParams))];
+    % We will search over the mRF and mRGC linking function parameters. We
+    % set the upper and lower bounds as multipliers on the median values
+    % found across meridians (with a bit of sign exponent trickery to
+    % handle the direction of negative params)
+    lb = [rfInitialTransformParams./(p.Results.cone_to_mRF_linkTolerance.^sign(rfInitialTransformParams)) rgcInitialTransformParams./(p.Results.rgc_to_mRGC_linkTolerance.^sign(rgcInitialTransformParams))];
+    ub = [rfInitialTransformParams.*(p.Results.cone_to_mRF_linkTolerance.^sign(rfInitialTransformParams)) rgcInitialTransformParams.*(p.Results.rgc_to_mRGC_linkTolerance.^sign(rgcInitialTransformParams))];
     x0 = [rfInitialTransformParams rgcInitialTransformParams];
 
     % Set up the options
@@ -182,9 +184,14 @@ for mm = 1:length(meridianAngles)
     if p.Results.verbose
         zeroPoints = find(rgcDisplacementEachMeridian(mm,:)==0);
         convergenceIdx = find(regularSupportPosDeg(zeroPoints) > 2,1);
+        if isempty(convergenceIdx)
+        outLine = ['Polar angle: ' num2str(meridianAngles(mm)) ', max RGC displacement: ' num2str(max(rgcDisplacementEachMeridian(mm,:))) ', target convergence: ' num2str(targetDisplacementDegByMeridian(mm)) ', found convergence: FAILED TO CONVERGE\n'];
+        fprintf(outLine);
+        else
         convergenceEccen(mm) = regularSupportPosDeg(zeroPoints(convergenceIdx));
         outLine = ['Polar angle: ' num2str(meridianAngles(mm)) ', max RGC displacement: ' num2str(max(rgcDisplacementEachMeridian(mm,:))) ', target convergence: ' num2str(targetDisplacementDegByMeridian(mm)) ', found convergence: ' num2str(convergenceEccen(mm)) '\n'];
         fprintf(outLine);
+        end
     end
     
 end % loop over meridians
