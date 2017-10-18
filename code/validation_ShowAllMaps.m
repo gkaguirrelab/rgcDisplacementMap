@@ -65,7 +65,7 @@ for mm = 1:length(meridianAngles)
     rgcDensityEachMeridian(mm,:) = rgcDensitySqDeg;
     
     % obtain the mRGC density
-    [ mRGCDensitySqDeg, midgetFraction ] = transformRGCToMidgetRGCDensity( regularSupportPosDeg, rgcDensitySqDeg', 'recipFitParams', fitParams(mm,3:5) );
+    [ mRGCDensitySqDeg, midgetFraction ] = transformRGCToMidgetRGCDensity( regularSupportPosDeg, rgcDensitySqDeg', 'logitFitParams', fitParams(mm,3:4) );
     mRGCDensityEachMeridian(mm,:) = mRGCDensitySqDeg;
     midgetFractionEachMeridian(mm,:) = midgetFraction;
     
