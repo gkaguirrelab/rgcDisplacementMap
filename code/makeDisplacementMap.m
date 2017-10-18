@@ -163,10 +163,10 @@ for mm = 1:length(meridianAngles)
     % transform parameters. Set upper and lower bounds on the mRF params
     % to be 1.25x the median values found across meridians (with a bit of
     % sign exponent trickery to handle the direction of negative params)
-    lb = [rfInitialTransformParams./(2.^sign(rfInitialTransformParams)) rgcInitialTransformParams./(4.^sign(rgcInitialTransformParams))];
-    ub = [rfInitialTransformParams.*(2.^sign(rfInitialTransformParams)) rgcInitialTransformParams.*(4.^sign(rgcInitialTransformParams))];
+    lb = [rfInitialTransformParams./(1.2.^sign(rfInitialTransformParams)) rgcInitialTransformParams./(1.05.^sign(rgcInitialTransformParams))];
+    ub = [rfInitialTransformParams.*(1.2.^sign(rfInitialTransformParams)) rgcInitialTransformParams.*(1.05.^sign(rgcInitialTransformParams))];
     x0 = [rfInitialTransformParams rgcInitialTransformParams];
-    
+
     % Set up the options
     options = optimoptions('fmincon', 'Display', 'none', 'ConstraintTolerance', 1);
     

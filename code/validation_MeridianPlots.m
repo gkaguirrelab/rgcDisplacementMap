@@ -47,6 +47,7 @@ regularSupportPosDeg = ...
     'displacementMapPixelsPerDeg', p.Results.displacementMapPixelsPerDeg, ...
     'verbose', p.Results.verbose);
 
+fitParams
 
 % Plot the cumulatives and displacements across meridians
 figHandle = figure();
