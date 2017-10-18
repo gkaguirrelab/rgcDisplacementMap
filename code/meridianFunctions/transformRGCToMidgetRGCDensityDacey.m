@@ -37,7 +37,7 @@ function [ mRGCDensitySqDeg, midgetFraction ] = transformRGCToMidgetRGCDensity( 
 %       value of unity at this point.
 %   maxRatio - The midget fraction assigned to the fovea
 %   minRatio - The midget fraction assigned to the far periphery
-%   logitFitParams - the slope and inflection parameters that are used in
+%   linkingFuncParams - the slope and inflection parameters that are used in
 %       the logisitic function.
 %   verbose - Controls text output to console
 %   makePlots - Do we make a figure?
@@ -53,7 +53,7 @@ p.addRequired('rgcDensitySqDeg',@isnumeric);
 p.addParameter('referenceEccen',15,@isnumeric);
 p.addParameter('minRatio',0.45,@isnumeric);
 p.addParameter('maxRatio',0.95,@isnumeric);
-p.addParameter('logitFitParams',[5 1],@isnumeric);
+p.addParameter('linkingFuncParams',[5 1],@isnumeric);
 
 % parse
 p.parse(regularSupportPosDeg, rgcDensitySqDeg, varargin{:})
@@ -79,7 +79,7 @@ RGC_ringcount = calcCumulative(regularSupportPosDeg,rgcDensitySqDeg);
 propRGC_ringcount=RGC_ringcount./RGC_ringcount(refPointIdx);
 
 % Calculate the midgetFraction based upon the propRGC_ringcount
-midgetFraction = logisticFunc(p.Results.logitFitParams(1), p.Results.logitFitParams(2), p.Results.minRatio, p.Results.maxRatio, propRGC_ringcount);
+midgetFraction = logisticFunc(p.Results.linkingFuncParams(1), p.Results.linkingFuncParams(2), p.Results.minRatio, p.Results.maxRatio, propRGC_ringcount);
 
 % Scale the rgcDensity by the midget fraction
 mRGCDensitySqDeg = rgcDensitySqDeg .* midgetFraction;
