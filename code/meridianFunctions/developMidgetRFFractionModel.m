@@ -13,9 +13,12 @@ function [ fitParams, figHandle ] = developMidgetRFFractionModel( varargin )
 % midget fraction in relation to the RGC cell bodies at their displaced
 % positions.
 %
-% Watson (2014), citing other sources, aserts that the ratio of cones to
-% mRFs at the fovea is 2:1. That is, each mRGC with a foveal receptive field
-% location receives input from two cones.
+% Watson (2014), citing Kolb & Dekorver (1991), asserts that the ratio of
+% mRFs cones at the fovea is 2:1. That is, each foveal cone provides input
+% to two mRGCs (an "on" and "off" cell). We note, however, that Watson's
+% functions for mRF density have a discontinuity at the fovea, in that his
+% formula has the mRF:cone ratio asymptote at ~1.9, and then jump to a
+% value of 2 at the fovea.
 %
 % For each meridian, We first load the Curcio cone density measurements. At
 % each of the sampled eccentricity values, we obtain the midgetRF density
@@ -31,9 +34,20 @@ function [ fitParams, figHandle ] = developMidgetRFFractionModel( varargin )
 %
 % where maxRatio and minRatio are locked parameters.
 %
-% We calculate the fit of this function across each of the four meridians,
-% then take the median of the two free fit parameters (slope and inflect)
-% and return these.
+% We adopt a maxRatio of 1.9 (instead of the anatomically predicted value
+% of 2) as this better fits the values provided by Watson. Additionally, we
+% adopt a slightly negative minRatio to provide a better fit of the sigmoid
+% at the far periphery, although we observe that this value is not
+% physiologically meaningful. Effectively, our model returns impossible
+% values when the cone density reaches less than 1% of its peak value at
+% the fovea.
+%
+% We calculate the fit of this function across each of the four meridians.
+% We observe that our functional form fits the data from the nasal,
+% temporal, and inferior meridians very well. The form for the superior
+% meridian is poorly fit by this mode. Therefore, we take the median of the
+% two free fit parameters (slope and inflect) from just the three
+% well-modeled meridians and return these values.
 %
 %
 % OUTPUT
@@ -52,6 +66,8 @@ function [ fitParams, figHandle ] = developMidgetRFFractionModel( varargin )
 %       asymptote range of cone density
 %   meridianNames - Cell array of the text string names of the meridia
 %   meridianAngles - Polar angle values assigned to the meridians
+%   meridiansIdxToUseForFitParams - Index of the meridians from which we 
+%       will calculate the median fit param values.
 %   maxConeDensity - The maximum cone density at the fovea (couts / deg^2).
 %       The default value is from Curcio 1990. If set to empty, the maximum
 %       value from coneDensitySqDeg is used.
@@ -71,9 +87,10 @@ p.addParameter('supportEccenMaxDegrees',60,@isnumeric);
 p.addParameter('meridianNames',{'Nasal' 'Superior' 'Temporal' 'Inferior'},@iscell);
 p.addParameter('meridianAngles',[0, 90, 180, 270],@isnumeric);
 p.addParameter('meridianSymbols',{'.','x','o','^'},@cell);
+p.addParameter('meridiansIdxToUseForFitParams',[1 3 4],@isnumeric);
 p.addParameter('maxConeDensity',1.4806e+04,@(x)(isempty(x) | isnumeric(x)));
-p.addParameter('minRatio',0,@isnumeric);
-p.addParameter('maxRatio',2,@isnumeric);
+p.addParameter('minRatio',-0.1,@isnumeric);
+p.addParameter('maxRatio',1.9,@isnumeric);
 p.addParameter('logitFitStartPoint',[3,-1],@isnumeric);
 
 % Optional display params
@@ -154,12 +171,14 @@ for mm = 1:length(p.Results.meridianAngles)
     
 end % loop over meridians
 
-% Now calculate the median parm values across the meridians and add a fit
-% line to the plot
-fitParams=median(fitParams);
+% Calculate the median param values across meridians, but only for those
+% meridians that we have declared hwe wish to use for this purpose
+fitParams=median(fitParams(p.Results.meridiansIdxToUseForFitParams,:));
 
+% Add a fit line to the plot
 if p.Results.makePlots
     xFit= -2:.01:0;
+    ylim([0 2.5]);
     plot( xFit, ...
         logisticFunc(fitParams(1), fitParams(2), p.Results.minRatio, p.Results.maxRatio, xFit),'-r')
     legend({p.Results.meridianNames{:} 'fit'},'Location','southeast');
