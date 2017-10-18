@@ -26,7 +26,7 @@ function [ mRFDensitySqDeg, mRFtoConeDensityRatio ] = transformConeToMidgetRFDen
 %   minRatio - The minimum value of the mRF:cone density ratio. Set to zero
 %       as the functions appear to asymptote close to this value.
 %   maxRatio - The maximuim value of the mRF:cone density ratio.
-%   logitFitParams - parameters for the logisitic fit, corresponding to the
+%   linkingFuncParams - parameters for the logisitic fit, corresponding to the
 %       slope and inflection point. The default values are those found by
 %       fitting the Curcio data from the four meridiansl
 
@@ -38,9 +38,9 @@ p.addRequired('coneDensitySqDeg',@isnumeric);
 
 % Optional anaysis params
 p.addParameter('maxConeDensity',1.4806e+04,@(x)(isempty(x) | isnumeric(x)));
-p.addParameter('minRatio',0,@isnumeric);
-p.addParameter('maxRatio',2,@isnumeric);
-p.addParameter('logitFitParams',[5.9861, -1.0636],@isnumeric);
+p.addParameter('minRatio',-0.1,@isnumeric);
+p.addParameter('maxRatio',1.9,@isnumeric);
+p.addParameter('linkingFuncParams',[5.9861, -1.0636],@isnumeric);
 
 % parse
 p.parse(coneDensitySqDeg, varargin{:})
@@ -63,7 +63,7 @@ x = log10(coneDensitySqDeg ./ maxConeDensity)';
 
 % Obtain the midgetRF : cone ratio from the logisitc function
 mRFtoConeDensityRatio = ...
-    logisticFunc(p.Results.logitFitParams(1), p.Results.logitFitParams(2), p.Results.minRatio, p.Results.maxRatio, x);
+    logisticFunc(p.Results.linkingFuncParams(1), p.Results.linkingFuncParams(2), p.Results.minRatio, p.Results.maxRatio, x);
 
 % Calculate the mRF density
 mRFDensitySqDeg = coneDensitySqDeg .* mRFtoConeDensityRatio';

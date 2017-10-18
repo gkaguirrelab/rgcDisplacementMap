@@ -34,7 +34,7 @@ function [ mRGCDensitySqDeg, midgetFraction ] = transformRGCToMidgetRGCDensityDr
 %       the cumulative RGC density. The proportion function will have a
 %       value of unity at this point.
 %   watsonEq8_f0 - The midget fraction assigned to the fovea
-%   recipFitParams - parameters of the reciprocal fit the defines the
+%   linkingFuncParams - parameters of the reciprocal fit the defines the
 %      transformation
 %   verbose - Controls text output to console
 %   makePlots - Do we make a figure?
@@ -49,7 +49,7 @@ p.addRequired('rgcDensitySqDeg',@isnumeric);
 % Optional anaysis params
 p.addParameter('referenceEccen',15,@isnumeric);
 p.addParameter('watsonEq8_f0',0.8928,@isnumeric);
-p.addParameter('recipFitParams',[2.4026 -8.0877 -0.0139],@isnumeric);
+p.addParameter('linkingFuncParams',[2.4026 -8.0877 -0.0139],@isnumeric);
 
 % parse
 p.parse(regularSupportPosDeg, rgcDensitySqDeg, varargin{:})
@@ -79,7 +79,7 @@ if ~isempty(zeroPoints)
 end
 
 % Calculate the midgetFraction based upon the propRGC_ringcount
-midgetFraction = p.Results.watsonEq8_f0-recipFunc(p.Results.recipFitParams(1),p.Results.recipFitParams(2),p.Results.recipFitParams(3),log10(propRGC_ringcount));
+midgetFraction = p.Results.watsonEq8_f0-recipFunc(p.Results.linkingFuncParams(1),p.Results.linkingFuncParams(2),p.Results.linkingFuncParams(3),log10(propRGC_ringcount));
 
 % Scale the rgcDensity by the midget fraction
 mRGCDensitySqDeg = rgcDensitySqDeg .* midgetFraction;
