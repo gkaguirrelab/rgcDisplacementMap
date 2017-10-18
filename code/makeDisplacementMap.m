@@ -80,7 +80,7 @@ p.addParameter('cardinalMeridianAngles',[0 90 180 270],@isnumeric);
 p.addParameter('meridianAngleResolutionDeg',15,@isnumeric);
 p.addParameter('displacementMapPixelsPerDeg',10,@isnumeric);
 p.addParameter('cone_to_mRF_linkTolerance',1.05,@isnumeric);
-p.addParameter('rgc_to_mRGC_linkTolerance',1.5,@isnumeric);
+p.addParameter('rgc_to_mRGC_linkTolerance',2,@isnumeric);
 
 % Optional display params
 p.addParameter('verbose',false,@islogical);
@@ -169,8 +169,12 @@ for mm = 1:length(meridianAngles)
     ub = [rfInitialTransformParams.*(p.Results.cone_to_mRF_linkTolerance.^sign(rfInitialTransformParams)) rgcInitialTransformParams.*(p.Results.rgc_to_mRGC_linkTolerance.^sign(rgcInitialTransformParams))];
     x0 = [rfInitialTransformParams rgcInitialTransformParams];
 
+    lb(3:5) = [3.3516   -4.2559   -0.0066];
+    ub(3:5) = [3.3516   -4.2559   -0.0066];
+    x0(3:5) = [3.3516   -4.2559   -0.0066];
+
     % Set up the options
-    options = optimoptions('fmincon', 'Display', 'none', 'ConstraintTolerance', 1);
+    options = optimoptions('fmincon', 'Display', 'none', 'ConstraintTolerance', 0.1);
     
     % Fit that sucker
     fitParams(mm,:) = fmincon(errorFunc,x0,[],[],[],[],lb,ub,nonlinconst,options);
@@ -214,7 +218,10 @@ function [c,ceq] = testRFGreaterThanRGC(regularSupportPosDeg, countPerRingRF, co
 withinRangeIdx = find(regularSupportPosDeg < displacementPointDeg);
 c = sum(countPerRingRGC(withinRangeIdx) > countPerRingRF(withinRangeIdx));
 
-ceq = []; % unused
+% If the maximum displacement is greater than 2.5 degrees, then that
+% violates the constraint
+displaceInDeg = calcDisplacement(regularSupportPosDeg, countPerRingRGC, countPerRingRF);
+ceq = sum(displaceInDeg > 2.5);
 
 end
 
