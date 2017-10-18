@@ -1,4 +1,28 @@
-function midgetFraction = calcDaceyMidgetFractionByEccen(supportPosDeg)
+function midgetFraction = calcDaceyMidgetFractionByEccen(supportPosDeg, varargin)
+% calcDaceyMidgetFractionByEccen - midget fraction as a function of eccentricity
+%
+% This routine returns, for each of the locations in supportPosDeg, the
+% fraction of retinal ganglion cells that are midget RGCs. The calculation
+% is based upon the values provided in Dacey (1993) J Neurosci. A logisitic
+% function is fit to the data from the Dacey paper which then allows for
+% interpolation to intermediate values.
+%
+% The 
+
+%% Parse input and define variables
+p = inputParser;
+
+% required input
+p.addRequired('regularSupportPosDeg',@isnumeric);
+
+% Optional anaysis params
+p.addParameter('minRatio',0.45,@isnumeric);
+p.addParameter('maxRatio',0.95,@isnumeric);
+p.addParameter('logitFitStartPoint',[5, 20],@isnumeric);
+
+% parse
+p.parse(supportPosDeg, varargin{:})
+
 
 % Define a four-parameter logistic function that will be used to fit the
 % modeled relationship. Two of the parameters (max and min asymptote) are
@@ -16,14 +40,14 @@ daceyMidgetFraction = [91.54203702	97.96884938	95.9768409	94.73766615	82.9715404
 % Convert the Dacey support vector from mm to degrees
 daceyDataSupportPosDeg = convert_mm_to_deg(daceyDataSupportPosMM);
 
-% Convert the Dacey % values to proportion
+% Convert the Dacey percent values to proportion
 daceyMidgetFraction = daceyMidgetFraction / 100;
 
 % Fit a logistic function
 logisticFit = fit(daceyDataSupportPosDeg',daceyMidgetFraction',logisticFunc, ...
-    'problem',{0.45, 0.95}, ...
-    'StartPoint',[5, 20], ...
-    'Lower',[-100,0],'Upper',[100,100] );
+    'problem',{p.Results.minRatio, p.Results.maxRatio}, ...
+    'StartPoint',p.Results.logitFitStartPoint, ...
+    'Lower',[0,0],'Upper',[100,100] );
 
 midgetFraction = logisticFit(supportPosDeg);
 
