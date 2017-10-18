@@ -1,4 +1,4 @@
-function [ fitParams, figHandle ] = developMidgetRGCFractionModelDrasdo( varargin )
+function [ fitParams, figHandle ] = developDrasdoMidgetRGCFractionModel( varargin )
 % developMidgetRGCFractionModel( varargin )
 %
 % Our goal is to be able to derive the fraction of RGCs that are midget
@@ -59,6 +59,8 @@ function [ fitParams, figHandle ] = developMidgetRGCFractionModelDrasdo( varargi
 %   supportEccenMaxDegrees - the maximum eccentricity used for modeling
 %   meridianNames - Cell array of the text string names of the meridia
 %   meridianAngles - Polar angle values assigned to the meridians
+%   meridiansIdxToUseForFitParams - Index of the meridians from which we 
+%       will calculate the median fit param values.
 %   watsonEq8_f0 - The midget fraction assigned to the fovea
 %   watsonEq8_rm - decay parameter controlling the midget fraction function
 %   recipFitStartPoint - initial values used for the fit of the
@@ -77,6 +79,7 @@ p.addParameter('supportEccenMaxDegrees',30,@isnumeric);
 p.addParameter('meridianNames',{'Nasal' 'Superior' 'Temporal' 'Inferior'},@iscell);
 p.addParameter('meridianAngles',[0, 90, 180, 270],@isnumeric);
 p.addParameter('meridianSymbols',{'.','x','o','^'},@cell);
+p.addParameter('meridiansIdxToUseForFitParams',[1 2 3 4],@isnumeric);
 p.addParameter('watsonEq8_f0',0.8928,@isnumeric);
 p.addParameter('watsonEq8_rm',41.03,@isnumeric);
 p.addParameter('recipFitStartPoint',[3 -8 0],@isnumeric);
@@ -141,7 +144,7 @@ for mm = 1:length(p.Results.meridianAngles)
     end
     
     % Obtain the Watson midget fraction as a function of eccentricity
-    midgetFractionByEccen = calcWatsonMidgetFractionByEccen(regularSupportPosDeg,p.Results.watsonEq8_f0,p.Results.watsonEq8_rm);
+    midgetFractionByEccen = calcDrasdoMidgetFractionByEccen(regularSupportPosDeg,p.Results.watsonEq8_f0,p.Results.watsonEq8_rm);
     
     % Fit the reciprocal model that relates log10(proportionRGC) to midget
     % fraction. First, define a weight function to lock the f0 value
@@ -179,10 +182,11 @@ for mm = 1:length(p.Results.meridianAngles)
     
 end % loop over meridians
 
-% Now calculate the median parm values across the meridians and add a fit
-% line to the plot
-fitParams=median(fitParams);
+% Calculate the median param values across meridians, but only for those
+% meridians that we have declared hwe wish to use for this purpose
+fitParams=median(fitParams(p.Results.meridiansIdxToUseForFitParams,:));
 
+% Add a fit line to the plot
 if p.Results.makePlots
     xFit=logspace(-12,0.175,100);
     plot( log10(xFit), ...
@@ -194,5 +198,3 @@ end
 
 
 end % function
-
-
