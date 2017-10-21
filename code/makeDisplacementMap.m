@@ -83,7 +83,7 @@ function [ displacementMapDeg, fitParams, meridianAngles, rgcDisplacementEachMer
 %   verbose - Do we give you the text?
 
 %% Parse input and define variables
-p = inputParser;
+p = inputParser; p.KeepUnmatched = true;
 
 % Optional anaysis params
 p.addParameter('sampleResolutionDegrees',0.01,@isnumeric);
@@ -127,7 +127,7 @@ targetDisplacementDegByMeridian = targetByAngleFit(meridianAngles);
 
 % Derive parameters for the transformation of cone density to mRF density
 if isempty(p.Results.rfInitialTransformParams)
-    [ rfInitialTransformParams ] = developMidgetRFFractionModel();
+    [ rfInitialTransformParams ] = developMidgetRFFractionModel(varargin{:});
 else
     rfInitialTransformParams = p.Results.rfInitialTransformParams;
 end
@@ -138,14 +138,14 @@ switch p.Results.rgcLinkingFunctionFlavor
     case 'Drasdo'
         % Derive linking function initial values if not passed
         if isempty(p.Results.rgcDrasdoInitialTransformParams)
-            [ rgcInitialTransformParams ] = developDrasdoMidgetRGCFractionModel();
+            [ rgcInitialTransformParams ] = developDrasdoMidgetRGCFractionModel(varargin{:});
         else
             rgcInitialTransformParams = p.Results.rgcDrasdoInitialTransformParams;
         end
     case 'Dacey'
         % Derive linking function initial values if not passed
         if isempty(p.Results.rgcDaceyInitialTransformParams)
-            [ rgcInitialTransformParams ] = developDaceyMidgetRGCFractionModel();
+            [ rgcInitialTransformParams ] = developDaceyMidgetRGCFractionModel(varargin{:});
         else
             rgcInitialTransformParams = p.Results.rgcDaceyInitialTransformParams;
         end
@@ -167,7 +167,7 @@ for mm = 1:length(meridianAngles)
     % Create an anonymous function that returns mRF density as a function
     % of cone density, with the transform defined by the first two fitParams
     mRFDensityOverRegularSupport = ...
-        @(fitParams) transformConeToMidgetRFDensity(coneDensityFit(regularSupportPosDeg), ...
+        @(fitParams) transformConeToMidgetRFDensity(coneDensityFit(regularSupportPosDeg, varargin{:}), ...
         'linkingFuncParams',fitParams(1:2))';
     % Define anonymous function for the cumulative sum of mRF density
     mRF_cumulative = @(fitParams) calcCumulative(regularSupportPosDeg, mRFDensityOverRegularSupport(fitParams));
@@ -187,11 +187,11 @@ for mm = 1:length(meridianAngles)
     switch p.Results.rgcLinkingFunctionFlavor
         case 'Drasdo'
             mRGCDensityOverRegularSupport = ...
-                @(fitParams) transformRGCToMidgetRGCDensityDrasdo(regularSupportPosDeg,rgcDensityFit(regularSupportPosDeg)',...
+                @(fitParams) transformRGCToMidgetRGCDensityDrasdo(regularSupportPosDeg,rgcDensityFit(regularSupportPosDeg, varargin{:})',...
                 'linkingFuncParams',fitParams(3:end));
         case 'Dacey'
             mRGCDensityOverRegularSupport = ...
-                @(fitParams) transformRGCToMidgetRGCDensityDacey(regularSupportPosDeg,rgcDensityFit(regularSupportPosDeg)',...
+                @(fitParams) transformRGCToMidgetRGCDensityDacey(regularSupportPosDeg,rgcDensityFit(regularSupportPosDeg, varargin{:})',...
                 'linkingFuncParams',fitParams(3:end));
         otherwise
             error('This is not an RGC linking function flavor that I know');
