@@ -77,7 +77,7 @@ function [ displacementMapDeg, fitParams, meridianAngles, rgcDisplacementEachMer
 %       linking function of mRGC to RGC density.
 %   rfInitialTransformParams - values for the linking function. If set to
 %       empty, these will be calculated using the develop model routine.
-%   rgcInitialTransformParams - values for the linking function. If set to
+%   rgcDrasdoInitialTransformParams - values for the linking function. If set to
 %       empty, these will be calculated using the develop model routine.
 %
 %   verbose - Do we give you the text?
@@ -94,8 +94,10 @@ p.addParameter('meridianAngleResolutionDeg',15,@isnumeric);
 p.addParameter('displacementMapPixelsPerDeg',10,@isnumeric);
 p.addParameter('cone_to_mRF_linkTolerance',1.05,@isnumeric);
 p.addParameter('rgc_to_mRGC_linkTolerance',1.05,@isnumeric);
+p.addParameter('rgcLinkingFunctionFlavor','Drasdo',@(x)(stcmp(x,'Drasdo') | stcmp(x,'Dacey')));
 p.addParameter('rfInitialTransformParams',[4.6378   -1.0859],@(x)(isempty(x) | isnumeric(x)));
-p.addParameter('rgcInitialTransformParams',[3.3516   -4.2559   -0.0066],@(x)(isempty(x) | isnumeric(x)));
+p.addParameter('rgcDrasdoInitialTransformParams',[3.3516   -4.2559   -0.0066],@(x)(isempty(x) | isnumeric(x)));
+p.addParameter('rgcDaceyInitialTransformParams',[12.1705    1.2557],@(x)(isempty(x) | isnumeric(x)));
 
 % Optional display params
 p.addParameter('verbose',false,@islogical);
@@ -121,21 +123,35 @@ targetByAngleFit = fit(angleBase',targetValues','pchipinterp');
 targetDisplacementDegByMeridian = targetByAngleFit(meridianAngles);
 
 
-%% Derive parameters for the transformation of cone density to mRF density
+%% Setup the initial values for the linking function parameters
+
+% Derive parameters for the transformation of cone density to mRF density
 if isempty(p.Results.rfInitialTransformParams)
     [ rfInitialTransformParams ] = developMidgetRFFractionModel();
 else
     rfInitialTransformParams = p.Results.rfInitialTransformParams;
 end
 
-
-%% Derive parameters for the transformation of RGC density to mRGC density
-if isempty(p.Results.rgcInitialTransformParams)
-    [ rgcInitialTransformParams ] = developDrasdoMidgetRGCFractionModel();
-else
-    rgcInitialTransformParams = p.Results.rgcInitialTransformParams;
+% Derive parameters for the transformation of RGC density to mRGC density
+% Note that we can use either the Drasdo or Dacey base expression here
+switch p.Results.rgcLinkingFunctionFlavor
+    case 'Drasdo'
+        % Derive linking function initial values if not passed
+        if isempty(p.Results.rgcDrasdoInitialTransformParams)
+            [ rgcInitialTransformParams ] = developDrasdoMidgetRGCFractionModel();
+        else
+            rgcInitialTransformParams = p.Results.rgcDrasdoInitialTransformParams;
+        end
+    case 'Dacey'
+        % Derive linking function initial values if not passed
+        if isempty(p.Results.rgcDaceyInitialTransformParams)
+            [ rgcInitialTransformParams ] = developDaceyMidgetRGCFractionModel();
+        else
+            rgcInitialTransformParams = p.Results.rgcDaceyInitialTransformParams;
+        end
+    otherwise
+        error('This is not an RGC linking function flavor that I know');
 end
-
 
 
 %% Loop over the meridians
@@ -164,11 +180,23 @@ for mm = 1:length(meridianAngles)
     
     % Obtain a spline fit to the empirical RGC density data of Curcio 1990
     rgcDensityFit = getSplineFitToRGCDensity(meridianAngles(mm));
+
     % Create an anonymous function that returns mRGC density as a function of
-    % RGC density, with the transform defined by the last three fitParams
-    mRGCDensityOverRegularSupport = ...
-        @(fitParams) transformRGCToMidgetRGCDensityDrasdo(regularSupportPosDeg,rgcDensityFit(regularSupportPosDeg)',...
-        'linkingFuncParams',fitParams(3:end));
+    % RGC density, with the transform defined by the last two or three fitParams
+    % This function can be set up with Drasdo or Dacey flavor
+    switch p.Results.rgcLinkingFunctionFlavor
+        case 'Drasdo'
+            mRGCDensityOverRegularSupport = ...
+                @(fitParams) transformRGCToMidgetRGCDensityDrasdo(regularSupportPosDeg,rgcDensityFit(regularSupportPosDeg)',...
+                'linkingFuncParams',fitParams(3:end));
+        case 'Dacey'
+            mRGCDensityOverRegularSupport = ...
+                @(fitParams) transformRGCToMidgetRGCDensityDacey(regularSupportPosDeg,rgcDensityFit(regularSupportPosDeg)',...
+                'linkingFuncParams',fitParams(3:end));
+        otherwise
+            error('This is not an RGC linking function flavor that I know');
+    end
+
     % Define anonymous function for the cumulative sum of mRGC density
     mRGC_cumulative = @(fitParams) calcCumulative(regularSupportPosDeg, mRGCDensityOverRegularSupport(fitParams));
     
