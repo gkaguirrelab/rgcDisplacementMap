@@ -81,7 +81,7 @@ for mm = 1:length(meridianAngles)
     % itself is taken from Drasdo 2017)
     mRGCDensityOverRegularSupport = ...
         RGCDensityFit(regularSupportPosDeg)' .* ...
-        calcWatsonMidgetFractionByEccen(regularSupportPosDeg,0.8928,41.03);
+        calcDrasdoMidgetFractionByEccen(regularSupportPosDeg,0.8928,41.03);
     % Define the cumulative sum of mRGC density
     mRGC_cumulative = calcCumulative(regularSupportPosDeg, mRGCDensityOverRegularSupport);
         
