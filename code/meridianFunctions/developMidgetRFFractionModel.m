@@ -30,13 +30,13 @@ function [ fitParams, figHandle ] = developMidgetRFFractionModel( varargin )
 % maximum cone density observed in the fovea. We then fit this relationship
 % with the function:
 %
-%	mRFtoConeDensityRatio = minRatio+(maxRatio-minRatio)./(1+(x./inflect).^slope)
+%	mRFtoConeDensityRatio = minMidgetRGCToConeRatio+(maxMidgetRGCToConeRatio-minMidgetRGCToConeRatio)./(1+(x./inflect).^slope)
 %
-% where maxRatio and minRatio are locked parameters.
+% where maxMidgetRGCToConeRatio and minMidgetRGCToConeRatio are locked parameters.
 %
-% We adopt a maxRatio of 1.9 (instead of the anatomically predicted value
+% We adopt a maxMidgetRGCToConeRatio of 1.9 (instead of the anatomically predicted value
 % of 2) as this better fits the values provided by Watson. Additionally, we
-% adopt a slightly negative minRatio to provide a better fit of the sigmoid
+% adopt a slightly negative minMidgetRGCToConeRatio to provide a better fit of the sigmoid
 % at the far periphery, although we observe that this value is not
 % physiologically meaningful. Effectively, our model returns impossible
 % values when the cone density reaches less than 1% of its peak value at
@@ -71,8 +71,8 @@ function [ fitParams, figHandle ] = developMidgetRFFractionModel( varargin )
 %   maxConeDensity - The maximum cone density at the fovea (couts / deg^2).
 %       The default value is from Curcio 1990. If set to empty, the maximum
 %       value from coneDensitySqDeg is used.
-%   minRatio - The minimum value of the mRF:cone density ratio.
-%   maxRatio - The maximuim value of the mRF:cone density ratio.
+%   minMidgetRGCToConeRatio - The minimum value of the mRF:cone density ratio.
+%   maxMidgetRGCToConeRatio - The maximuim value of the mRF:cone density ratio.
 %   logitFitStartPoint - initial values used for the slope and inflection
 %       point parameters of the logisic fit. Informed by examination of
 %       typical data.
@@ -89,8 +89,8 @@ p.addParameter('meridianAngles',[0, 90, 180, 270],@isnumeric);
 p.addParameter('meridianSymbols',{'.','x','o','^'},@cell);
 p.addParameter('meridiansIdxToUseForFitParams',[1 3 4],@isnumeric);
 p.addParameter('maxConeDensity',1.4806e+04,@(x)(isempty(x) | isnumeric(x)));
-p.addParameter('minRatio',-0.1,@isnumeric);
-p.addParameter('maxRatio',1.9,@isnumeric);
+p.addParameter('minMidgetRGCToConeRatio',-0.1,@isnumeric);
+p.addParameter('maxMidgetRGCToConeRatio',1.9,@isnumeric);
 p.addParameter('logitFitStartPoint',[3,-1],@isnumeric);
 
 % Optional display params
@@ -105,8 +105,8 @@ p.parse(varargin{:})
 % Define a four-parameter logistic function that will be used to fit the
 % modeled relationship. Two of the parameters (max and min asymptote) are
 % locked by the passed parameter
-logisticFunc = fittype( @(slope,inflect,minRatio,maxRatio,x) minRatio+(maxRatio-minRatio)./(1+sign(x./inflect).*abs((x./inflect).^slope)), ...
-    'independent','x','dependent','y','problem',{'minRatio','maxRatio'});
+logisticFunc = fittype( @(slope,inflect,minMidgetRGCToConeRatio,maxMidgetRGCToConeRatio,x) minMidgetRGCToConeRatio+(maxMidgetRGCToConeRatio-minMidgetRGCToConeRatio)./(1+sign(x./inflect).*abs((x./inflect).^slope)), ...
+    'independent','x','dependent','y','problem',{'minMidgetRGCToConeRatio','maxMidgetRGCToConeRatio'});
 
 % Prepare a figure if requested
 if p.Results.makePlots
@@ -153,7 +153,7 @@ for mm = 1:length(p.Results.meridianAngles)
     % Perform the logistic fit. Note that the max and min asymptote are
     % pinned by the passed parameters
     logitFit = fit(x,midgetRFtoConeRatio,logisticFunc, ...
-        'problem',{p.Results.minRatio, p.Results.maxRatio}, ...
+        'problem',{p.Results.minMidgetRGCToConeRatio, p.Results.maxMidgetRGCToConeRatio}, ...
         'StartPoint',p.Results.logitFitStartPoint, ...
         'Lower',[0,-2],'Upper',[10,0] );
     
@@ -180,7 +180,7 @@ if p.Results.makePlots
     xFit= -2:.01:0;
     ylim([0 2.5]);
     plot( xFit, ...
-        logisticFunc(fitParams(1), fitParams(2), p.Results.minRatio, p.Results.maxRatio, xFit),'-r')
+        logisticFunc(fitParams(1), fitParams(2), p.Results.minMidgetRGCToConeRatio, p.Results.maxMidgetRGCToConeRatio, xFit),'-r')
     legend({p.Results.meridianNames{:} 'fit'},'Location','southeast');
     title('midget RF : cone ratio as a function of relative cone density');
     drawnow

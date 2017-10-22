@@ -28,10 +28,10 @@ function [ fitParams, figHandle ] = developDaceyMidgetRGCFractionModel( varargin
 % which the measurement was made. If we term this proportion value x, then
 % the relationship is:
 %
-%   midgetFraction = minRatio+(maxRatio-minRatio)./(1+sign(x./inflect).*abs((x./inflect).^slope))
+%   midgetFraction = minMidgetFractionRatio+(maxMidgetFractionRatio-minMidgetFractionRatio)./(1+sign(x./inflect).*abs((x./inflect).^slope))
 %
 % where inflect and slope are free paramters of the logisitic fit, and
-% maxRatio and minRatio are the values of the midget fraction at the fovea
+% maxMidgetFractionRatio and minMidgetFractionRatio are the values of the midget fraction at the fovea
 % and periphery, respectivey.
 %
 % OUTPUT
@@ -53,8 +53,8 @@ function [ fitParams, figHandle ] = developDaceyMidgetRGCFractionModel( varargin
 %   meridianAngles - Polar angle values assigned to the meridians
 %   meridiansIdxToUseForFitParams - Index of the meridians from which we 
 %       will calculate the median fit param values.
-%   maxRatio - The midget fraction assigned to the fovea
-%   minRatio - The midget fraction assigned to the far periphery
+%   maxMidgetFractionRatio - The midget fraction assigned to the fovea
+%   minMidgetFractionRatio - The midget fraction assigned to the far periphery
 %   logitFitStartPoint - initial values used for the fit of the
 %       logisitic function.
 %   makePlots - Do we make a figure?
@@ -70,8 +70,8 @@ p.addParameter('meridianNames',{'Nasal' 'Superior' 'Temporal' 'Inferior'},@iscel
 p.addParameter('meridianAngles',[0, 90, 180, 270],@isnumeric);
 p.addParameter('meridianSymbols',{'.','x','o','^'},@cell);
 p.addParameter('meridiansIdxToUseForFitParams',[1 2 3 4],@isnumeric);
-p.addParameter('minRatio',0.45,@isnumeric);
-p.addParameter('maxRatio',0.95,@isnumeric);
+p.addParameter('minMidgetFractionRatio',0.45,@isnumeric);
+p.addParameter('maxMidgetFractionRatio',0.95,@isnumeric);
 p.addParameter('logitFitStartPoint',[5 1],@isnumeric);
 
 % Optional display params
@@ -86,8 +86,8 @@ p.parse(varargin{:})
 % Define a four-parameter logistic function that will be used to fit the
 % modeled relationship. Two of the parameters (max and min asymptote) are
 % locked by the passed parameter
-logisticFunc = fittype( @(slope,inflect,minRatio,maxRatio,x) minRatio+(maxRatio-minRatio)./(1+sign(x./inflect).*abs((x./inflect).^slope)), ...
-    'independent','x','dependent','y','problem',{'minRatio','maxRatio'});
+logisticFunc = fittype( @(slope,inflect,minMidgetFractionRatio,maxMidgetFractionRatio,x) minMidgetFractionRatio+(maxMidgetFractionRatio-minMidgetFractionRatio)./(1+sign(x./inflect).*abs((x./inflect).^slope)), ...
+    'independent','x','dependent','y','problem',{'minMidgetFractionRatio','maxMidgetFractionRatio'});
 
 % Define the regular-spaced eccentricity support over which we will model
 % the anatomical retinal functions
@@ -144,7 +144,7 @@ for mm = 1:length(p.Results.meridianAngles)
         % Perform the logistic fit. Note that the max and min asymptote are
     % pinned by the passed parameters
     logitFit = fit(propRGC_ringcount',midgetFractionByEccen',logisticFunc, ...
-        'problem',{p.Results.minRatio, p.Results.maxRatio}, ...
+        'problem',{p.Results.minMidgetFractionRatio, p.Results.maxMidgetFractionRatio}, ...
         'StartPoint',p.Results.logitFitStartPoint, ...
         'Lower',[0,0],'Upper',[50,5] );
     
@@ -175,7 +175,7 @@ fitParams=median(fitParams(p.Results.meridiansIdxToUseForFitParams,:));
 if p.Results.makePlots
     xFit=0:.1:2;
     plot( xFit, ...
-        logisticFunc(fitParams(1), fitParams(2), p.Results.minRatio, p.Results.maxRatio, xFit),'-r')
+        logisticFunc(fitParams(1), fitParams(2), p.Results.minMidgetFractionRatio, p.Results.maxMidgetFractionRatio, xFit),'-r')
     legend({p.Results.meridianNames{:} 'fit'},'Location','southwest');
     title('midget fraction as a function of relative RGC cumulative density');
     drawnow
