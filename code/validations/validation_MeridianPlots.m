@@ -12,13 +12,12 @@ p.addParameter('maxModeledEccentricity',30,@isnumeric);
 p.addParameter('meridianAngleResolutionDeg',90,@isnumeric);
 p.addParameter('meridianNames',{'nasal','superior','temporal','inferior'},@iscell);
 p.addParameter('displacementMapPixelsPerDeg',10,@isnumeric);
-p.addParameter('pathToPlotOutputDir','~/Desktop/rgcDisplacementMapPlots',@ischar);
 p.addParameter('referenceEccen',15,@isnumeric);
-
 
 % Optional display and ouput params
 p.addParameter('verbose',true,@islogical);
 p.addParameter('savePlots',true,@islogical);
+p.addParameter('pathToPlotOutputDir','~/Desktop/rgcDisplacementMapPlots',@ischar);
 
 % parse
 p.parse(varargin{:})
