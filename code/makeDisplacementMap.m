@@ -1,7 +1,6 @@
 function [ displacementMapDeg, fitParams, meridianAngles, rgcDisplacementEachMeridian, mRGC_cumulativeEachMeridian, mRF_cumulativeEachMeridian, convergenceEccen] = makeDisplacementMap( varargin )
-% makeDisplacementMap( varargin )
+% makeDisplacementMap -  This routine models retinal ganglion cell displacement.
 %
-% This routine models retinal ganglion cell displacement.
 % Our strategy is to begin with empirical measurements of cone and retinal
 % ganglion cell densities obtained from each of the four cardinal meridians
 % of the human retina. The data we use are from two papers published by
@@ -49,28 +48,42 @@ function [ displacementMapDeg, fitParams, meridianAngles, rgcDisplacementEachMer
 %       the displacement values were calculated
 %
 % OPTIONS
-%   sampleResolutionDegrees, maxModeledEccentricity - The calculations are
-%       performed across a regular sampling of eccentricity. These params
-%       deine sample resolution and the max modeled eccentricity. We
-%       note that the sample resolution must be sufficient fine so that the
-%       cumulative is an accurate estimate of the integral. Further, we
-%       find that our results depend in unpredictable ways on the
-%       particular maxModeledEccentricity selected. This latter value must
-%       be sufficiently outside the displacement zone so that there is a
-%       portion of the cumulative to match between the mRF and mRGC
-%       functions, but not so large as to venture into the periphery where
-%       our transform models areless accurate
+%   sampleResolutionDegrees - The calculations are
+%       performed across a regular sampling of eccentricity. This param
+%       defines sample resolution The sample resolution must be sufficient
+%       fine so that the cumulative is an accurate estimate of the
+%       integral.
+%   maxModeledEccentricity - The eccentricity extent of the model. This
+%       value must be sufficiently outside the displacement zone so that
+%       there is a portion of the cumulative to match between the mRF and
+%       mRGC functions, but not so large as to venture into the periphery
+%       where our transform models areless accurate. We find that our
+%       results depend in unpredictable ways on the particular
+%       maxModeledEccentricity selected, which is unfortunate.
 %   targetDisplacementPointDeg - This is point in degrees at which
 %       displacement should become zero for each cadinal meridian
 %   meridianAngleResolutionDeg - The resolution across polar angle for
 %       which displacements are calculated.
 %   displacementMapPixelsPerDeg - The resolution in pixels per degree at
 %       which the displacement map is rendered.
+%   cone_to_mRF_linkTolerance - We derive initial parameters for the
+%       linking function that converts cone density to mRF density. These
+%       values are used as the starting point for a search that aims to
+%       produce convergence of the mRF and mRGC cumulative functions (as
+%       well as other constraints). This parameter defines the upper and
+%       lower bounds for the search across the parameters as a
+%       multiplicative function.
+%   rgc_to_mRGC_linkTolerance - Same as the prior param, except for the
+%       linking function of mRGC to RGC density.
+%   rfInitialTransformParams - values for the linking function. If set to
+%       empty, these will be calculated using the develop model routine.
+%   rgcDrasdoInitialTransformParams - values for the linking function. If set to
+%       empty, these will be calculated using the develop model routine.
+%
 %   verbose - Do we give you the text?
-%   makePlots - Do we make a figure?
 
 %% Parse input and define variables
-p = inputParser;
+p = inputParser; p.KeepUnmatched = true;
 
 % Optional anaysis params
 p.addParameter('sampleResolutionDegrees',0.01,@isnumeric);
@@ -79,6 +92,14 @@ p.addParameter('targetDisplacementAtCardinalMeridiansDeg',[11 17 17 17],@isnumer
 p.addParameter('cardinalMeridianAngles',[0 90 180 270],@isnumeric);
 p.addParameter('meridianAngleResolutionDeg',15,@isnumeric);
 p.addParameter('displacementMapPixelsPerDeg',10,@isnumeric);
+p.addParameter('cone_to_mRF_linkTolerance',1.05,@isnumeric);
+p.addParameter('rgc_to_mRGC_linkTolerance',1.05,@isnumeric);
+p.addParameter('rgcLinkingFunctionFlavor','Drasdo',@(x)(stcmp(x,'Drasdo') | stcmp(x,'Dacey')));
+p.addParameter('rfInitialTransformParams',[4.6378   -1.0859],@(x)(isempty(x) | isnumeric(x)));
+p.addParameter('rgcDrasdoInitialTransformParams',[3.3516   -4.2559   -0.0066],@(x)(isempty(x) | isnumeric(x)));
+p.addParameter('rgcDaceyInitialTransformParams',[12.1705    1.2557],@(x)(isempty(x) | isnumeric(x)));
+p.addParameter('minMidgetRGCToConeRatio',-0.1,@isnumeric);
+p.addParameter('maxMidgetRGCToConeRatio',1.9,@isnumeric);
 
 % Optional display params
 p.addParameter('verbose',false,@islogical);
@@ -104,12 +125,38 @@ targetByAngleFit = fit(angleBase',targetValues','pchipinterp');
 targetDisplacementDegByMeridian = targetByAngleFit(meridianAngles);
 
 
-%% Derive parameters for the transformation of RGC density to mRGC density
-[ rgcInitialTransformParams ] = developMidgetRGCFractionModel();
+%% Setup the initial values for the linking function parameters
 
+% Derive parameters for the transformation of cone density to mRF density
+if isempty(p.Results.rfInitialTransformParams)
+    [ rfInitialTransformParams ] = developMidgetRFFractionModel(...
+        'minMidgetRGCToConeRatio', p.Results.minMidgetRGCToConeRatio, ...
+        'maxMidgetRGCToConeRatio', p.Results.maxMidgetRGCToConeRatio ...
+        );
+else
+    rfInitialTransformParams = p.Results.rfInitialTransformParams;
+end
 
-%% Derive parameters for the transformation of cone density to mRF density
-[ rfInitialTransformParams ] = developMidgetRFFractionModel();
+% Derive parameters for the transformation of RGC density to mRGC density
+% Note that we can use either the Drasdo or Dacey base expression here
+switch p.Results.rgcLinkingFunctionFlavor
+    case 'Drasdo'
+        % Derive linking function initial values if not passed
+        if isempty(p.Results.rgcDrasdoInitialTransformParams)
+            [ rgcInitialTransformParams ] = developDrasdoMidgetRGCFractionModel(varargin{:});
+        else
+            rgcInitialTransformParams = p.Results.rgcDrasdoInitialTransformParams;
+        end
+    case 'Dacey'
+        % Derive linking function initial values if not passed
+        if isempty(p.Results.rgcDaceyInitialTransformParams)
+            [ rgcInitialTransformParams ] = developDaceyMidgetRGCFractionModel(varargin{:});
+        else
+            rgcInitialTransformParams = p.Results.rgcDaceyInitialTransformParams;
+        end
+    otherwise
+        error('This is not an RGC linking function flavor that I know');
+end
 
 
 %% Loop over the meridians
@@ -126,7 +173,10 @@ for mm = 1:length(meridianAngles)
     % of cone density, with the transform defined by the first two fitParams
     mRFDensityOverRegularSupport = ...
         @(fitParams) transformConeToMidgetRFDensity(coneDensityFit(regularSupportPosDeg), ...
-        'logitFitParams',fitParams(1:2))';
+        'linkingFuncParams',fitParams(1:2),...
+        'minMidgetRGCToConeRatio', p.Results.minMidgetRGCToConeRatio, ...
+        'maxMidgetRGCToConeRatio', p.Results.maxMidgetRGCToConeRatio ...
+        )';
     % Define anonymous function for the cumulative sum of mRF density
     mRF_cumulative = @(fitParams) calcCumulative(regularSupportPosDeg, mRFDensityOverRegularSupport(fitParams));
     
@@ -138,11 +188,23 @@ for mm = 1:length(meridianAngles)
     
     % Obtain a spline fit to the empirical RGC density data of Curcio 1990
     rgcDensityFit = getSplineFitToRGCDensity(meridianAngles(mm));
+
     % Create an anonymous function that returns mRGC density as a function of
-    % RGC density, with the transform defined by the last three fitParams
-    mRGCDensityOverRegularSupport = ...
-        @(fitParams) transformRGCToMidgetRGCDensity(regularSupportPosDeg,rgcDensityFit(regularSupportPosDeg)',...
-        'recipFitParams',fitParams(3:5));
+    % RGC density, with the transform defined by the last two or three fitParams
+    % This function can be set up with Drasdo or Dacey flavor
+    switch p.Results.rgcLinkingFunctionFlavor
+        case 'Drasdo'
+            mRGCDensityOverRegularSupport = ...
+                @(fitParams) transformRGCToMidgetRGCDensityDrasdo(regularSupportPosDeg,rgcDensityFit(regularSupportPosDeg)',...
+                'linkingFuncParams',fitParams(3:end));
+        case 'Dacey'
+            mRGCDensityOverRegularSupport = ...
+                @(fitParams) transformRGCToMidgetRGCDensityDacey(regularSupportPosDeg,rgcDensityFit(regularSupportPosDeg)',...
+                'linkingFuncParams',fitParams(3:end));
+        otherwise
+            error('This is not an RGC linking function flavor that I know');
+    end
+
     % Define anonymous function for the cumulative sum of mRGC density
     mRGC_cumulative = @(fitParams) calcCumulative(regularSupportPosDeg, mRGCDensityOverRegularSupport(fitParams));
     
@@ -159,16 +221,16 @@ for mm = 1:length(meridianAngles)
     
     
     %% Perform the fit
-    % We will search over the mRF transform parameters and lock the mRGC
-    % transform parameters. Set upper and lower bounds on the mRF params
-    % to be 1.25x the median values found across meridians (with a bit of
-    % sign exponent trickery to handle the direction of negative params)
-    lb = [rfInitialTransformParams./(2.^sign(rfInitialTransformParams)) rgcInitialTransformParams];
-    ub = [rfInitialTransformParams.*(2.^sign(rfInitialTransformParams)) rgcInitialTransformParams];
+    % We will search over the mRF and mRGC linking function parameters. We
+    % set the upper and lower bounds as multipliers on the median values
+    % found across meridians (with a bit of sign exponent trickery to
+    % handle the direction of negative params)
+    lb = [rfInitialTransformParams./(p.Results.cone_to_mRF_linkTolerance.^sign(rfInitialTransformParams)) rgcInitialTransformParams./(p.Results.rgc_to_mRGC_linkTolerance.^sign(rgcInitialTransformParams))];
+    ub = [rfInitialTransformParams.*(p.Results.cone_to_mRF_linkTolerance.^sign(rfInitialTransformParams)) rgcInitialTransformParams.*(p.Results.rgc_to_mRGC_linkTolerance.^sign(rgcInitialTransformParams))];
     x0 = [rfInitialTransformParams rgcInitialTransformParams];
     
     % Set up the options
-    options = optimoptions('fmincon', 'Display', 'none', 'ConstraintTolerance', 1);
+    options = optimoptions('fmincon', 'Display', 'none', 'ConstraintTolerance', 0.1);
     
     % Fit that sucker
     fitParams(mm,:) = fmincon(errorFunc,x0,[],[],[],[],lb,ub,nonlinconst,options);
@@ -182,9 +244,14 @@ for mm = 1:length(meridianAngles)
     if p.Results.verbose
         zeroPoints = find(rgcDisplacementEachMeridian(mm,:)==0);
         convergenceIdx = find(regularSupportPosDeg(zeroPoints) > 2,1);
-        convergenceEccen(mm) = regularSupportPosDeg(zeroPoints(convergenceIdx));
-        outLine = ['Polar angle: ' num2str(meridianAngles(mm)) ', max RGC displacement: ' num2str(max(rgcDisplacementEachMeridian(mm,:))) ', target convergence: ' num2str(targetDisplacementDegByMeridian(mm)) ', found convergence: ' num2str(convergenceEccen(mm)) '\n'];
-        fprintf(outLine);
+        if isempty(convergenceIdx)
+            outLine = ['Polar angle: ' num2str(meridianAngles(mm)) ', max RGC displacement: ' num2str(max(rgcDisplacementEachMeridian(mm,:))) ', target convergence: ' num2str(targetDisplacementDegByMeridian(mm)) ', found convergence: FAILED TO CONVERGE\n'];
+            fprintf(outLine);
+        else
+            convergenceEccen(mm) = regularSupportPosDeg(zeroPoints(convergenceIdx));
+            outLine = ['Polar angle: ' num2str(meridianAngles(mm)) ', max RGC displacement: ' num2str(max(rgcDisplacementEachMeridian(mm,:))) ', target convergence: ' num2str(targetDisplacementDegByMeridian(mm)) ', found convergence: ' num2str(convergenceEccen(mm)) '\n'];
+            fprintf(outLine);
+        end
     end
     
 end % loop over meridians
@@ -207,7 +274,10 @@ function [c,ceq] = testRFGreaterThanRGC(regularSupportPosDeg, countPerRingRF, co
 withinRangeIdx = find(regularSupportPosDeg < displacementPointDeg);
 c = sum(countPerRingRGC(withinRangeIdx) > countPerRingRF(withinRangeIdx));
 
-ceq = []; % unused
+% If the maximum displacement is greater than 2.5 degrees, then that
+% violates the constraint
+displaceInDeg = calcDisplacement(regularSupportPosDeg, countPerRingRGC, countPerRingRF);
+ceq = sum(displaceInDeg > 2.6);
 
 end
 

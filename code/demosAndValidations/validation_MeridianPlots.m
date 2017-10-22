@@ -12,13 +12,12 @@ p.addParameter('maxModeledEccentricity',30,@isnumeric);
 p.addParameter('meridianAngleResolutionDeg',90,@isnumeric);
 p.addParameter('meridianNames',{'nasal','superior','temporal','inferior'},@iscell);
 p.addParameter('displacementMapPixelsPerDeg',10,@isnumeric);
-p.addParameter('pathToPlotOutputDir','~/Desktop/rgcDisplacementMapPlots',@ischar);
 p.addParameter('referenceEccen',15,@isnumeric);
-
 
 % Optional display and ouput params
 p.addParameter('verbose',true,@islogical);
 p.addParameter('savePlots',true,@islogical);
+p.addParameter('pathToPlotOutputDir','~/Desktop/rgcDisplacementMapPlots',@ischar);
 
 % parse
 p.parse(varargin{:})
@@ -47,6 +46,7 @@ regularSupportPosDeg = ...
     'displacementMapPixelsPerDeg', p.Results.displacementMapPixelsPerDeg, ...
     'verbose', p.Results.verbose);
 
+fitParams
 
 % Plot the cumulatives and displacements across meridians
 figHandle = figure();
@@ -93,7 +93,7 @@ meridianColors={'r','b','g','k'};
 for mm = 1:length(meridianAngles)
     coneDensityFit = getSplineFitToConeDensity(meridianAngles(mm));
     coneDensitySqDeg = coneDensityFit(regularSupportPosDeg);
-    [ ~, mRFtoConeDensityRatio ] = transformConeToMidgetRFDensity( coneDensitySqDeg, 'logitFitParams', fitParams(mm,1:2) );
+    [ ~, mRFtoConeDensityRatio ] = transformConeToMidgetRFDensity( coneDensitySqDeg, 'linkingFuncParams', fitParams(mm,1:2) );
     xvals = log10(coneDensitySqDeg./max(coneDensitySqDeg));
     plot(xvals,mRFtoConeDensityRatio,'-','Color',meridianColors{mm});
 end
@@ -105,7 +105,7 @@ if p.Results.savePlots
 end
 
 % Show the RGC --> mRGC model
-[ ~, figHandle ] = developMidgetRGCFractionModel( 'makePlots', true );
+[ ~, figHandle ] = developDrasdoMidgetRGCFractionModel( 'makePlots', true );
 hold on
 % Add plot lines showing the fit by meridian
 meridianColors={'r','b','g','k'};
@@ -123,9 +123,9 @@ for mm = 1:length(meridianAngles)
     if ~isempty(zeroPoints)
         propRGC_ringcount(zeroPoints)=min(propRGC_ringcount(find(propRGC_ringcount~=0)));
     end
-    [ ~, midgetFraction ] = transformRGCToMidgetRGCDensity( regularSupportPosDeg, rgcDensitySqDeg', 'recipFitParams', fitParams(mm,3:5) );
-    xvals = log10(propRGC_ringcount);
-    plot(xvals,midgetFraction,'-','Color',meridianColors{mm});
+    [ ~, midgetFraction ] = transformRGCToMidgetRGCDensityDrasdo( regularSupportPosDeg, rgcDensitySqDeg', 'linkingFuncParams', fitParams(mm,3:end) );
+    xvals = propRGC_ringcount;
+    plot(log10(xvals),midgetFraction,'-','Color',meridianColors{mm});
 end
 hold off
 if p.Results.savePlots
@@ -141,7 +141,7 @@ meridianColors={'r','b','g','k'};
 subplot(2,1,1)
 for mm=1:4
     xFit= 1.4806e+04/100:100:1.4806e+04;
-    tmp_mRFDensity = transformConeToMidgetRFDensity(xFit, 'logitFitParams', fitParams(mm,1:2));
+    tmp_mRFDensity = transformConeToMidgetRFDensity(xFit, 'linkingFuncParams', fitParams(mm,1:2));
     plot( log10(xFit ./ 1.4806e+04), tmp_mRFDensity./xFit,'-','Color',meridianColors{mm});
     hold on
 end
@@ -276,7 +276,7 @@ meridianColors={'r','b','g','k'};
 subplot(2,1,1)
 [coneDensityFit] = getSplineFitToConeDensity(cardinalMeridianAngles(mm));
 regularSupportPosDeg=0:0.01:70;
-[ mRFDensitySqDeg ] = transformConeToMidgetRFDensity( coneDensityFit(regularSupportPosDeg), 'logitFitParams', fitParams(mm,1:2) );
+[ mRFDensitySqDeg ] = transformConeToMidgetRFDensity( coneDensityFit(regularSupportPosDeg), 'linkingFuncParams', fitParams(mm,1:2) );
 plot(regularSupportPosDeg,mRFDensitySqDeg,'-','Color',meridianColors{mm});
 xlim([0,30]);
 ylim([0,3e4]);
@@ -285,7 +285,7 @@ ylabel('mRF density [counts / deg2]');
 
 subplot(2,1,2)
 [RGCDensityFit] = getSplineFitToRGCDensity(cardinalMeridianAngles(mm));
-[ mRGCDensitySqDeg ] = transformRGCToMidgetRGCDensity( regularSupportPosDeg, RGCDensityFit(regularSupportPosDeg)', 'recipFitParams', fitParams(mm,3:5) );
+[ mRGCDensitySqDeg ] = transformRGCToMidgetRGCDensityDrasdo( regularSupportPosDeg, RGCDensityFit(regularSupportPosDeg)', 'linkingFuncParams', fitParams(mm,3:end) );
 plot(regularSupportPosDeg,mRGCDensitySqDeg,'-','Color',meridianColors{mm});
 xlim([0,30]);
 ylim([0,2500]);
@@ -316,9 +316,9 @@ for mm = 1:4
     
     % Plot Watson's midget fraction
     subplot(1,2,1);
-    f0 = 0.8928; rm = 41.03; % Watson's values
-    midgetFraction_watson = calcWatsonMidgetFractionByEccen(RGCNativeSupportPosDeg,f0,rm);
-    plot(RGCNativeSupportPosDeg,midgetFraction_watson,'-k');
+    f0 = 0.8928; rm = 41.03; % Drasdo's values
+    midgetFraction_Drasdo = calcDrasdoMidgetFractionByEccen(RGCNativeSupportPosDeg,f0,rm);
+    plot(RGCNativeSupportPosDeg,midgetFraction_Drasdo,'-k');
     hold on
     xlabel('eccentricity deg');
     ylabel('midget fraction');
@@ -329,7 +329,7 @@ for mm = 1:4
     
     % Plot our midget fraction
     subplot(1,2,2);
-    [ ~, midgetFraction_ours ] = transformRGCToMidgetRGCDensity( RGCNativeSupportPosDeg, RGCDensitySqDeg, 'recipFitParams', fitParams(meridianIdx,3:5) );
+    [ ~, midgetFraction_ours ] = transformRGCToMidgetRGCDensityDrasdo( RGCNativeSupportPosDeg, RGCDensitySqDeg, 'linkingFuncParams', fitParams(meridianIdx,3:end) );
     plot(RGCNativeSupportPosDeg,midgetFraction_ours,'-','Color',meridianColors{mm});
     hold on
     ylim([0 1]);
@@ -362,7 +362,10 @@ for mm = 1:4
     isvalididx=find(~isnan(coneDensitySqDeg));
     coneNativeSupportPosDeg = coneNativeSupportPosDeg(isvalididx);
     coneDensitySqDeg = coneDensitySqDeg(isvalididx);
-    
+
+    % Get the spline fit to cone density for this medidain
+    [coneDensityFit] = getSplineFitToConeDensity(cardinalMeridianAngles(mm));
+
     % calculate the mRF density using Watson equation 8 at the sites of
     % empirical cone measurement
     [ mRFDensitySqDeg_watson ] = calcWatsonMidgetRFDensityByEccen(coneNativeSupportPosDeg, cardinalMeridianAngles(mm));
@@ -381,7 +384,7 @@ for mm = 1:4
     % Plot the mRF density by eccentricity from our functions
     subplot(2,2,2);
     mRFDensitySqDeg_ours = transformConeToMidgetRFDensity(coneDensityFit(coneNativeSupportPosDeg), ...
-        'logitFitParams',fitParams(meridianIdx,1:2))';
+        'linkingFuncParams',fitParams(meridianIdx,1:2))';
     loglog(coneNativeSupportPosDeg(2:end),mRFDensitySqDeg_ours(2:end),'-','Color',meridianColors{mm});
     ylim([1e0 1e5]);
     xlabel('log10 eccentricity');
@@ -403,7 +406,7 @@ for mm = 1:4
     % Plot the mRF : cone ratio for us
     subplot(2,2,4);
     mRFDensitySqDeg_ours = ...
-        transformConeToMidgetRFDensity(coneDensityFit(coneNativeSupportPosDeg)','logitFitParams',fitParams(mm,1:2));
+        transformConeToMidgetRFDensity(coneDensityFit(coneNativeSupportPosDeg)','linkingFuncParams',fitParams(mm,1:2));
     loglog(coneNativeSupportPosDeg(2:end),mRFDensitySqDeg_ours(2:end)./coneDensitySqDeg(2:end),'-','Color',meridianColors{mm});
     ylim([1e-2 10]);
     xlabel('log10 eccentricity');

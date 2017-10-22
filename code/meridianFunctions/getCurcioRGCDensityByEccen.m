@@ -25,7 +25,7 @@ function [rgcDensitySqDeg, supportPosDeg] = getCurcioRGCDensityByEccen(polarAngl
 
 % Check the input
 if sum([0 90 180 270]==polarAngle) ~= 1
-    error('The Curcio RGC data are defined only for the cardinal meridia');
+    error('The Curcio RGC data are defined only for the cardinal meridians');
 end
 
 %% Load the RGC Density Data from Curcio et al 1990:

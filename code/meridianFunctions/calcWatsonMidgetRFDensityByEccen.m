@@ -7,14 +7,6 @@ function [ midgetRFDensity_degSq ] = calcWatsonMidgetRFDensityByEccen(supportPos
 % switched. In this routine we return the values that Watson labeled
 % "nasal" as the temporal retina, and vice-a-versa.
 %
-% NOTE 2: Watson's equation 8 seems to omit a key parameter. In text that
-% described the components of equation 8, it is clear that Watson intends
-% to have the midget RF calculation reflect the midget fraction equation
-% derived from Drasdon 2007 (which is shown in Watson Eq 7). While Eq 8
-% incorporates Eq 7, it omits the key parameter f(0), which is the fraction
-% of midget receptive fields at the fovea. It appears that the remaining
-% figures of the paper carry this error. Here, we modify Watson's
-% published version of equation 8 to include this factor.
 %
 % Inputs
 %   supportPosDeg - the positions (in degrees of visual angle) from the
@@ -67,16 +59,12 @@ dcZero = 14804.6;
 % meridia
 rm = 41.03;
 
-% Fraction of receptive fields at the fovea that are midget receptive
-% fields. This is missing from Watson's published paper.
-f0 = 0.8928;
-
 % Note, the 2 * dcZero value is an expression for the number of midget
 % retinal ganglion cells at the fovea, which is assumed to be 2 * dcZero.
 % That is, it is assumed that the number of midget RGCs at the fovea is
 % exactly equal to twice the number of cones.
 
-midgetRFDensity_degSq = 2 * dcZero .* f0 .* ...                                     % The number of RFs at the fovea (which is twice the cone density)
+midgetRFDensity_degSq = 2 * dcZero .* ...                                     % The number of mRFs at the fovea (which is twice the cone density)
     ( (a*((1+supportPosDeg./r2)).^-2) + (1-a).*exp(-1.*supportPosDeg./re) ) .* ...  % The number of receptive fields as a function of eccentricity
     ((1+supportPosDeg./rm).^-1);                                                    % The midget fraction at each eccentricity
 
