@@ -51,7 +51,7 @@ aggregatePosition=[];
 aggregateDensity=[];
 for mm=p.Results.meridiansForKnotDefinition(1):p.Results.meridiansForKnotDefinition(2)
     % load the empirical RGC density measured by Curcio
-    [rgcDensitySqDeg, rgcNativeSupportPosDeg] = getCurcioRGCDensityByEccen(p.Results.meridianAngles(mm));
+    [rgcDensitySqDeg, rgcNativeSupportPosDeg] = loadRawRGCDensityByEccen(p.Results.meridianAngles(mm));
     % remove nan values
     isvalididx=find(~isnan(rgcDensitySqDeg));
     rgcNativeSupportPosDeg = rgcNativeSupportPosDeg(isvalididx);
@@ -68,7 +68,7 @@ knots = BformSplineFit.knots;
 % with the specified knots
 for mm=1:length(p.Results.meridianAngles)
     % load the empirical rgc density measured by Curcio
-    [rgcDensitySqDeg, rgcNativeSupportPosDeg] = getCurcioRGCDensityByEccen(p.Results.meridianAngles(mm));
+    [rgcDensitySqDeg, rgcNativeSupportPosDeg] = loadRawRGCDensityByEccen(p.Results.meridianAngles(mm));
     % remove nan values
     isvalididx=find(~isnan(rgcDensitySqDeg));
     rgcNativeSupportPosDeg = rgcNativeSupportPosDeg(isvalididx);

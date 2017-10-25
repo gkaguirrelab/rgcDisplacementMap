@@ -120,7 +120,7 @@ end
 for mm = 1:length(p.Results.meridianAngles)
     
     % Load the Cone density Data from Curcio 1990:
-    [coneDensitySqDeg, nativeSupportPosDeg] = getCurcioConeDensityByEccen(p.Results.meridianAngles(mm));
+    [coneDensitySqDeg, nativeSupportPosDeg] = loadRawConeDensityByEccen(p.Results.meridianAngles(mm));
     
     % remove nan values
     isvalididx=find(~isnan(coneDensitySqDeg)  );

@@ -30,27 +30,25 @@ regularSupportPosDeg = ...
 
 
 %% Check cone density values
-fprintf('Checking the function getCurcioConeDensityByEccen:\n');
+fprintf('Checking the function loadRawConeDensityByEccen:\n');
 
 % Test the nasal meridian
-[rgcDensitySqDeg, supportPosDeg] = getCurcioConeDensityByEccen(p.Results.nasalMeridianAngle);
-checkEccenMm = 1; checkDensityMmSq = 20962; % These values copied from Curcio data table
-checkEccenDeg = convert_mm_to_deg(checkEccenMm);
+[rgcDensitySqDeg, supportPosDeg] = loadRawConeDensityByEccen(p.Results.nasalMeridianAngle);
+checkEccenDeg = 1; checkDensityMmSq = 74233; % These values copied from Curcio data table
 checkDensityMmDeg = convert_mmSq_to_degSq(checkEccenDeg, checkDensityMmSq );
 Idx = find(supportPosDeg==checkEccenDeg,1);
-if checkDensityMmDeg == rgcDensitySqDeg(Idx)
+if (checkDensityMmDeg - rgcDensitySqDeg(Idx))<1
     fprintf('\tNasal cone density value matches Curcio table\n');
 else
     error('Nasal cone density value DOES NOT MATCH Curcio table\n');
 end
 
 % Test the temporal meridian
-[rgcDensitySqDeg, supportPosDeg] = getCurcioConeDensityByEccen(p.Results.temporalMeridianAngle);
-checkEccenMm = 1; checkDensityMmSq = 19699; % These values copied from Curcio data table
-checkEccenDeg = convert_mm_to_deg(checkEccenMm);
+[rgcDensitySqDeg, supportPosDeg] = loadRawConeDensityByEccen(p.Results.temporalMeridianAngle);
+checkEccenDeg = 1; checkDensityMmSq = 80004; % These values copied from Curcio data table
 checkDensityMmDeg = convert_mmSq_to_degSq(checkEccenDeg, checkDensityMmSq );
 Idx = find(supportPosDeg==checkEccenDeg,1);
-if checkDensityMmDeg == rgcDensitySqDeg(Idx)
+if (checkDensityMmDeg - rgcDensitySqDeg(Idx))<1
     fprintf('\tTemporal cone density value matches Curcio table\n');
 else
     error('Temporal cone density value DOES NOT MATCH Curcio table\n');
@@ -58,27 +56,25 @@ end
 
 
 %% Check RGC density values
-fprintf('Checking the function getCurcioRGCDensityByEccen:\n');
+fprintf('Checking the function loadRawRGCDensityByEccen:\n');
 
 % Test the nasal meridian
-[rgcDensitySqDeg, supportPosDeg] = getCurcioRGCDensityByEccen(p.Results.nasalMeridianAngle);
-checkEccenMm = 1.0085; checkDensityMmSq = 31544.2; % These values copied from Curcio data table
-checkEccenDeg = convert_mm_to_deg(checkEccenMm);
+[rgcDensitySqDeg, supportPosDeg] = loadRawRGCDensityByEccen(p.Results.nasalMeridianAngle);
+checkEccenDeg = 1; checkDensityMmSq = 4587.86; % These values copied from Curcio data table
 checkDensityMmDeg = convert_mmSq_to_degSq(checkEccenDeg, checkDensityMmSq );
 Idx = find(supportPosDeg==checkEccenDeg,1);
-if checkDensityMmDeg == rgcDensitySqDeg(Idx)
+if (checkDensityMmDeg - rgcDensitySqDeg(Idx)) < 1
     fprintf('\tNasal RGC density value matches Curcio table\n');
 else
     fprintf('Nasal RGC density value DOES NOT MATCH Curcio table\n');
 end
 
 % Test the temporal meridian
-[rgcDensitySqDeg, supportPosDeg] = getCurcioRGCDensityByEccen(p.Results.temporalMeridianAngle);
-checkEccenMm = 1.0085; checkDensityMmSq = 26921.8; % These values copied from Curcio data table
-checkEccenDeg = convert_mm_to_deg(checkEccenMm);
+[rgcDensitySqDeg, supportPosDeg] = loadRawRGCDensityByEccen(p.Results.temporalMeridianAngle);
+checkEccenDeg = 1; checkDensityMmSq = 4036.92; % These values copied from Curcio data table
 checkDensityMmDeg = convert_mmSq_to_degSq(checkEccenDeg, checkDensityMmSq );
 Idx = find(supportPosDeg==checkEccenDeg,1);
-if checkDensityMmDeg == rgcDensitySqDeg(Idx)
+if (checkDensityMmDeg - rgcDensitySqDeg(Idx)) <1
     fprintf('\tTemporal RGC density value matches Curcio table\n');
 else
     fprintf('Temporal RGC density value DOES NOT MATCH Curcio table\n');

@@ -48,7 +48,7 @@ aggregatePosition=[];
 aggregateDensity=[];
 for mm=1:length(p.Results.meridianAngles)
     % load the empirical cone density measured by Curcio
-    [coneDensitySqDeg, coneNativeSupportPosDeg] = getCurcioConeDensityByEccen(p.Results.meridianAngles(mm));
+    [coneDensitySqDeg, coneNativeSupportPosDeg] = loadRawConeDensityByEccen(p.Results.meridianAngles(mm));
     % remove nan values
     isvalididx=find(~isnan(coneDensitySqDeg));
     coneNativeSupportPosDeg = coneNativeSupportPosDeg(isvalididx);
@@ -65,7 +65,7 @@ knots = BformSplineFit.knots;
 % with the specified knots
 for mm=1:length(p.Results.meridianAngles)
     % load the empirical cone density measured by Curcio
-    [coneDensitySqDeg, coneNativeSupportPosDeg] = getCurcioConeDensityByEccen(p.Results.meridianAngles(mm));
+    [coneDensitySqDeg, coneNativeSupportPosDeg] = loadRawConeDensityByEccen(p.Results.meridianAngles(mm));
     % remove nan values
     isvalididx=find(~isnan(coneDensitySqDeg));
     coneNativeSupportPosDeg = coneNativeSupportPosDeg(isvalididx);

@@ -164,7 +164,7 @@ cardinalMeridianAngles=[0 90 180 270];
 meridianColors={'r','b','g','k'};
 subplot(1,2,1)
 for mm=1:4
-    [coneDensitySqDeg, coneNativeSupportPosDeg] = getCurcioConeDensityByEccen(cardinalMeridianAngles(mm));
+    [coneDensitySqDeg, coneNativeSupportPosDeg] = loadRawConeDensityByEccen(cardinalMeridianAngles(mm));
     dispConeNativeSupportPosDeg=coneNativeSupportPosDeg;
     dispConeNativeSupportPosDeg(1)=1e-2;
     [coneDensityFit] = getSplineFitToConeDensity(cardinalMeridianAngles(mm));
@@ -201,7 +201,7 @@ cardinalMeridianAngles=[0 90 180 270];
 meridianColors={'r','b','g','k'};
 subplot(1,2,1)
 for mm=1:4
-    [RGCDensitySqDeg, RGCNativeSupportPosDeg] = getCurcioRGCDensityByEccen(cardinalMeridianAngles(mm));
+    [RGCDensitySqDeg, RGCNativeSupportPosDeg] = loadRawRGCDensityByEccen(cardinalMeridianAngles(mm));
     dispRGCNativeSupportPosDeg=RGCNativeSupportPosDeg;
     dispRGCNativeSupportPosDeg(1)=1e-2;
     [RGCDensityFit] = getSplineFitToRGCDensity(cardinalMeridianAngles(mm));
@@ -239,7 +239,7 @@ figHandle = figure();
 cardinalMeridianAngles=[0 90 180 270];
 meridianColors={'r','b','g','k'};
 subplot(2,1,1)
-[coneDensitySqDeg, coneNativeSupportPosDeg] = getCurcioConeDensityByEccen(cardinalMeridianAngles(mm));
+[coneDensitySqDeg, coneNativeSupportPosDeg] = loadRawConeDensityByEccen(cardinalMeridianAngles(mm));
 dispConeNativeSupportPosDeg=coneNativeSupportPosDeg;
 [coneDensityFit] = getSplineFitToConeDensity(cardinalMeridianAngles(mm));
 plot(dispConeNativeSupportPosDeg,coneDensitySqDeg,'x','Color',meridianColors{mm});
@@ -251,7 +251,7 @@ plot(regularSupportPosDeg,coneDensityFit(regularSupportPosDeg),'-','Color',merid
 xlabel('Eccentricity [deg]');
 ylabel('Cone density [counts / deg2]');
 subplot(2,1,2)
-[RGCDensitySqDeg, RGCNativeSupportPosDeg] = getCurcioRGCDensityByEccen(cardinalMeridianAngles(mm));
+[RGCDensitySqDeg, RGCNativeSupportPosDeg] = loadRawRGCDensityByEccen(cardinalMeridianAngles(mm));
 dispRGCNativeSupportPosDeg=RGCNativeSupportPosDeg;
 [RGCDensityFit] = getSplineFitToRGCDensity(cardinalMeridianAngles(mm));
 plot(dispRGCNativeSupportPosDeg,RGCDensitySqDeg,'x','Color',meridianColors{mm});
@@ -308,7 +308,7 @@ for mm = 1:4
     meridianIdx = find(meridianAngles==cardinalMeridianAngles(mm),1);
     
     % Load the RGC Density Data from Curcio and Allen 1990:
-    [ RGCDensitySqDeg, RGCNativeSupportPosDeg ] = getCurcioRGCDensityByEccen( cardinalMeridianAngles(mm) );
+    [ RGCDensitySqDeg, RGCNativeSupportPosDeg ] = loadRawRGCDensityByEccen( cardinalMeridianAngles(mm) );
     % remove nan values
     isvalididx=find(~isnan(RGCDensitySqDeg)  );
     RGCNativeSupportPosDeg = RGCNativeSupportPosDeg(isvalididx);
@@ -357,7 +357,7 @@ for mm = 1:4
     meridianIdx = find(meridianAngles==cardinalMeridianAngles(mm),1);
     
     % load the empirical cone density measured by Curcio
-    [coneDensitySqDeg, coneNativeSupportPosDeg] = getCurcioConeDensityByEccen(cardinalMeridianAngles(mm));
+    [coneDensitySqDeg, coneNativeSupportPosDeg] = loadRawConeDensityByEccen(cardinalMeridianAngles(mm));
     % remove nan values
     isvalididx=find(~isnan(coneDensitySqDeg));
     coneNativeSupportPosDeg = coneNativeSupportPosDeg(isvalididx);
