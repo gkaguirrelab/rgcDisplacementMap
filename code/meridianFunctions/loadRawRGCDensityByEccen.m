@@ -42,7 +42,7 @@ p.addRequired('polarAngle',@isnumeric);
 
 % Optional anaysis params
 p.addParameter('densityDataFileName', ...
-    fullfile([getpref('rgcDisplacementMap','LocalDataPath') , '/Curcio_1990_JCompNeurol_GanglionCellTopography/curcioRawRGCDensity_average.mat']), ...
+    fullfile([getpref('rgcDisplacementMap','LocalDataPath') , '/Curcio_1990_JCompNeurol_GanglionCellTopography/curcioRawRGCDensity_computedAverage.mat']), ...
     @ischar);
 p.addParameter('cardinalMeridianAngles',[0 90 180 270],@isnumeric);
 p.addParameter('cardinalMeridianNames',{'nasal' 'superior' 'temporal' 'inferior'},@iscell);
@@ -71,12 +71,13 @@ if ~isfield(rawRGCDensity.meta, 'densityUnits')
     error('The raw data file lacks the field .meta.densityUnits');
 end
 
+
 %% Select the requested meridian and perform unit conversion
 switch rawRGCDensity.meta.supportUnits
     case {'mm','MM','Mm'}
         % Convert mm to deg
         supportPosDeg = ...
-            convert_mm_to_deg(rawRGCDensity.support);
+            rawRGCDensity.support./0.2017;
     case {'deg','degrees'}
         % no conversion needed
         supportPosDeg = rawRGCDensity.support;

@@ -42,7 +42,7 @@ p.addRequired('polarAngle',@isnumeric);
 
 % Optional anaysis params
 p.addParameter('densityDataFileName', ...
-    fullfile([getpref('rgcDisplacementMap','LocalDataPath') , '/Curcio_1990_JCompNeurol_HumanPhotoreceptorTopography/curcioRawConeDensity_average.mat']), ...
+    fullfile([getpref('rgcDisplacementMap','LocalDataPath') , '/Curcio_1990_JCompNeurol_HumanPhotoreceptorTopography/curcioRawConeDensity_computedAverage.mat']), ...
     @ischar);
 p.addParameter('cardinalMeridianAngles',[0 90 180 270],@isnumeric);
 p.addParameter('cardinalMeridianNames',{'nasal' 'superior' 'temporal' 'inferior'},@iscell);
@@ -76,7 +76,7 @@ switch rawConeDensity.meta.supportUnits
     case {'mm','MM','Mm'}
         % Convert mm to deg
         supportPosDeg = ...
-            convert_mm_to_deg(rawConeDensity.support);
+            rawConeDensity.support./0.2017;
     case {'deg','degrees'}
         % no conversion needed
         supportPosDeg = rawConeDensity.support;

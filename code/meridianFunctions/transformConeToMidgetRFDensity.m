@@ -39,7 +39,7 @@ p.addRequired('coneDensitySqDeg',@isnumeric);
 % Optional anaysis params
 p.addParameter('maxConeDensity',1.4806e+04,@(x)(isempty(x) | isnumeric(x)));
 p.addParameter('minMidgetRGCToConeRatio',-0.1,@isnumeric);
-p.addParameter('maxMidgetRGCToConeRatio',1.9,@isnumeric);
+p.addParameter('maxMidgetRGCToConeRatio',2,@isnumeric);
 p.addParameter('linkingFuncParams',[5.9861, -1.0636],@isnumeric);
 
 % parse
