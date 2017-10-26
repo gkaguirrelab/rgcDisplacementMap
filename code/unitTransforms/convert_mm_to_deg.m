@@ -1,6 +1,7 @@
 function supportPosDeg = convert_mm_to_deg(supportPosMm)
-%convert_mm_to_deg -- Converts milimeters to degrees on the retina based on
-% the equation from the appendix of Watson 2014.
+%convert_mm_to_deg -- Converts milimeters on the retina to degrees in the
+% visual field, based on the the equation from the appendix of Watson 2014,
+% itself a fit to a plot presented in Drasdo & Fowler 1974.
 %
 % Input: 
 %   supportPosMm  = Retinal postion(s) in milimeters. Either scalar value or
