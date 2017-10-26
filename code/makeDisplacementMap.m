@@ -92,12 +92,12 @@ p.addParameter('targetDisplacementAtCardinalMeridiansDeg',[11 17 17 17],@isnumer
 p.addParameter('cardinalMeridianAngles',[0 90 180 270],@isnumeric);
 p.addParameter('meridianAngleResolutionDeg',15,@isnumeric);
 p.addParameter('displacementMapPixelsPerDeg',10,@isnumeric);
-p.addParameter('cone_to_mRF_linkTolerance',1.05,@isnumeric);
-p.addParameter('rgc_to_mRGC_linkTolerance',1.05,@isnumeric);
+p.addParameter('cone_to_mRF_linkTolerance',2,@isnumeric);
+p.addParameter('rgc_to_mRGC_linkTolerance',2,@isnumeric);
 p.addParameter('rgcLinkingFunctionFlavor','Drasdo',@(x)(stcmp(x,'Drasdo') | stcmp(x,'Dacey')));
-p.addParameter('rfInitialTransformParams',[4.6378   -1.0859],@(x)(isempty(x) | isnumeric(x)));
-p.addParameter('rgcDrasdoInitialTransformParams',[3.3516   -4.2559   -0.0066],@(x)(isempty(x) | isnumeric(x)));
-p.addParameter('rgcDaceyInitialTransformParams',[12.1705    1.2557],@(x)(isempty(x) | isnumeric(x)));
+p.addParameter('rfInitialTransformParams',[],@(x)(isempty(x) | isnumeric(x)));
+p.addParameter('rgcDrasdoInitialTransformParams',[],@(x)(isempty(x) | isnumeric(x)));
+p.addParameter('rgcDaceyInitialTransformParams',[],@(x)(isempty(x) | isnumeric(x)));
 p.addParameter('minMidgetRGCToConeRatio',-0.1,@isnumeric);
 p.addParameter('maxMidgetRGCToConeRatio',1.9,@isnumeric);
 
@@ -143,14 +143,14 @@ switch p.Results.rgcLinkingFunctionFlavor
     case 'Drasdo'
         % Derive linking function initial values if not passed
         if isempty(p.Results.rgcDrasdoInitialTransformParams)
-            [ rgcInitialTransformParams ] = developDrasdoMidgetRGCFractionModel(varargin{:});
+            [ rgcInitialTransformParams ] = developDrasdoMidgetRGCFractionModel();
         else
             rgcInitialTransformParams = p.Results.rgcDrasdoInitialTransformParams;
         end
     case 'Dacey'
         % Derive linking function initial values if not passed
         if isempty(p.Results.rgcDaceyInitialTransformParams)
-            [ rgcInitialTransformParams ] = developDaceyMidgetRGCFractionModel(varargin{:});
+            [ rgcInitialTransformParams ] = developDaceyMidgetRGCFractionModel();
         else
             rgcInitialTransformParams = p.Results.rgcDaceyInitialTransformParams;
         end
