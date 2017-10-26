@@ -90,7 +90,7 @@ p.addParameter('meridianSymbols',{'.','x','o','^'},@cell);
 p.addParameter('meridiansIdxToUseForFitParams',[1 3 4],@isnumeric);
 p.addParameter('maxConeDensity',1.4806e+04,@(x)(isempty(x) | isnumeric(x)));
 p.addParameter('minMidgetRGCToConeRatio',-0.1,@isnumeric);
-p.addParameter('maxMidgetRGCToConeRatio',1.9,@isnumeric);
+p.addParameter('maxMidgetRGCToConeRatio',2,@isnumeric);
 p.addParameter('logitFitStartPoint',[3,-1],@isnumeric);
 
 % Optional display params
