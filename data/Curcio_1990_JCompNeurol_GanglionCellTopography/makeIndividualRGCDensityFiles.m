@@ -1,5 +1,5 @@
 
-tableFileName = 'DENSITY5_gc_resorted.csv';
+tableFileName = 'DENSITY5_gc_resorted_computedAverage.xls';
 outputFileNameStem = 'curcioRawRGCDensity_';
 
 T=readtable(tableFileName);

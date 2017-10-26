@@ -1,5 +1,5 @@
 
-tableFileName = 'DENSITY8_cones_resorted.csv';
+tableFileName = 'DENSITY8_cones_resorted_computedAverage.xlsx';
 outputFileNameStem = 'curcioRawConeDensity_';
 
 T=readtable(tableFileName);
