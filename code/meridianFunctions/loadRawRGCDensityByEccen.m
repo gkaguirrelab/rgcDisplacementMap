@@ -73,11 +73,11 @@ end
 
 %% Select the requested meridian and perform unit conversion
 switch rawRGCDensity.meta.supportUnits
-    case 'mm'
+    case {'mm','MM','Mm'}
         % Convert mm to deg
         supportPosDeg = ...
             convert_mm_to_deg(rawRGCDensity.support);
-    case 'deg'
+    case {'deg','degrees'}
         % no conversion needed
         supportPosDeg = rawRGCDensity.support;
     otherwise
