@@ -375,6 +375,7 @@ for mm = 1:4
     
     loglog(coneNativeSupportPosDeg(2:end),mRFDensitySqDeg_watson(2:end),'-','Color',meridianColors{mm});
     ylim([1e0 1e5]);
+    xlim([1e-1 1e2]);
     xlabel('log10 eccentricity');
     ylabel('log10 mRF density / deg2');
     title('Watson''s mRF density by eccentricity');
@@ -387,6 +388,7 @@ for mm = 1:4
         'linkingFuncParams',fitParams(meridianIdx,1:2))';
     loglog(coneNativeSupportPosDeg(2:end),mRFDensitySqDeg_ours(2:end),'-','Color',meridianColors{mm});
     ylim([1e0 1e5]);
+    xlim([1e-1 1e2]);
     xlabel('log10 eccentricity');
     ylabel('log10 mRF density / deg2');
     title('Our mRF density by eccentricity');
@@ -397,6 +399,7 @@ for mm = 1:4
     subplot(2,2,3);
     loglog(coneNativeSupportPosDeg(2:end),mRFDensitySqDeg_watson(2:end)./coneDensitySqDeg(2:end),'-','Color',meridianColors{mm});
     ylim([1e-2 10]);
+    xlim([1e-1 1e2]);
     xlabel('log10 eccentricity');
     ylabel('log10 mRF:cone');
     title('Watson''s mRF:cone ratio by eccentricity');
@@ -409,6 +412,7 @@ for mm = 1:4
         transformConeToMidgetRFDensity(coneDensityFit(coneNativeSupportPosDeg)','linkingFuncParams',fitParams(mm,1:2));
     loglog(coneNativeSupportPosDeg(2:end),mRFDensitySqDeg_ours(2:end)./coneDensitySqDeg(2:end),'-','Color',meridianColors{mm});
     ylim([1e-2 10]);
+    xlim([1e-1 1e2]);
     xlabel('log10 eccentricity');
     ylabel('log10 mRF:cone');
     title('Our mRF:cone ratio by eccentricity');
