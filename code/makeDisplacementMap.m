@@ -92,14 +92,13 @@ p.addParameter('targetDisplacementAtCardinalMeridiansDegRetina',[11 17 17 17],@i
 p.addParameter('cardinalMeridianAngles',[0 90 180 270],@isnumeric);
 p.addParameter('meridianAngleResolutionDeg',15,@isnumeric);
 p.addParameter('displacementMapPixelsPerDegRetina',10,@isnumeric);
-p.addParameter('cone_to_mRF_linkTolerance',1.05,@isnumeric);
-p.addParameter('rgc_to_mRGC_linkTolerance',2,@isnumeric);
+p.addParameter('cone_to_mRF_linkTolerance',1.00,@isnumeric);
+p.addParameter('rgc_to_mRGC_linkTolerance',4,@isnumeric);
 p.addParameter('rgcLinkingFunctionFlavor','Drasdo',@(x)(stcmp(x,'Drasdo') | stcmp(x,'Dacey')));
 p.addParameter('rfInitialTransformParams',[],@(x)(isempty(x) | isnumeric(x)));
 p.addParameter('rgcDrasdoInitialTransformParams',[],@(x)(isempty(x) | isnumeric(x)));
 p.addParameter('rgcDaceyInitialTransformParams',[],@(x)(isempty(x) | isnumeric(x)));
-p.addParameter('minMidgetRGCToConeRatio',-0.1,@isnumeric);
-p.addParameter('maxMidgetRGCToConeRatio',1.9,@isnumeric);
+
 
 % Optional display params
 p.addParameter('verbose',false,@islogical);
@@ -129,10 +128,7 @@ targetDisplacementDegByMeridian = targetByAngleFit(meridianAngles);
 
 % Derive parameters for the transformation of cone density to mRF density
 if isempty(p.Results.rfInitialTransformParams)
-    [ rfInitialTransformParams ] = developMidgetRFFractionModel(...
-        'minMidgetRGCToConeRatio', p.Results.minMidgetRGCToConeRatio, ...
-        'maxMidgetRGCToConeRatio', p.Results.maxMidgetRGCToConeRatio ...
-        );
+    [ rfInitialTransformParams ] = developMidgetRFFractionModel();
 else
     rfInitialTransformParams = p.Results.rfInitialTransformParams;
 end
@@ -173,10 +169,7 @@ for mm = 1:length(meridianAngles)
     % of cone density, with the transform defined by the first two fitParams
     mRFDensityOverRegularSupport = ...
         @(fitParams) transformConeToMidgetRFDensity(coneDensityFit(regularSupportPosDegRetina), ...
-        'linkingFuncParams',fitParams(1:2),...
-        'minMidgetRGCToConeRatio', p.Results.minMidgetRGCToConeRatio, ...
-        'maxMidgetRGCToConeRatio', p.Results.maxMidgetRGCToConeRatio ...
-        )';
+        'linkingFuncParams',fitParams(1:2))';
     % Define anonymous function for the cumulative sum of mRF density
     mRF_cumulative = @(fitParams) calcCumulative(regularSupportPosDegRetina, mRFDensityOverRegularSupport(fitParams));
     

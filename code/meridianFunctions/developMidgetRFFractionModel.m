@@ -125,9 +125,9 @@ for mm = 1:length(p.Results.meridianAngles)
     
     % Set the maxConeDensity value
     if isempty(p.Results.maxConeDensitySqDegRetina)
-        maxConeDensity = max(coneDensitySqDegRetina);
+        maxConeDensitySqDegRetina = max(coneDensitySqDegRetina);
     else
-        maxConeDensity = p.Results.maxConeDensitySqDegRetina;
+        maxConeDensitySqDegRetina = p.Results.maxConeDensitySqDegRetina;
     end
     
     % Determine the visual field positions corresponding to these retinal
@@ -162,7 +162,7 @@ for mm = 1:length(p.Results.meridianAngles)
     midgetRFtoConeRatio = (midgetRFDensitySqDegRetina ./ coneDensitySqDegRetina)';
     
     % Define the x-axis as the log10 of the proportion of max cone density
-    x = log10(coneDensitySqDegRetina ./ maxConeDensity)';
+    x = log10(coneDensitySqDegRetina ./ maxConeDensitySqDegRetina)';
         
     % Perform the logistic fit. Note that the max and min asymptote are
     % pinned by the passed parameters
