@@ -92,7 +92,7 @@ p.addParameter('targetDisplacementAtCardinalMeridiansDegRetina',[11 17 17 17],@i
 p.addParameter('cardinalMeridianAngles',[0 90 180 270],@isnumeric);
 p.addParameter('meridianAngleResolutionDeg',15,@isnumeric);
 p.addParameter('displacementMapPixelsPerDegRetina',10,@isnumeric);
-p.addParameter('cone_to_mRF_linkTolerance',2,@isnumeric);
+p.addParameter('cone_to_mRF_linkTolerance',1.05,@isnumeric);
 p.addParameter('rgc_to_mRGC_linkTolerance',2,@isnumeric);
 p.addParameter('rgcLinkingFunctionFlavor','Drasdo',@(x)(stcmp(x,'Drasdo') | stcmp(x,'Dacey')));
 p.addParameter('rfInitialTransformParams',[],@(x)(isempty(x) | isnumeric(x)));

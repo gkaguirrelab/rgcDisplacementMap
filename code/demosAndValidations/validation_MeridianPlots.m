@@ -56,7 +56,7 @@ for mm = 1:length(meridianAngles)
     subplot(length(meridianAngles),2,mm*2);
     plot(regularSupportPosDeg,rgcDisplacementEachMeridian(mm,:),'-r')
     axis off;
-    ylim([-.5 3.0]);
+    ylim([-.5 4.0]);
     if mm == length(meridianAngles)
         axis on;
         xlabel('eccentricity [deg]');
@@ -317,7 +317,7 @@ for mm = 1:4
     % Plot Watson's midget fraction
     subplot(1,2,1);
     f0 = 0.8928; rm = 41.03; % Drasdo's values
-    midgetFraction_Drasdo = calcDrasdoMidgetFractionByEccen(RGCNativeSupportPosDeg,f0,rm);
+    midgetFraction_Drasdo = calcDrasdoMidgetFractionByVisualEccen(RGCNativeSupportPosDeg,f0,rm);
     plot(RGCNativeSupportPosDeg,midgetFraction_Drasdo,'-k');
     hold on
     xlabel('eccentricity deg');
