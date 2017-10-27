@@ -85,7 +85,7 @@ p.addParameter('watsonEq8_rm',41.03,@isnumeric);
 p.addParameter('recipFitStartPoint',[3 -8 0],@isnumeric);
 
 % Optional display params
-p.addParameter('makePlots',true,@islogical);
+p.addParameter('makePlots',false,@islogical);
 
 % parse
 p.parse(varargin{:})
