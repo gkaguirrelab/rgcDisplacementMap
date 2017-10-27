@@ -134,9 +134,9 @@ for mm = 1:length(meridianAngles)
     % to the reference point (which is assigned a value of unity)
     propRGC_ringcount=RGC_ringcount./RGC_ringcount(refPointIdx);
 
-    [ ~, midgetFraction ] = transformRGCToMidgetRGCDensityDacey( regularSupportPosDegRetina, rgcDensitySqDeg', 'linkingFuncParams', fitParams(mm,3:end) );
+    [ ~, midgetFraction ] = transformRGCToMidgetRGCDensityDacey( regularSupportPosDegRetina, RGCDensitySqDegRetinaFit(regularSupportPosDegRetina)', 'linkingFuncParams', fitParams(mm,3:end) );
     xvals = propRGC_ringcount;
-    plot(log10(xvals),midgetFraction,'-','Color',meridianColors{mm});
+    plot(xvals,midgetFraction,'-','Color',meridianColors{mm});
 end
 hold off
 if p.Results.savePlots
