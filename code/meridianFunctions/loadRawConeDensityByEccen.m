@@ -91,10 +91,10 @@ rawConeDensityForSelectedMeridian = rawConeDensity.(requestedMeridianName);
 switch rawConeDensity.meta.densityUnits
     case 'counts/mm2'
         % convert counts/mmSqRetina to counts/degSqRetina
-        coneDensitySqDeg = rawConeDensityForSelectedMeridian .* calc_degSqRetina_per_mmSqRetina();
+        coneDensitySqDegRetina = rawConeDensityForSelectedMeridian ./ calc_degSqRetina_per_mmSqRetina();
     case 'counts/deg2'
         % no conversion needed
-        coneDensitySqDeg = rawConeDensityForSelectedMeridian;
+        coneDensitySqDegRetina = rawConeDensityForSelectedMeridian;
     otherwise
         error('The densityUnits of this raw file are not recognized');
 end

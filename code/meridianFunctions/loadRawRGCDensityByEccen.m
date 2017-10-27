@@ -92,7 +92,7 @@ rawRGCDensityForSelectedMeridian = rawRGCDensity.(requestedMeridianName);
 switch rawRGCDensity.meta.densityUnits
     case 'counts/mm2'
         % convert counts/mmSqRetina to counts/degSqRetina
-        rgcDensitySqDegRetina = rawRGCDensityForSelectedMeridian .* calc_degSqRetina_per_mmSqRetina();
+        rgcDensitySqDegRetina = rawRGCDensityForSelectedMeridian ./ calc_degSqRetina_per_mmSqRetina();
     case 'counts/deg2'
         % no conversion needed
         rgcDensitySqDegRetina = rawRGCDensityForSelectedMeridian;

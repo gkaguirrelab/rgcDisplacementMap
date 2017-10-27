@@ -40,16 +40,16 @@ for mm = 1:length(p.Results.cardinalMeridianAngles)
     calculateRGCdensityFile = fullfile([getpref('rgcDisplacementMap','LocalDataPath') , '/Curcio_1990_JCompNeurol_GanglionCellTopography/curcioRawRGCDensity_computedAverage.mat']);
     reportedRGCdensityFile = fullfile([getpref('rgcDisplacementMap','LocalDataPath') , '/Curcio_1990_JCompNeurol_GanglionCellTopography/curcioRawRGCDensity_reportedAverage.mat']);
     
-    [calculatedRGCDensitySqDegRetina, calculateRGCdensitySupportDegRetina] = loadRawRGCDensityByEccen(p.Results.cardinalMeridianAngles(mm), 'densityDataFileName', calculateRGCdensityFile);
+    [calculatedRGCDensitySqDegRetina, calculatedRGCdensitySupportDegRetina] = loadRawRGCDensityByEccen(p.Results.cardinalMeridianAngles(mm), 'densityDataFileName', calculateRGCdensityFile);
     [reportedRGCDensitySqDegRetina, reportedRGCdensitySupportDegRetina] = loadRawRGCDensityByEccen(p.Results.cardinalMeridianAngles(mm), 'densityDataFileName', reportedRGCdensityFile);
     
     subplot(2,2,mm);
-    plot(calculateRGCdensitySupportDegRetina, calculatedRGCDensitySqDegRetina, 'xb');
+    plot(calculatedRGCdensitySupportDegRetina, calculatedRGCDensitySqDegRetina, 'xb');
     hold on
     plot(reportedRGCdensitySupportDegRetina, reportedRGCDensitySqDegRetina, '.r');
-    plot(calculateRGCdensitySupportDegRetina, calculatedRGCDensitySqDegRetina, '-b');
+    plot(calculatedRGCdensitySupportDegRetina, calculatedRGCDensitySqDegRetina, '-b');
     xlabel('retinal degrees');
-    ylabel('counts/mm2 retina');
+    ylabel('counts/deg2 retina');
     legend('computed','reported')
     title(p.Results.cardinalMeridianNames{mm});    
 end % loop over meridians
@@ -62,19 +62,19 @@ figure;
 
 % loop over meridians
 for mm = 1:length(p.Results.cardinalMeridianAngles)
-    calculateRGCdensityFile = fullfile([getpref('rgcDisplacementMap','LocalDataPath') , '/Curcio_1990_JCompNeurol_HumanPhotoreceptorTopography/curcioRawConeDensity_computedAverage.mat']);
-    reportedRGCdensityFile = fullfile([getpref('rgcDisplacementMap','LocalDataPath') , '/Curcio_1990_JCompNeurol_HumanPhotoreceptorTopography/curcioRawConeDensity_reportedAverage.mat']);
+    calculateConeDensityFile = fullfile([getpref('rgcDisplacementMap','LocalDataPath') , '/Curcio_1990_JCompNeurol_HumanPhotoreceptorTopography/curcioRawConeDensity_computedAverage.mat']);
+    reportedConeDensityFile = fullfile([getpref('rgcDisplacementMap','LocalDataPath') , '/Curcio_1990_JCompNeurol_HumanPhotoreceptorTopography/curcioRawConeDensity_reportedAverage.mat']);
     
-    [calculatedRGCDensitySqDegRetina, calculateRGCdensitySupportDegRetina] = loadRawRGCDensityByEccen(p.Results.cardinalMeridianAngles(mm), 'densityDataFileName', calculateRGCdensityFile);
-    [reportedRGCDensitySqDegRetina, reportedRGCdensitySupportDegRetina] = loadRawRGCDensityByEccen(p.Results.cardinalMeridianAngles(mm), 'densityDataFileName', reportedRGCdensityFile);
+    [calculatedConeDensitySqDegRetina, calculatedConeDensitySupportDegRetina] = loadRawConeDensityByEccen(p.Results.cardinalMeridianAngles(mm), 'densityDataFileName', calculateConeDensityFile);
+    [reportedConeDensitySqDegRetina, reportedConeDensitySupportDegRetina] = loadRawConeDensityByEccen(p.Results.cardinalMeridianAngles(mm), 'densityDataFileName', reportedConeDensityFile);
     
     subplot(2,2,mm);
-    plot(calculateRGCdensitySupportDegRetina, calculatedRGCDensitySqDegRetina, 'xb');
+    plot(calculatedConeDensitySupportDegRetina, calculatedConeDensitySqDegRetina, 'xb');
     hold on
-    plot(reportedRGCdensitySupportDegRetina, reportedRGCDensitySqDegRetina, '.r');
-    plot(calculateRGCdensitySupportDegRetina, calculatedRGCDensitySqDegRetina, '-b');
+    plot(reportedConeDensitySupportDegRetina, reportedConeDensitySqDegRetina, '.r');
+    plot(calculatedConeDensitySupportDegRetina, calculatedConeDensitySqDegRetina, '-b');
     xlabel('retinal degrees');
-    ylabel('counts/mm2 retina');
+    ylabel('counts/deg2 retina');
     legend('computed','reported')
     title(p.Results.cardinalMeridianNames{mm});    
 end % loop over meridians
