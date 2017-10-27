@@ -12,7 +12,7 @@ p.addParameter('maxModeledEccentricity',30,@isnumeric);
 p.addParameter('meridianAngleResolutionDeg',90,@isnumeric);
 p.addParameter('meridianNames',{'nasal','superior','temporal','inferior'},@iscell);
 p.addParameter('displacementMapPixelsPerDeg',10,@isnumeric);
-p.addParameter('referenceEccen',15,@isnumeric);
+p.addParameter('referenceEccenDegRetina',15,@isnumeric);
 
 % Optional display and ouput params
 p.addParameter('verbose',true,@islogical);
@@ -34,7 +34,7 @@ if p.Results.savePlots
 end
 
 % Prepare the regular eccentricity support base
-regularSupportPosDeg = ...
+regularSupportPosDegRetina = ...
     0:p.Results.sampleResolutionDegrees:p.Results.maxModeledEccentricity;
 
 % make the displacement map for the cardinal meridians
@@ -54,7 +54,7 @@ for mm = 1:length(meridianAngles)
     
     % plot the displacement
     subplot(length(meridianAngles),2,mm*2);
-    plot(regularSupportPosDeg,rgcDisplacementEachMeridian(mm,:),'-r')
+    plot(regularSupportPosDegRetina,rgcDisplacementEachMeridian(mm,:),'-r')
     axis off;
     ylim([-.5 4.0]);
     if mm == length(meridianAngles)
@@ -65,7 +65,7 @@ for mm = 1:length(meridianAngles)
     
     % Plot the cumulative functions
     subplot(length(meridianAngles),2,mm*2-1);
-    plot(regularSupportPosDeg,mRGC_cumulativeEachMeridian(mm,:),'-k')
+    plot(regularSupportPosDegRetina,mRGC_cumulativeEachMeridian(mm,:),'-k')
     axis off;
     if mm == length(meridianAngles)
         axis on;
@@ -73,7 +73,7 @@ for mm = 1:length(meridianAngles)
         ylabel('cells per sector');
     end
     hold on
-    plot(regularSupportPosDeg,mRF_cumulativeEachMeridian(mm,:),'-b')
+    plot(regularSupportPosDegRetina,mRF_cumulativeEachMeridian(mm,:),'-b')
     ylim([0 8e5]);
     hold off
     drawnow
@@ -92,7 +92,7 @@ hold on
 meridianColors={'r','b','g','k'};
 for mm = 1:length(meridianAngles)
     coneDensityFit = getSplineFitToConeDensity(meridianAngles(mm));
-    coneDensitySqDeg = coneDensityFit(regularSupportPosDeg);
+    coneDensitySqDeg = coneDensityFit(regularSupportPosDegRetina);
     [ ~, mRFtoConeDensityRatio ] = transformConeToMidgetRFDensity( coneDensitySqDeg, 'linkingFuncParams', fitParams(mm,1:2) );
     xvals = log10(coneDensitySqDeg./max(coneDensitySqDeg));
     plot(xvals,mRFtoConeDensityRatio,'-','Color',meridianColors{mm});
@@ -110,20 +110,31 @@ hold on
 % Add plot lines showing the fit by meridian
 meridianColors={'r','b','g','k'};
 for mm = 1:length(meridianAngles)
-    rgcDensityFit = getSplineFitToRGCDensity(meridianAngles(mm));
-    rgcDensitySqDeg = rgcDensityFit(regularSupportPosDeg);
-    RGC_ringcount = calcCumulative(regularSupportPosDeg,rgcDensitySqDeg');
+    % Load the RGC Density Data from Curcio and Allen 1990
+    [ RGCDensitySqDegRetina, nativeSupportPosDegRetina ] = loadRawRGCDensityByEccen( meridianAngles(mm) );
+    
+    % remove nan values
+    isvalididx=find(~isnan(RGCDensitySqDegRetina)  );
+    nativeSupportPosDegRetina = nativeSupportPosDegRetina(isvalididx);
+    RGCDensitySqDegRetina = RGCDensitySqDegRetina(isvalididx);
+    
+    % Fit a spline to the RGC density data
+    RGCDensitySqDegRetinaFit = fit(nativeSupportPosDegRetina',RGCDensitySqDegRetina','smoothingspline', 'Exclude',find(isnan(RGCDensitySqDegRetina)),'SmoothingParam', 1);
+    
+    % Obtain the cumulative RGC function
+    RGC_ringcount = calcCumulative(regularSupportPosDegRetina,RGCDensitySqDegRetinaFit(regularSupportPosDegRetina)');
+    
+    % Find the index position in the regularSupportPosDegRetina that is as close
+    % as possible to the referenceEccenDegRetinaDegRetina
     refPointIdx= ...
-        find((regularSupportPosDeg-p.Results.referenceEccen)== ...
-        min(abs(regularSupportPosDeg-p.Results.referenceEccen)));
+        find((regularSupportPosDegRetina-p.Results.referenceEccenDegRetina)== ...
+        min(abs(regularSupportPosDegRetina-p.Results.referenceEccenDegRetina)));
+
     % Calculate a proportion of the cumulative RGC density counts, relative
     % to the reference point (which is assigned a value of unity)
     propRGC_ringcount=RGC_ringcount./RGC_ringcount(refPointIdx);
-    zeroPoints=find(propRGC_ringcount==0);
-    if ~isempty(zeroPoints)
-        propRGC_ringcount(zeroPoints)=min(propRGC_ringcount(find(propRGC_ringcount~=0)));
-    end
-    [ ~, midgetFraction ] = transformRGCToMidgetRGCDensityDacey( regularSupportPosDeg, rgcDensitySqDeg', 'linkingFuncParams', fitParams(mm,3:end) );
+
+    [ ~, midgetFraction ] = transformRGCToMidgetRGCDensityDacey( regularSupportPosDegRetina, rgcDensitySqDeg', 'linkingFuncParams', fitParams(mm,3:end) );
     xvals = propRGC_ringcount;
     plot(log10(xvals),midgetFraction,'-','Color',meridianColors{mm});
 end
@@ -208,8 +219,8 @@ for mm=1:4
     loglog(dispRGCNativeSupportPosDeg,RGCDensitySqDeg,'x','Color',meridianColors{mm});
     xlim([1e-2,70]);
     hold on
-    regularSupportPosDeg=1e-2:0.01:70;
-    loglog(regularSupportPosDeg,RGCDensityFit(regularSupportPosDeg),'-','Color',meridianColors{mm});
+    regularSupportPosDegRetina=1e-2:0.01:70;
+    loglog(regularSupportPosDegRetina,RGCDensityFit(regularSupportPosDegRetina),'-','Color',meridianColors{mm});
     xlabel('log10 Eccentricity [deg]');
     ylabel('log10 RGC density [counts / deg2]');
 end
@@ -219,7 +230,7 @@ subplot(1,2,2)
 interpolarMeridianAngles=[45 135 225 315];
 for mm=1:4
     [RGCDensityFit] = getSplineFitToRGCDensity(interpolarMeridianAngles(mm));
-    loglog(regularSupportPosDeg,RGCDensityFit(regularSupportPosDeg),'-','Color',meridianColors{mm});
+    loglog(regularSupportPosDegRetina,RGCDensityFit(regularSupportPosDegRetina),'-','Color',meridianColors{mm});
     xlim([1e-2,70]);
     xlabel('log10 Eccentricity [deg]');
     ylabel('log10 RGC density [counts / deg2]');
@@ -246,8 +257,8 @@ plot(dispConeNativeSupportPosDeg,coneDensitySqDeg,'x','Color',meridianColors{mm}
 xlim([0,30]);
 ylim([0,3e4]);
 hold on
-regularSupportPosDeg=0:0.01:70;
-plot(regularSupportPosDeg,coneDensityFit(regularSupportPosDeg),'-','Color',meridianColors{mm});
+regularSupportPosDegRetina=0:0.01:70;
+plot(regularSupportPosDegRetina,coneDensityFit(regularSupportPosDegRetina),'-','Color',meridianColors{mm});
 xlabel('Eccentricity [deg]');
 ylabel('Cone density [counts / deg2]');
 subplot(2,1,2)
@@ -258,8 +269,8 @@ plot(dispRGCNativeSupportPosDeg,RGCDensitySqDeg,'x','Color',meridianColors{mm});
 xlim([0,30]);
 ylim([0,2500]);
 hold on
-regularSupportPosDeg=1e-2:0.01:70;
-loglog(regularSupportPosDeg,RGCDensityFit(regularSupportPosDeg),'-','Color',meridianColors{mm});
+regularSupportPosDegRetina=1e-2:0.01:70;
+loglog(regularSupportPosDegRetina,RGCDensityFit(regularSupportPosDegRetina),'-','Color',meridianColors{mm});
 xlabel('Eccentricity [deg]');
 ylabel('RGC density [counts / deg2]');
 if p.Results.savePlots
@@ -275,9 +286,9 @@ cardinalMeridianAngles=[0 90 180 270];
 meridianColors={'r','b','g','k'};
 subplot(2,1,1)
 [coneDensityFit] = getSplineFitToConeDensity(cardinalMeridianAngles(mm));
-regularSupportPosDeg=0:0.01:70;
-[ mRFDensitySqDeg ] = transformConeToMidgetRFDensity( coneDensityFit(regularSupportPosDeg), 'linkingFuncParams', fitParams(mm,1:2) );
-plot(regularSupportPosDeg,mRFDensitySqDeg,'-','Color',meridianColors{mm});
+regularSupportPosDegRetina=0:0.01:70;
+[ mRFDensitySqDeg ] = transformConeToMidgetRFDensity( coneDensityFit(regularSupportPosDegRetina), 'linkingFuncParams', fitParams(mm,1:2) );
+plot(regularSupportPosDegRetina,mRFDensitySqDeg,'-','Color',meridianColors{mm});
 xlim([0,30]);
 ylim([0,3e4]);
 xlabel('Eccentricity [deg]');
@@ -285,8 +296,8 @@ ylabel('mRF density [counts / deg2]');
 
 subplot(2,1,2)
 [RGCDensityFit] = getSplineFitToRGCDensity(cardinalMeridianAngles(mm));
-[ mRGCDensitySqDeg ] = transformRGCToMidgetRGCDensityDacey( regularSupportPosDeg, RGCDensityFit(regularSupportPosDeg)', 'linkingFuncParams', fitParams(mm,3:end) );
-plot(regularSupportPosDeg,mRGCDensitySqDeg,'-','Color',meridianColors{mm});
+[ mRGCDensitySqDeg ] = transformRGCToMidgetRGCDensityDacey( regularSupportPosDegRetina, RGCDensityFit(regularSupportPosDegRetina)', 'linkingFuncParams', fitParams(mm,3:end) );
+plot(regularSupportPosDegRetina,mRGCDensitySqDeg,'-','Color',meridianColors{mm});
 xlim([0,30]);
 ylim([0,2500]);
 xlabel('Eccentricity [deg]');
@@ -314,17 +325,19 @@ for mm = 1:4
     RGCNativeSupportPosDeg = RGCNativeSupportPosDeg(isvalididx);
     RGCDensitySqDeg = RGCDensitySqDeg(isvalididx);
     
-    % Plot Watson's midget fraction
+    % Plot the Drasdo and Dacey midget fraction
     subplot(1,2,1);
     f0 = 0.8928; rm = 41.03; % Drasdo's values
     midgetFraction_Drasdo = calcDrasdoMidgetFractionByVisualEccen(RGCNativeSupportPosDeg,f0,rm);
     plot(RGCNativeSupportPosDeg,midgetFraction_Drasdo,'-k');
     hold on
-    xlabel('eccentricity deg');
+    midgetFraction_Dacey = calcDaceyMidgetFractionByVisualEccen(RGCNativeSupportPosDeg);
+    plot(RGCNativeSupportPosDeg,midgetFraction_Dacey,'-k');
+    xlabel('eccentricity deg (visual - Drasdo, retina - dacey)');
     ylabel('midget fraction');
     ylim([0 1]);
     xlim([0 40]);
-    title('Watson''s midget fraction (from Drasdo)');
+    title('Dacey and Drasdo midget fraction');
     pbaspect([2 1 1]);
     
     % Plot our midget fraction

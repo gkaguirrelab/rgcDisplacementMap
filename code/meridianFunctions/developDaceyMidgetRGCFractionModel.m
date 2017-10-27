@@ -51,7 +51,7 @@ function [ fitParams, figHandle ] = developDaceyMidgetRGCFractionModel( varargin
 %   supportEccenMaxDegreesRetina - the maximum eccentricity used for modeling
 %   meridianNames - Cell array of the text string names of the meridia
 %   meridianAngles - Polar angle values assigned to the meridians
-%   meridiansIdxToUseForFitParams - Index of the meridians from which we 
+%   meridiansIdxToUseForFitParams - Index of the meridians from which we
 %       will calculate the median fit param values.
 %   maxMidgetFractionRatio - The midget fraction assigned to the fovea
 %   minMidgetFractionRatio - The midget fraction assigned to the far periphery
@@ -124,14 +124,14 @@ for mm = 1:length(p.Results.meridianAngles)
     refPointIdx= ...
         find((regularSupportPosDegRetina-p.Results.referenceEccenDegRetina)== ...
         min(abs(regularSupportPosDegRetina-p.Results.referenceEccenDegRetina)));
-
+    
     % Calculate a proportion of the cumulative RGC density counts, relative
     % to the reference point (which is assigned a value of unity)
     propRGC_ringcount=RGC_ringcount./RGC_ringcount(refPointIdx);
-        
+    
     % Obtain the Dacey midget fraction as a function of eccentricity
     midgetFractionByEccenDegRetina = calcDaceyMidgetFractionByEccenDegRetina(regularSupportPosDegRetina)';
-
+    
     % Adjust the Dacey fraction so that it has the specified max and
     % minimum values
     midgetFractionByEccenDegRetina = midgetFractionByEccenDegRetina-min(midgetFractionByEccenDegRetina);
@@ -148,7 +148,7 @@ for mm = 1:length(p.Results.meridianAngles)
     warning('off','curvefit:fit:complexXusingOnlyReal');
     warning('off','MATLAB:plot:IgnoreImaginaryXYPart');
     
-        % Perform the logistic fit. Note that the max and min asymptote are
+    % Perform the logistic fit. Note that the max and min asymptote are
     % pinned by the passed parameters
     logitFit = fit(propRGC_ringcount',midgetFractionByEccenDegRetina',logisticFunc, ...
         'problem',{p.Results.minMidgetFractionRatio, p.Results.maxMidgetFractionRatio}, ...
