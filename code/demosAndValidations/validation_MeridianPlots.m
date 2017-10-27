@@ -331,7 +331,7 @@ for mm = 1:4
     midgetFraction_Drasdo = calcDrasdoMidgetFractionByVisualEccen(RGCNativeSupportPosDeg,f0,rm);
     plot(RGCNativeSupportPosDeg,midgetFraction_Drasdo,'-k');
     hold on
-    midgetFraction_Dacey = calcDaceyMidgetFractionByVisualEccen(RGCNativeSupportPosDeg);
+    midgetFraction_Dacey = calcDaceyMidgetFractionByEccenDegRetina(RGCNativeSupportPosDeg);
     plot(RGCNativeSupportPosDeg,midgetFraction_Dacey,'-k');
     xlabel('eccentricity deg (visual - Drasdo, retina - dacey)');
     ylabel('midget fraction');
