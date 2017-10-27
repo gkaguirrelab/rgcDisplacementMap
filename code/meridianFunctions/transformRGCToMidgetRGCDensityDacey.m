@@ -1,4 +1,4 @@
-function [ mRGCDensitySqDeg, midgetFraction ] = transformRGCToMidgetRGCDensity( regularSupportPosDeg, rgcDensitySqDeg, varargin )
+function [ mRGCDensitySqDegRetina, midgetFraction ] = transformRGCToMidgetRGCDensity( regularSupportPosDegRetina, rgcDensitySqDegRetina, varargin )
 % transformRGCToMidgetRGCDensity( regularSupportPosDeg, rgcDensitySqDeg, varargin )
 %
 % This function transforms a vector of RGC density measurements into
@@ -32,7 +32,7 @@ function [ mRGCDensitySqDeg, midgetFraction ] = transformRGCToMidgetRGCDensity( 
 %   midgetFraction - the midget fraction at each eccentricity location
 %
 % OPTIONS
-%   referenceEccen - the reference eccentricity for the proportion of
+%   referenceEccenDegRetina - the reference eccentricity for the proportion of
 %       the cumulative RGC density. The proportion function will have a
 %       value of unity at this point.
 %   maxMidgetFractionRatio - The midget fraction assigned to the fovea
@@ -50,13 +50,13 @@ p.addRequired('regularSupportPosDeg',@isnumeric);
 p.addRequired('rgcDensitySqDeg',@isnumeric);
 
 % Optional anaysis params
-p.addParameter('referenceEccen',15,@isnumeric);
+p.addParameter('referenceEccenDegRetina',15,@isnumeric);
 p.addParameter('minMidgetFractionRatio',0.41,@isnumeric);
 p.addParameter('maxMidgetFractionRatio',0.85,@isnumeric);
 p.addParameter('linkingFuncParams',[5 1],@isnumeric);
 
 % parse
-p.parse(regularSupportPosDeg, rgcDensitySqDeg, varargin{:})
+p.parse(regularSupportPosDegRetina, rgcDensitySqDegRetina, varargin{:})
 
 
 %% Perform the calculations
@@ -68,11 +68,11 @@ logisticFunc = fittype( @(slope,inflect,minMidgetFractionRatio,maxMidgetFraction
     'independent','x','dependent','y','problem',{'minMidgetFractionRatio','maxMidgetFractionRatio'});
 
 % Obtain the cumulative RGC function
-RGC_ringcount = calcCumulative(regularSupportPosDeg,rgcDensitySqDeg);
+RGC_ringcount = calcCumulative(regularSupportPosDegRetina,rgcDensitySqDegRetina);
 
 % Find the index position in the regularSupportPosDeg that is as close
-% as possible to the referenceEccen
-[ ~, refPointIdx ] = min(abs(regularSupportPosDeg-p.Results.referenceEccen));
+% as possible to the referenceEccenDegRetina
+[ ~, refPointIdx ] = min(abs(regularSupportPosDegRetina-p.Results.referenceEccenDegRetina));
 
 % Calculate a proportion of the cumulative RGC density counts, relative
 % to the reference point (which is assigned a value of unity)
@@ -82,12 +82,12 @@ propRGC_ringcount=RGC_ringcount./RGC_ringcount(refPointIdx);
 midgetFraction = logisticFunc(p.Results.linkingFuncParams(1), p.Results.linkingFuncParams(2), p.Results.minMidgetFractionRatio, p.Results.maxMidgetFractionRatio, propRGC_ringcount);
 
 % Scale the rgcDensity by the midget fraction
-mRGCDensitySqDeg = rgcDensitySqDeg .* midgetFraction;
+mRGCDensitySqDegRetina = rgcDensitySqDegRetina .* midgetFraction;
 
 % NaNs can happen; set them to zero
-badIdx = find(isnan(mRGCDensitySqDeg));
+badIdx = find(isnan(mRGCDensitySqDegRetina));
 if ~isempty(badIdx)
-    mRGCDensitySqDeg(badIdx)=0;
+    mRGCDensitySqDegRetina(badIdx)=0;
 end
 
 end % function
