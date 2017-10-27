@@ -1,4 +1,4 @@
-function [ mRFDensitySqDeg, mRFtoConeDensityRatio ] = transformConeToMidgetRFDensity( coneDensitySqDeg, varargin )
+function [ mRFDensitySqDegRetina, mRFtoConeDensityRatio ] = transformConeToMidgetRFDensity( coneDensitySqDegRetina, varargin )
 % transformConeToMidgetRFDensity( coneDensitySqDeg, varargin )
 %
 % This function transforms a vector of cone density measurements into
@@ -13,14 +13,14 @@ function [ mRFDensitySqDeg, mRFtoConeDensityRatio ] = transformConeToMidgetRFDen
 %	mRFtoConeDensityRatio = minMidgetRGCToConeRatio+(maxMidgetRGCToConeRatio-minMidgetRGCToConeRatio)./(1+(x./inflect).^slope)
 %
 % INPUT
-%   coneDensitySqDeg - a vector of cone densities
+%   coneDensitySqDegRetina - a vector of cone densities
 %
 % OUTPUT
-%   mRFDensitySqDeg - a vector of midget receptive field density values
+%   mRFDensitySqDegRetina - a vector of midget receptive field density values
 %   mRFtoConeDensityRatio - a vector of midgetRF to cone ratio values
 %
 % OPTIONS
-%   maxConeDensity - The maximum cone density at the fovea (counts / deg^2).
+%   maxConeDensitySqDegRetina - The maximum cone density at the fovea (counts / deg^2).
 %       The default value is derived from Curcio 1990. If set to empty, the
 %       maximum value from coneDensitySqDeg is used.
 %   minMidgetRGCToConeRatio - The minimum value of the mRF:cone density ratio. Set to zero
@@ -37,19 +37,19 @@ p = inputParser;
 p.addRequired('coneDensitySqDeg',@isnumeric);
 
 % Optional anaysis params
-p.addParameter('maxConeDensity',1.4806e+04,@(x)(isempty(x) | isnumeric(x)));
-p.addParameter('minMidgetRGCToConeRatio',-0.1,@isnumeric);
+p.addParameter('maxConeDensitySqDegRetina',[],@(x)(isempty(x) | isnumeric(x)));
+p.addParameter('minMidgetRGCToConeRatio',-0.5,@isnumeric);
 p.addParameter('maxMidgetRGCToConeRatio',2,@isnumeric);
 p.addParameter('linkingFuncParams',[5.9861, -1.0636],@isnumeric);
 
 % parse
-p.parse(coneDensitySqDeg, varargin{:})
+p.parse(coneDensitySqDegRetina, varargin{:})
 
 % Set the maxConeDensity value
-if isempty(p.Results.maxConeDensity)
-    maxConeDensity = max(coneDensitySqDeg);
+if isempty(p.Results.maxConeDensitySqDegRetina)
+    maxConeDensitySqDegRetina = max(coneDensitySqDegRetina);
 else
-    maxConeDensity = p.Results.maxConeDensity;
+    maxConeDensitySqDegRetina = p.Results.maxConeDensitySqDegRetina;
 end
 
 % Define a four-parameter logistic function that will be used to fit the
@@ -59,14 +59,14 @@ logisticFunc = fittype( @(slope,inflect,minMidgetRGCToConeRatio,maxMidgetRGCToCo
     'independent','x','dependent','y','problem',{'minMidgetRGCToConeRatio','maxMidgetRGCToConeRatio'});
 
 % Define the x-axis as the log10 of the proportion of max cone density
-x = log10(coneDensitySqDeg ./ maxConeDensity)';
+x = log10(coneDensitySqDegRetina ./ maxConeDensitySqDegRetina)';
 
 % Obtain the midgetRF : cone ratio from the logisitc function
 mRFtoConeDensityRatio = ...
     logisticFunc(p.Results.linkingFuncParams(1), p.Results.linkingFuncParams(2), p.Results.minMidgetRGCToConeRatio, p.Results.maxMidgetRGCToConeRatio, x);
 
 % Calculate the mRF density
-mRFDensitySqDeg = coneDensitySqDeg .* mRFtoConeDensityRatio';
+mRFDensitySqDegRetina = coneDensitySqDegRetina .* mRFtoConeDensityRatio';
 
 
 end % function
