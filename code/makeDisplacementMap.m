@@ -88,12 +88,12 @@ p = inputParser; p.KeepUnmatched = true;
 % Optional anaysis params
 p.addParameter('sampleResolutionDegreesRetina',0.01,@isnumeric);
 p.addParameter('maxModeledEccentricityRetina',30,@isnumeric);
-p.addParameter('targetDisplacementAtCardinalMeridiansDegRetina',[11 17 17 17],@isnumeric);
+p.addParameter('targetDisplacementAtCardinalMeridiansDegRetina',[13 17 17 17],@isnumeric);
 p.addParameter('cardinalMeridianAngles',[0 90 180 270],@isnumeric);
 p.addParameter('meridianAngleResolutionDeg',15,@isnumeric);
 p.addParameter('displacementMapPixelsPerDegRetina',10,@isnumeric);
-p.addParameter('cone_to_mRF_linkTolerance',1.00,@isnumeric);
-p.addParameter('rgc_to_mRGC_linkTolerance',4,@isnumeric);
+p.addParameter('cone_to_mRF_linkTolerance',1.05,@isnumeric);
+p.addParameter('rgc_to_mRGC_linkTolerance',2,@isnumeric);
 p.addParameter('rgcLinkingFunctionFlavor','Drasdo',@(x)(stcmp(x,'Drasdo') | stcmp(x,'Dacey')));
 p.addParameter('rfInitialTransformParams',[],@(x)(isempty(x) | isnumeric(x)));
 p.addParameter('rgcDrasdoInitialTransformParams',[],@(x)(isempty(x) | isnumeric(x)));
@@ -267,10 +267,10 @@ function [c,ceq] = testRFGreaterThanRGC(regularSupportPosDeg, countPerRingRF, co
 withinRangeIdx = find(regularSupportPosDeg < displacementPointDeg);
 c = sum(countPerRingRGC(withinRangeIdx) > countPerRingRF(withinRangeIdx));
 
-% If the maximum displacement is greater than 2.5 degrees, then that
+% If the maximum displacement is greater than 3.4 degrees, then that
 % violates the constraint
 displaceInDeg = calcDisplacement(regularSupportPosDeg, countPerRingRGC, countPerRingRF);
-ceq = sum(displaceInDeg > 2.6);
+ceq = sum(displaceInDeg > 3.4);
 
 end
 
