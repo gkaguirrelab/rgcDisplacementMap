@@ -1,4 +1,4 @@
-function [coneDensitySqDeg, supportPosDeg] = loadRawConeDensityByEccen(polarAngle, varargin)
+function [coneDensitySqDegRetina, supportPosDegRetina] = loadRawConeDensityByEccen(polarAngle, varargin)
 % loadRawConeDensityByEccen(angle)
 %
 % This routine loads cone density data from a file in standardized format.
@@ -24,10 +24,10 @@ function [coneDensitySqDeg, supportPosDeg] = loadRawConeDensityByEccen(polarAngl
 %                (0=nasal;90=superior;180=temporal;270=inferior)
 %
 % Outputs:
-%   coneDensitySqDeg - the density (counts per square degree) of cones at
-%       each of the positions
-%   supportPosDeg - the positions (in degrees of visual angle) from the
-%       fovea at which the cone density is defined
+%   coneDensitySqDegRetina - the density (counts per square degree) of
+%       cones at each of the positions
+%   supportPosDegRetina - the positions (in degrees of visual angle) from
+%       the fovea at which the cone density is defined
 %
 % Options:
 %  densityDataFileName - The full path to the data file. The default value
@@ -74,12 +74,11 @@ end
 %% Select the requested meridian and perform unit conversion
 switch rawConeDensity.meta.supportUnits
     case {'mm','MM','Mm'}
-        % Convert mm to deg
-        supportPosDeg = ...
-            rawConeDensity.support./0.2017;
+        % convert mmRetina to degRetina
+        supportPosDegRetina = convert_mmRetina_to_degRetina(rawConeDensity.support);
     case {'deg','degrees'}
         % no conversion needed
-        supportPosDeg = rawConeDensity.support;
+        supportPosDegRetina = rawConeDensity.support;
     otherwise
         error('The supportUnits of this raw file are not recognized');
 end
@@ -91,8 +90,8 @@ rawConeDensityForSelectedMeridian = rawConeDensity.(requestedMeridianName);
 % Perform denisty unit conversion
 switch rawConeDensity.meta.densityUnits
     case 'counts/mm2'
-        coneDensitySqDeg = ...
-            convert_mmSq_to_degSq(supportPosDeg, rawConeDensityForSelectedMeridian );
+        % convert counts/mmSqRetina to counts/degSqRetina
+        coneDensitySqDeg = rawConeDensityForSelectedMeridian .* calc_degSqRetina_per_mmSqRetina();
     case 'counts/deg2'
         % no conversion needed
         coneDensitySqDeg = rawConeDensityForSelectedMeridian;

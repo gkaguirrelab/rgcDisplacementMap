@@ -1,4 +1,4 @@
-function [rgcDensitySqDeg, supportPosDeg] = loadRawRGCDensityByEccen(polarAngle, varargin)
+function [rgcDensitySqDegRetina, supportPosDegRetina] = loadRawRGCDensityByEccen(polarAngle, varargin)
 % loadRawRGCDensityByEccen(polarAngle)
 %
 % This routine loads RGC density data from a file in standardized format.
@@ -24,9 +24,9 @@ function [rgcDensitySqDeg, supportPosDeg] = loadRawRGCDensityByEccen(polarAngle,
 %                (0=nasal;90=superior;180=temporal;270=inferior)
 %
 % Outputs:
-%   RGCDensitySqDeg - the density (counts per square degree) of RGCs at
+%   rgcDensitySqDegRetina - the density (counts per square degree) of RGCs at
 %       each of the positions
-%   supportPosDeg - the positions (in degrees of visual angle) from the
+%   supportPosDegRetina - the positions (in degrees of retinal angle) from the
 %       fovea at which the RGC density is defined
 %
 % Options:
@@ -75,12 +75,11 @@ end
 %% Select the requested meridian and perform unit conversion
 switch rawRGCDensity.meta.supportUnits
     case {'mm','MM','Mm'}
-        % Convert mm to deg
-        supportPosDeg = ...
-            rawRGCDensity.support./0.2017;
+        % convert mmRetina to degRetina
+        supportPosDegRetina = convert_mmRetina_to_degRetina(rawRGCDensity.support);
     case {'deg','degrees'}
         % no conversion needed
-        supportPosDeg = rawRGCDensity.support;
+        supportPosDegRetina = rawRGCDensity.support;
     otherwise
         error('The supportUnits of this raw file are not recognized');
 end
@@ -92,11 +91,11 @@ rawRGCDensityForSelectedMeridian = rawRGCDensity.(requestedMeridianName);
 % Perform denisty unit conversion
 switch rawRGCDensity.meta.densityUnits
     case 'counts/mm2'
-        rgcDensitySqDeg = ...
-            convert_mmSq_to_degSq(supportPosDeg, rawRGCDensityForSelectedMeridian );
+        % convert counts/mmSqRetina to counts/degSqRetina
+        rgcDensitySqDegRetina = rawRGCDensityForSelectedMeridian .* calc_degSqRetina_per_mmSqRetina();
     case 'counts/deg2'
         % no conversion needed
-        rgcDensitySqDeg = rawRGCDensityForSelectedMeridian;
+        rgcDensitySqDegRetina = rawRGCDensityForSelectedMeridian;
     otherwise
         error('The densityUnits of this raw file are not recognized');
 end

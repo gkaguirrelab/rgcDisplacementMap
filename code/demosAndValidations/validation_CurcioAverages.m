@@ -40,16 +40,16 @@ for mm = 1:length(p.Results.cardinalMeridianAngles)
     calculateRGCdensityFile = fullfile([getpref('rgcDisplacementMap','LocalDataPath') , '/Curcio_1990_JCompNeurol_GanglionCellTopography/curcioRawRGCDensity_computedAverage.mat']);
     reportedRGCdensityFile = fullfile([getpref('rgcDisplacementMap','LocalDataPath') , '/Curcio_1990_JCompNeurol_GanglionCellTopography/curcioRawRGCDensity_reportedAverage.mat']);
     
-    [calculatedRGCDensitySqDeg, calculateRGCdensitySupportDeg] = loadRawRGCDensityByEccen(p.Results.cardinalMeridianAngles(mm), 'densityDataFileName', calculateRGCdensityFile);
-    [reportedRGCDensitySqDeg, reportedRGCdensitySupportDeg] = loadRawRGCDensityByEccen(p.Results.cardinalMeridianAngles(mm), 'densityDataFileName', reportedRGCdensityFile);
+    [calculatedRGCDensitySqDegRetina, calculateRGCdensitySupportDegRetina] = loadRawRGCDensityByEccen(p.Results.cardinalMeridianAngles(mm), 'densityDataFileName', calculateRGCdensityFile);
+    [reportedRGCDensitySqDegRetina, reportedRGCdensitySupportDegRetina] = loadRawRGCDensityByEccen(p.Results.cardinalMeridianAngles(mm), 'densityDataFileName', reportedRGCdensityFile);
     
     subplot(2,2,mm);
-    plot(calculateRGCdensitySupportDeg, calculatedRGCDensitySqDeg, 'xb');
+    plot(calculateRGCdensitySupportDegRetina, calculatedRGCDensitySqDegRetina, 'xb');
     hold on
-    plot(reportedRGCdensitySupportDeg, reportedRGCDensitySqDeg, '.r');
-    plot(calculateRGCdensitySupportDeg, calculatedRGCDensitySqDeg, '-b');
-    xlabel('degrees');
-    ylabel('counts/mm2');
+    plot(reportedRGCdensitySupportDegRetina, reportedRGCDensitySqDegRetina, '.r');
+    plot(calculateRGCdensitySupportDegRetina, calculatedRGCDensitySqDegRetina, '-b');
+    xlabel('retinal degrees');
+    ylabel('counts/mm2 retina');
     legend('computed','reported')
     title(p.Results.cardinalMeridianNames{mm});    
 end % loop over meridians
@@ -65,16 +65,16 @@ for mm = 1:length(p.Results.cardinalMeridianAngles)
     calculateRGCdensityFile = fullfile([getpref('rgcDisplacementMap','LocalDataPath') , '/Curcio_1990_JCompNeurol_HumanPhotoreceptorTopography/curcioRawConeDensity_computedAverage.mat']);
     reportedRGCdensityFile = fullfile([getpref('rgcDisplacementMap','LocalDataPath') , '/Curcio_1990_JCompNeurol_HumanPhotoreceptorTopography/curcioRawConeDensity_reportedAverage.mat']);
     
-    [calculatedRGCDensitySqDeg, calculateRGCdensitySupportDeg] = loadRawRGCDensityByEccen(p.Results.cardinalMeridianAngles(mm), 'densityDataFileName', calculateRGCdensityFile);
-    [reportedRGCDensitySqDeg, reportedRGCdensitySupportDeg] = loadRawRGCDensityByEccen(p.Results.cardinalMeridianAngles(mm), 'densityDataFileName', reportedRGCdensityFile);
+    [calculatedRGCDensitySqDegRetina, calculateRGCdensitySupportDegRetina] = loadRawRGCDensityByEccen(p.Results.cardinalMeridianAngles(mm), 'densityDataFileName', calculateRGCdensityFile);
+    [reportedRGCDensitySqDegRetina, reportedRGCdensitySupportDegRetina] = loadRawRGCDensityByEccen(p.Results.cardinalMeridianAngles(mm), 'densityDataFileName', reportedRGCdensityFile);
     
     subplot(2,2,mm);
-    plot(calculateRGCdensitySupportDeg, calculatedRGCDensitySqDeg, 'xb');
+    plot(calculateRGCdensitySupportDegRetina, calculatedRGCDensitySqDegRetina, 'xb');
     hold on
-    plot(reportedRGCdensitySupportDeg, reportedRGCDensitySqDeg, '.r');
-    plot(calculateRGCdensitySupportDeg, calculatedRGCDensitySqDeg, '-b');
-    xlabel('degrees');
-    ylabel('counts/mm2');
+    plot(reportedRGCdensitySupportDegRetina, reportedRGCDensitySqDegRetina, '.r');
+    plot(calculateRGCdensitySupportDegRetina, calculatedRGCDensitySqDegRetina, '-b');
+    xlabel('retinal degrees');
+    ylabel('counts/mm2 retina');
     legend('computed','reported')
     title(p.Results.cardinalMeridianNames{mm});    
 end % loop over meridians
