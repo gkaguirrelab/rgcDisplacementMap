@@ -25,7 +25,7 @@ p.parse(varargin{:})
 
 mmPerDegree = (p.Results.radiusCurvatureRetinaMm * 2 * pi)/360;
 
-supportPosDegRetina = supportPosMmRetina .* mmPerDegree;
+supportPosDegRetina = supportPosMmRetina ./ mmPerDegree;
 
 end
 
