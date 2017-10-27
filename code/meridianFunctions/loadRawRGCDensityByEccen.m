@@ -77,9 +77,11 @@ switch rawRGCDensity.meta.supportUnits
     case {'mm','MM','Mm'}
         % convert mmRetina to degRetina
         supportPosDegRetina = convert_mmRetina_to_degRetina(rawRGCDensity.support);
-    case {'deg','degrees'}
+    case {'retinalDegree'}
         % no conversion needed
         supportPosDegRetina = rawRGCDensity.support;
+    case {'visualDegree'}
+        error('This case is not yet implemented');
     otherwise
         error('The supportUnits of this raw file are not recognized');
 end
@@ -93,9 +95,11 @@ switch rawRGCDensity.meta.densityUnits
     case 'counts/mm2'
         % convert counts/mmSqRetina to counts/degSqRetina
         rgcDensitySqDegRetina = rawRGCDensityForSelectedMeridian ./ calc_degSqRetina_per_mmSqRetina();
-    case 'counts/deg2'
+    case 'counts/retinalDeg2'
         % no conversion needed
         rgcDensitySqDegRetina = rawRGCDensityForSelectedMeridian;
+    case 'counts/visualDeg2'
+        error('This case is not yet implemented');
     otherwise
         error('The densityUnits of this raw file are not recognized');
 end
