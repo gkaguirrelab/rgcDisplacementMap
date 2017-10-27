@@ -105,7 +105,7 @@ if p.Results.savePlots
 end
 
 % Show the RGC --> mRGC model
-[ ~, figHandle ] = developDrasdoMidgetRGCFractionModel( 'makePlots', true );
+[ ~, figHandle ] = developDaceyMidgetRGCFractionModel( 'makePlots', true );
 hold on
 % Add plot lines showing the fit by meridian
 meridianColors={'r','b','g','k'};
@@ -123,7 +123,7 @@ for mm = 1:length(meridianAngles)
     if ~isempty(zeroPoints)
         propRGC_ringcount(zeroPoints)=min(propRGC_ringcount(find(propRGC_ringcount~=0)));
     end
-    [ ~, midgetFraction ] = transformRGCToMidgetRGCDensityDrasdo( regularSupportPosDeg, rgcDensitySqDeg', 'linkingFuncParams', fitParams(mm,3:end) );
+    [ ~, midgetFraction ] = transformRGCToMidgetRGCDensityDacey( regularSupportPosDeg, rgcDensitySqDeg', 'linkingFuncParams', fitParams(mm,3:end) );
     xvals = propRGC_ringcount;
     plot(log10(xvals),midgetFraction,'-','Color',meridianColors{mm});
 end
@@ -285,7 +285,7 @@ ylabel('mRF density [counts / deg2]');
 
 subplot(2,1,2)
 [RGCDensityFit] = getSplineFitToRGCDensity(cardinalMeridianAngles(mm));
-[ mRGCDensitySqDeg ] = transformRGCToMidgetRGCDensityDrasdo( regularSupportPosDeg, RGCDensityFit(regularSupportPosDeg)', 'linkingFuncParams', fitParams(mm,3:end) );
+[ mRGCDensitySqDeg ] = transformRGCToMidgetRGCDensityDacey( regularSupportPosDeg, RGCDensityFit(regularSupportPosDeg)', 'linkingFuncParams', fitParams(mm,3:end) );
 plot(regularSupportPosDeg,mRGCDensitySqDeg,'-','Color',meridianColors{mm});
 xlim([0,30]);
 ylim([0,2500]);
@@ -329,7 +329,7 @@ for mm = 1:4
     
     % Plot our midget fraction
     subplot(1,2,2);
-    [ ~, midgetFraction_ours ] = transformRGCToMidgetRGCDensityDrasdo( RGCNativeSupportPosDeg, RGCDensitySqDeg, 'linkingFuncParams', fitParams(meridianIdx,3:end) );
+    [ ~, midgetFraction_ours ] = transformRGCToMidgetRGCDensityDacey( RGCNativeSupportPosDeg, RGCDensitySqDeg, 'linkingFuncParams', fitParams(meridianIdx,3:end) );
     plot(RGCNativeSupportPosDeg,midgetFraction_ours,'-','Color',meridianColors{mm});
     hold on
     ylim([0 1]);

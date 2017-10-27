@@ -70,12 +70,12 @@ p.addParameter('meridianNames',{'Nasal' 'Superior' 'Temporal' 'Inferior'},@iscel
 p.addParameter('meridianAngles',[0, 90, 180, 270],@isnumeric);
 p.addParameter('meridianSymbols',{'.','x','o','^'},@cell);
 p.addParameter('meridiansIdxToUseForFitParams',[1 2 3 4],@isnumeric);
-p.addParameter('minMidgetFractionRatio',0.45,@isnumeric);
-p.addParameter('maxMidgetFractionRatio',0.95,@isnumeric);
+p.addParameter('minMidgetFractionRatio',0.41,@isnumeric);
+p.addParameter('maxMidgetFractionRatio',0.85,@isnumeric);
 p.addParameter('logitFitStartPoint',[5 1],@isnumeric);
 
 % Optional display params
-p.addParameter('makePlots',true,@islogical);
+p.addParameter('makePlots',false,@islogical);
 
 % parse
 p.parse(varargin{:})
@@ -131,7 +131,14 @@ for mm = 1:length(p.Results.meridianAngles)
         
     % Obtain the Dacey midget fraction as a function of eccentricity
     midgetFractionByEccenDegRetina = calcDaceyMidgetFractionByEccenDegRetina(regularSupportPosDegRetina)';
-            
+
+    % Adjust the Dacey fraction so that it has the specified max and
+    % minimum values
+    midgetFractionByEccenDegRetina = midgetFractionByEccenDegRetina-min(midgetFractionByEccenDegRetina);
+    midgetFractionByEccenDegRetina = midgetFractionByEccenDegRetina./max(midgetFractionByEccenDegRetina);
+    midgetFractionByEccenDegRetina = midgetFractionByEccenDegRetina.*(p.Results.maxMidgetFractionRatio-p.Results.minMidgetFractionRatio);
+    midgetFractionByEccenDegRetina = midgetFractionByEccenDegRetina+p.Results.minMidgetFractionRatio;
+    
     % Perform the fit and save the param values.
     % The x values proportionRGC
     % The y values are the midget fraction
