@@ -24,9 +24,7 @@ p = inputParser;
 p.addRequired('polarAngle',@isnumeric);
 
 % Optional analysis params
-p.addParameter('meridianNames',{'Nasal' 'Superior' 'Temporal' 'Inferior'},@iscell);
-p.addParameter('meridianAngles',[0, 90, 180, 270],@isnumeric);
-p.addParameter('meridianSymbols',{'.','x','o','^'},@iscell);
+p.addParameter('cardinalMeridianAngles',[0, 90, 180, 270],@isnumeric);
 p.addParameter('splineKnots',15,@isnumeric);
 p.addParameter('splineOrder',4,@isnumeric);
 
@@ -38,7 +36,7 @@ p.addParameter('makePlots',true,@islogical);
 p.parse(polarAngle,varargin{:})
 
 %% sanity check the input
-if p.Results.meridianAngles ~= 0
+if p.Results.cardinalMeridianAngles ~= 0
     error('This routine assumes that the first meridian is polar angle = 0');
 end
 
@@ -46,9 +44,9 @@ end
 % aggregate data to define the knots for the spline fit.
 aggregatePosition=[];
 aggregateDensity=[];
-for mm=1:length(p.Results.meridianAngles)
+for mm=1:length(p.Results.cardinalMeridianAngles)
     % load the empirical cone density measured by Curcio
-    [coneDensitySqDegRetina, coneNativeSupportPosDegRetina] = loadRawConeDensityByEccen(p.Results.meridianAngles(mm));
+    [coneDensitySqDegRetina, coneNativeSupportPosDegRetina] = loadRawConeDensityByEccen(p.Results.cardinalMeridianAngles(mm));
     % remove nan values
     isvalididx=find(~isnan(coneDensitySqDegRetina));
     coneNativeSupportPosDegRetina = coneNativeSupportPosDegRetina(isvalididx);
@@ -63,9 +61,9 @@ knots = BformSplineFit.knots;
 
 % Loop across the cardinal meridians again, and now perform the spline fit
 % with the specified knots
-for mm=1:length(p.Results.meridianAngles)
+for mm=1:length(p.Results.cardinalMeridianAngles)
     % load the empirical cone density measured by Curcio
-    [coneDensitySqDegRetina, coneNativeSupportPosDegRetina] = loadRawConeDensityByEccen(p.Results.meridianAngles(mm));
+    [coneDensitySqDegRetina, coneNativeSupportPosDegRetina] = loadRawConeDensityByEccen(p.Results.cardinalMeridianAngles(mm));
     % remove nan values
     isvalididx=find(~isnan(coneDensitySqDegRetina));
     coneNativeSupportPosDegRetina = coneNativeSupportPosDegRetina(isvalididx);
@@ -90,7 +88,7 @@ interpCoefs = zeros(size(ppFormSplineFits{1}.coefs));
 
 % replicate the values for polar angle zero at polar angle 360 to allow a
 % wrap-around fit
-angleBase=[p.Results.meridianAngles 360];
+angleBase=[p.Results.cardinalMeridianAngles 360];
 
 % loop over each element of the coefficient matrix
 for cc=1:numel(interpCoefs)
