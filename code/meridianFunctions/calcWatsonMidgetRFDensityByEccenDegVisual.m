@@ -1,4 +1,4 @@
-function [ midgetRFDensity_degSq ] = calcWatsonMidgetRFDensityByEccen(supportPosDeg, polarAngle)
+function [ midgetRFDensitySqDegVisual ] = calcWatsonMidgetRFDensityByEccenDegVisual(supportPosDegVisual, polarAngle)
 % calcWatsonMidgetRFDensityByEccen(supportPosDeg, angle)
 %
 % This function implements Equation 8 of Watson 2014.
@@ -7,16 +7,19 @@ function [ midgetRFDensity_degSq ] = calcWatsonMidgetRFDensityByEccen(supportPos
 % switched. In this routine we return the values that Watson labeled
 % "nasal" as the temporal retina, and vice-a-versa.
 %
+% NOTE 2: Watson's formula is in terms of visual angle degrees (and visual
+% angle degrees squared). Therefore, the output of this routine must be
+% converted to be related to retinal measurements.
 %
 % Inputs
-%   supportPosDeg - the positions (in degrees of visual angle) from the
+%   supportPosDegVisual - the positions (in degrees of visual angle) from the
 %       fovea at which to calculate the midget receptive field density
 %   angle - the meridian to evaluate. Acceptable values are: 
 %       (0=nasal;90=superior;180=temporal;270=inferior)
 %
 % Outputs
-%   midgetRFDensity_degSq - the density (receptive fields per square
-%       degree) of midget receptive fields at each of the positions
+%   midgetRFDensitySqDegVisual - the density (receptive fields per visual
+%       square degree) of midget receptive fields at each of the positions
 
 %% Check the input
 
@@ -24,7 +27,7 @@ if sum([0 90 180 270]==polarAngle) ~= 1
     error('The Watson equation for mRF density is defined only for the cardinal meridia');
 end
 
-%% Obtain the parameters of the modeled receptive field denisty for this angle
+%% Obtain the parameters of the modeled receptive field density for this angle
 
 % Taken from Table 1 of Watson
 switch polarAngle
@@ -50,10 +53,10 @@ switch polarAngle
         
 end
         
-% Cone density (cones / deg^2) at the foveal peak, same for every meridian
+% Cone density (cones / deg visual ^2) at the foveal peak, same for every meridian
 dcZero = 14804.6;
 
-% Eccentricity (in degrees) at which the fraction of midget retinal
+% Eccentricity (in degrees visual) at which the fraction of midget retinal
 % ganglion cells has dropped by half from the initial fraction. The midget
 % fraction as a function of eccentricity is assumed to be the same for all
 % meridia
@@ -64,9 +67,9 @@ rm = 41.03;
 % That is, it is assumed that the number of midget RGCs at the fovea is
 % exactly equal to twice the number of cones.
 
-midgetRFDensity_degSq = 2 * dcZero .* ...                                     % The number of mRFs at the fovea (which is twice the cone density)
-    ( (a*((1+supportPosDeg./r2)).^-2) + (1-a).*exp(-1.*supportPosDeg./re) ) .* ...  % The number of receptive fields as a function of eccentricity
-    ((1+supportPosDeg./rm).^-1);                                                    % The midget fraction at each eccentricity
+midgetRFDensitySqDegVisual = 2 * dcZero .* ...                                     % The number of mRFs at the fovea (which is twice the cone density)
+    ( (a*((1+supportPosDegVisual./r2)).^-2) + (1-a).*exp(-1.*supportPosDegVisual./re) ) .* ...  % The number of receptive fields as a function of eccentricity
+    ((1+supportPosDegVisual./rm).^-1);                                                    % The midget fraction at each eccentricity
 
 
 end
