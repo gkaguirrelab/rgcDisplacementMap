@@ -53,13 +53,13 @@ function [ displacementMapDeg, fitParams, meridianAngles, rgcDisplacementEachMer
 %       defines sample resolution The sample resolution must be sufficient
 %       fine so that the cumulative is an accurate estimate of the
 %       integral.
-%   maxModeledEccentricityRetina - The eccentricity extent of the model. This
+%   maxModeledEccentricityDegreesRetina - The eccentricity extent of the model. This
 %       value must be sufficiently outside the displacement zone so that
 %       there is a portion of the cumulative to match between the mRF and
 %       mRGC functions, but not so large as to venture into the periphery
 %       where our transform models areless accurate. We find that our
 %       results depend in unpredictable ways on the particular
-%       maxModeledEccentricityRetina selected, which is unfortunate.
+%       value selected, which is unfortunate.
 %   targetConvergenceOnCardinalMeridiansDegRetina - This is point in
 %       degrees at which displacement should become zero for each cadinal
 %       meridian. The default values were set by taking the apparent
@@ -95,15 +95,15 @@ p = inputParser; p.KeepUnmatched = true;
 
 % Optional anaysis params
 p.addParameter('sampleResolutionDegreesRetina',0.01,@isnumeric);
-p.addParameter('maxModeledEccentricityRetina',30,@isnumeric);
+p.addParameter('maxModeledEccentricityDegreesRetina',30,@isnumeric);
 p.addParameter('targetConvergenceOnCardinalMeridiansDegRetina',[17 19.5 22 19.5],@isnumeric);
 p.addParameter('targetMaxDisplacementDegRetina',3.2,@isnumeric);
 
 p.addParameter('cardinalMeridianAngles',[0 90 180 270],@isnumeric);
 p.addParameter('meridianAngleResolutionDeg',15,@isnumeric);
 p.addParameter('displacementMapPixelsPerDegRetina',10,@isnumeric);
-p.addParameter('cone_to_mRF_linkTolerance',1.2,@isnumeric);
-p.addParameter('rgc_to_mRGC_linkTolerance',1.2,@isnumeric);
+p.addParameter('cone_to_mRF_linkTolerance',1.1,@isnumeric);
+p.addParameter('rgc_to_mRGC_linkTolerance',1.05,@isnumeric);
 p.addParameter('rgcLinkingFunctionFlavor','Dacey',@(x)(stcmp(x,'Drasdo') | stcmp(x,'Dacey')));
 p.addParameter('rfInitialTransformParams',[],@(x)(isempty(x) | isnumeric(x)));
 p.addParameter('rgcDrasdoInitialTransformParams',[],@(x)(isempty(x) | isnumeric(x)));
@@ -120,7 +120,7 @@ p.parse(varargin{:})
 %% Setup
 % Prepare the regular eccentricity support base
 regularSupportPosDegRetina = ...
-    0:p.Results.sampleResolutionDegreesRetina:p.Results.maxModeledEccentricityRetina;
+    0:p.Results.sampleResolutionDegreesRetina:p.Results.maxModeledEccentricityDegreesRetina;
 
 % Prepare the set of meridian angles for which we will calculate
 % displacement
@@ -260,7 +260,7 @@ for mm = 1:length(meridianAngles)
 end % loop over meridians
 
 % Create the displacement map
-imRdim = (p.Results.maxModeledEccentricityRetina * p.Results.displacementMapPixelsPerDegRetina * 2)-1;
+imRdim = (p.Results.maxModeledEccentricityDegreesRetina * p.Results.displacementMapPixelsPerDegRetina * 2)-1;
 displacementMapDeg = convertPolarMapToImageMap(rgcDisplacementEachMeridian, imRdim);
 
 

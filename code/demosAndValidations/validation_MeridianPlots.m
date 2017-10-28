@@ -7,11 +7,11 @@ function validation_MeridianPlots(varargin)
 p = inputParser; p.KeepUnmatched = true;
 
 % Optional anaysis params
-p.addParameter('sampleResolutionDegrees',0.01,@isnumeric);
-p.addParameter('maxModeledEccentricity',30,@isnumeric);
+p.addParameter('sampleResolutionDegreesRetina',0.01,@isnumeric);
+p.addParameter('maxModeledEccentricityDegreesRetina',30,@isnumeric);
 p.addParameter('meridianAngleResolutionDeg',90,@isnumeric);
-p.addParameter('meridianNames',{'nasal','superior','temporal','inferior'},@iscell);
-p.addParameter('displacementMapPixelsPerDeg',10,@isnumeric);
+p.addParameter('cardinalMeridianNames',{'nasal','superior','temporal','inferior'},@iscell);
+p.addParameter('displacementMapPixelsPerDegRetina',10,@isnumeric);
 p.addParameter('referenceEccenDegRetina',15,@isnumeric);
 
 % Optional display and ouput params
@@ -35,15 +35,15 @@ end
 
 % Prepare the regular eccentricity support base
 regularSupportPosDegRetina = ...
-    0:p.Results.sampleResolutionDegrees:p.Results.maxModeledEccentricity;
+    0:p.Results.sampleResolutionDegreesRetina:p.Results.maxModeledEccentricityDegreesRetina;
 
 % make the displacement map for the cardinal meridians
-[ ~, fitParams, meridianAngles, rgcDisplacementEachMeridian, mRGC_cumulativeEachMeridian, mRF_cumulativeEachMeridian ] = ...
+[ ~, fitParams, meridianAngles, rgcDisplacementDegRetinaEachMeridian, mRGC_cumulativeEachMeridian, mRF_cumulativeEachMeridian ] = ...
     makeDisplacementMap(...
-    'sampleResolutionDegrees', p.Results.sampleResolutionDegrees, ...
-    'maxModeledEccentricity', p.Results.maxModeledEccentricity, ...
+    'sampleResolutionDegreesRetina', p.Results.sampleResolutionDegreesRetina, ...
+    'maxModeledEccentricityDegreesRetina', p.Results.maxModeledEccentricityDegreesRetina, ...
     'meridianAngleResolutionDeg', p.Results.meridianAngleResolutionDeg, ...
-    'displacementMapPixelsPerDeg', p.Results.displacementMapPixelsPerDeg, ...
+    'displacementMapPixelsPerDegRetina', p.Results.displacementMapPixelsPerDegRetina, ...
     'verbose', p.Results.verbose);
 
 fitParams
@@ -54,13 +54,13 @@ for mm = 1:length(meridianAngles)
     
     % plot the displacement
     subplot(length(meridianAngles),2,mm*2);
-    plot(regularSupportPosDegRetina,rgcDisplacementEachMeridian(mm,:),'-r')
+    plot(regularSupportPosDegRetina,rgcDisplacementDegRetinaEachMeridian(mm,:),'-r')
     axis off;
     ylim([-.5 4.0]);
     if mm == length(meridianAngles)
         axis on;
-        xlabel('eccentricity [deg]');
-        ylabel('RGC displacement [deg]');
+        xlabel('eccentricity [deg retina]');
+        ylabel('RGC displacement [deg retina]');
     end
     
     % Plot the cumulative functions
@@ -69,7 +69,7 @@ for mm = 1:length(meridianAngles)
     axis off;
     if mm == length(meridianAngles)
         axis on;
-        xlabel('eccentricity [deg]');
+        xlabel('eccentricity [deg retina]');
         ylabel('cells per sector');
     end
     hold on
@@ -156,7 +156,7 @@ for mm=1:4
     plot( log10(xFit ./ 1.4806e+04), tmp_mRFDensity./xFit,'-','Color',meridianColors{mm});
     hold on
 end
-legend({p.Results.meridianNames{:} 'fit'},'Location','southeast');
+legend({p.Results.cardinalMeridianNames{:} 'fit'},'Location','southeast');
 title('midget RF : cone ratio as a function of relative cone density');
 xlabel('log10 proportion max cone density');
 ylabel('mRF density : cone density');
@@ -183,8 +183,8 @@ for mm=1:4
     xlim([1e-2,70]);
     hold on
     loglog(dispConeNativeSupportPosDeg,coneDensityFit(coneNativeSupportPosDeg),'-','Color',meridianColors{mm});
-    xlabel('log10 Eccentricity [deg]');
-    ylabel('log10 Cone density [counts / deg2]');
+    xlabel('log10 Eccentricity [deg retina]');
+    ylabel('log10 Cone density [counts / deg retina^2]');
 end
 legend(num2str(cardinalMeridianAngles),'Location','southwest')
 
@@ -194,8 +194,8 @@ for mm=1:4
     [coneDensityFit] = getSplineFitToConeDensity(interpolarMeridianAngles(mm));
     loglog(dispConeNativeSupportPosDeg,coneDensityFit(coneNativeSupportPosDeg),'-','Color',meridianColors{mm});
     xlim([1e-2,70]);
-    xlabel('log10 Eccentricity [deg]');
-    ylabel('log10 Cone density [counts / deg2]');
+    xlabel('log10 Eccentricity [deg retina]');
+    ylabel('log10 Cone density [counts / deg retina ^2]');
     hold on
 end
 legend(num2str(interpolarMeridianAngles),'Location','southwest')
@@ -217,12 +217,12 @@ for mm=1:4
     dispRGCNativeSupportPosDeg(1)=1e-2;
     [RGCDensityFit] = getSplineFitToRGCDensity(cardinalMeridianAngles(mm));
     loglog(dispRGCNativeSupportPosDeg,RGCDensitySqDeg,'x','Color',meridianColors{mm});
-    xlim([1e-2,70]);
+    xlim([0.2,70]);
     hold on
     regularSupportPosDegRetina=1e-2:0.01:70;
     loglog(regularSupportPosDegRetina,RGCDensityFit(regularSupportPosDegRetina),'-','Color',meridianColors{mm});
-    xlabel('log10 Eccentricity [deg]');
-    ylabel('log10 RGC density [counts / deg2]');
+    xlabel('log10 Eccentricity [deg retina]');
+    ylabel('log10 RGC density [counts / deg retina ^2]');
 end
 legend(num2str(cardinalMeridianAngles),'Location','southwest')
 
@@ -231,9 +231,9 @@ interpolarMeridianAngles=[45 135 225 315];
 for mm=1:4
     [RGCDensityFit] = getSplineFitToRGCDensity(interpolarMeridianAngles(mm));
     loglog(regularSupportPosDegRetina,RGCDensityFit(regularSupportPosDegRetina),'-','Color',meridianColors{mm});
-    xlim([1e-2,70]);
-    xlabel('log10 Eccentricity [deg]');
-    ylabel('log10 RGC density [counts / deg2]');
+    xlim([0.2,70]);
+    xlabel('log10 Eccentricity [deg retina]');
+    ylabel('log10 RGC density [counts / deg retina ^2]');
     hold on
 end
 legend(num2str(interpolarMeridianAngles),'Location','southwest')
@@ -259,8 +259,8 @@ ylim([0,3e4]);
 hold on
 regularSupportPosDegRetina=0:0.01:70;
 plot(regularSupportPosDegRetina,coneDensityFit(regularSupportPosDegRetina),'-','Color',meridianColors{mm});
-xlabel('Eccentricity [deg]');
-ylabel('Cone density [counts / deg2]');
+xlabel('Eccentricity [deg retina]');
+ylabel('Cone density [counts / deg retina ^2]');
 subplot(2,1,2)
 [RGCDensitySqDeg, RGCNativeSupportPosDeg] = loadRawRGCDensityByEccen(cardinalMeridianAngles(mm));
 dispRGCNativeSupportPosDeg=RGCNativeSupportPosDeg;
@@ -272,7 +272,7 @@ hold on
 regularSupportPosDegRetina=1e-2:0.01:70;
 loglog(regularSupportPosDegRetina,RGCDensityFit(regularSupportPosDegRetina),'-','Color',meridianColors{mm});
 xlabel('Eccentricity [deg]');
-ylabel('RGC density [counts / deg2]');
+ylabel('RGC density [counts / deg retina ^2]');
 if p.Results.savePlots
     fileOutPath = fullfile(p.Results.pathToPlotOutputDir,'splineFitConeRGCLinearSpace.pdf');
     saveas(figHandle,fileOutPath)
@@ -291,8 +291,8 @@ regularSupportPosDegRetina=0:0.01:70;
 plot(regularSupportPosDegRetina,mRFDensitySqDeg,'-','Color',meridianColors{mm});
 xlim([0,30]);
 ylim([0,3e4]);
-xlabel('Eccentricity [deg]');
-ylabel('mRF density [counts / deg2]');
+xlabel('Eccentricity [deg retina]');
+ylabel('mRF density [counts / deg retina ^2]');
 
 subplot(2,1,2)
 [RGCDensityFit] = getSplineFitToRGCDensity(cardinalMeridianAngles(mm));
@@ -300,8 +300,8 @@ subplot(2,1,2)
 plot(regularSupportPosDegRetina,mRGCDensitySqDeg,'-','Color',meridianColors{mm});
 xlim([0,30]);
 ylim([0,2500]);
-xlabel('Eccentricity [deg]');
-ylabel('mRGC density [counts / deg2]');
+xlabel('Eccentricity [deg retina]');
+ylabel('mRGC density [counts / deg retina^2]');
 if p.Results.savePlots
     fileOutPath = fullfile(p.Results.pathToPlotOutputDir,'mRGCmRF_linearOneMeridian.pdf');
     saveas(figHandle,fileOutPath)
@@ -347,7 +347,7 @@ for mm = 1:4
     hold on
     ylim([0 1]);
     xlim([0 40]);
-    xlabel('eccentricity deg');
+    xlabel('eccentricity deg retina');
     ylabel('midget fraction');
     title('Our midget fraction');
     pbaspect([2 1 1]);
@@ -389,8 +389,8 @@ for mm = 1:4
     loglog(coneNativeSupportPosDeg(2:end),mRFDensitySqDeg_watson(2:end),'-','Color',meridianColors{mm});
     ylim([1e0 1e5]);
     xlim([1e-1 1e2]);
-    xlabel('log10 eccentricity');
-    ylabel('log10 mRF density / deg2');
+    xlabel('log10 eccentricity deg visual');
+    ylabel('log10 mRF density / deg visual ^2');
     title('Watson''s mRF density by eccentricity');
     pbaspect([2 1 1]);
     hold on
