@@ -174,11 +174,11 @@ for mm = 1:length(meridianAngles)
     % density.
     
     % Obtain a spline fit to the empirical cone density data of Curcio 1990
-    [coneDensityFit] = getSplineFitToConeDensity(meridianAngles(mm));
+    [fitConeDensitySqDegRetina] = getSplineFitToConeDensitySqDegRetina(meridianAngles(mm));
     % Create an anonymous function that returns mRF density as a function
     % of cone density, with the transform defined by the first two fitParams
     mRFDensityOverRegularSupport = ...
-        @(fitParams) transformConeToMidgetRFDensity(coneDensityFit(regularSupportPosDegRetina), ...
+        @(fitParams) transformConeToMidgetRFDensity(fitConeDensitySqDegRetina(regularSupportPosDegRetina), ...
         'linkingFuncParams',fitParams(1:2))';
     % Define anonymous function for the cumulative sum of mRF density
     mRF_cumulative = @(fitParams) calcCumulative(regularSupportPosDegRetina, mRFDensityOverRegularSupport(fitParams));
@@ -190,7 +190,7 @@ for mm = 1:length(meridianAngles)
     % density.
     
     % Obtain a spline fit to the empirical RGC density data of Curcio 1990
-    rgcDensityFit = getSplineFitToRGCDensity(meridianAngles(mm));
+    fitRGCDensitySqDegRetina = getSplineFitToRGCDensitySqDegRetina(meridianAngles(mm));
 
     % Create an anonymous function that returns mRGC density as a function of
     % RGC density, with the transform defined by the last two or three fitParams
@@ -198,11 +198,11 @@ for mm = 1:length(meridianAngles)
     switch p.Results.rgcLinkingFunctionFlavor
         case 'Drasdo'
             mRGCDensityOverRegularSupport = ...
-                @(fitParams) transformRGCToMidgetRGCDensityDrasdo(regularSupportPosDegRetina,rgcDensityFit(regularSupportPosDegRetina)',...
+                @(fitParams) transformRGCToMidgetRGCDensityDrasdo(regularSupportPosDegRetina,fitRGCDensitySqDegRetina(regularSupportPosDegRetina)',...
                 'linkingFuncParams',fitParams(3:end));
         case 'Dacey'
             mRGCDensityOverRegularSupport = ...
-                @(fitParams) transformRGCToMidgetRGCDensityDacey(regularSupportPosDegRetina,rgcDensityFit(regularSupportPosDegRetina)',...
+                @(fitParams) transformRGCToMidgetRGCDensityDacey(regularSupportPosDegRetina,fitRGCDensitySqDegRetina(regularSupportPosDegRetina)',...
                 'linkingFuncParams',fitParams(3:end));
         otherwise
             error('This is not an RGC linking function flavor that I know');

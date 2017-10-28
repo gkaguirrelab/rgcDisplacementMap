@@ -138,7 +138,7 @@ for mm = 1:length(p.Results.meridianAngles)
     
     % calculate the mRF density at these eccentricity locations using
     % Watson equation 8.
-    [ midgetRFDensitySqDegVisual ] = calcWatsonMidgetRFDensityByEccen(nativeSupportPosDegVisual, p.Results.meridianAngles(mm));
+    [ midgetRFDensitySqDegVisual ] = calcWatsonMidgetRFDensityByEccenDegVisual(nativeSupportPosDegVisual, p.Results.meridianAngles(mm));
     
     % obtain the conversion from degree square visual to mm square retina
     mmSqRetinaPerDegSqVisual = calc_mmSqRetina_per_degSqVisual(nativeSupportPosDegVisual);
