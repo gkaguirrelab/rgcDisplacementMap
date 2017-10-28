@@ -1,21 +1,24 @@
-function [coneDensityFit] = getSplineFitToConeDensity(polarAngle, varargin)
-% getSplineFitToConeDensity(angle)
+function [fitRGCDensitySqDegRetina] = getSplineFitToRGCDensitySqDegRetina(polarAngle, varargin)
+% getSplineFitToRGCDensity(angle)
 %
-% This routine returns a fit to cone density data. Raw cone density data
+% This routine returns a fit to RGC density data. Raw RGC density data
 % are taken from Curcio et al (1990) unless otherwise specified.
 % Fits to the cardinal meridians are obtained. Interpolation over the
-% parameters of the fit are used to produce a function that returns cone
+% parameters of the fit are used to produce a function that returns RGC
 % density for an arbitrary meridian angle.
 %
 % Inputs:
 %   polarAngle - The desired angle of the density function on the retinal field.
 %                (0=nasal;90=superior;180=temporal;270=inferior)
 % Outputs:
-%   coneDensityFit - handle of a fitting function that returns cone density
-%       values for the specified meridian angle across eccentricity in
+%   fitRGCDensitySqDegRetina - handle of a fitting function that returns rgc density
+%       values for the specified meridian angle across retinal eccentricity in
 %       polarAngle
 %
 % Options:
+%   meridiansForKnotDefinition - We find that the knots must be defined
+%       using only the 180 and 270 degree meridians to produce knots that
+%       work for all meridians. This is a hack.
 
 %% Parse input and define variables
 p = inputParser;
@@ -24,10 +27,10 @@ p = inputParser;
 p.addRequired('polarAngle',@isnumeric);
 
 % Optional analysis params
-p.addParameter('meridianNames',{'Nasal' 'Superior' 'Temporal' 'Inferior'},@iscell);
+p.addParameter('meridianNames',{'nasal' 'superior' 'temporal' 'inferior'},@iscell);
 p.addParameter('meridianAngles',[0, 90, 180, 270],@isnumeric);
-p.addParameter('meridianSymbols',{'.','x','o','^'},@iscell);
-p.addParameter('splineKnots',15,@isnumeric);
+p.addParameter('meridiansForKnotDefinition',[3,4],@isnumeric);
+p.addParameter('splineKnots',20,@isnumeric);
 p.addParameter('splineOrder',4,@isnumeric);
 
 % Optional display params
@@ -42,19 +45,19 @@ if p.Results.meridianAngles ~= 0
     error('This routine assumes that the first meridian is polar angle = 0');
 end
 
-% Loop across the cardinal meridians and combine the cone data. Use this
+% Loop across the cardinal meridians and combine the RGC data. Use this
 % aggregate data to define the knots for the spline fit.
 aggregatePosition=[];
 aggregateDensity=[];
-for mm=1:length(p.Results.meridianAngles)
-    % load the empirical cone density measured by Curcio
-    [coneDensitySqDeg, coneNativeSupportPosDeg] = loadRawConeDensityByEccen(p.Results.meridianAngles(mm));
+for mm=p.Results.meridiansForKnotDefinition(1):p.Results.meridiansForKnotDefinition(2)
+    % load the empirical RGC density measured by Curcio
+    [rgcDensitySqDegRetina, rgcNativeSupportPosDegRetina] = loadRawRGCDensityByEccen(p.Results.meridianAngles(mm));
     % remove nan values
-    isvalididx=find(~isnan(coneDensitySqDeg));
-    coneNativeSupportPosDeg = coneNativeSupportPosDeg(isvalididx);
-    coneDensitySqDeg = coneDensitySqDeg(isvalididx);
-    aggregatePosition=[aggregatePosition coneNativeSupportPosDeg];
-    aggregateDensity = [aggregateDensity coneDensitySqDeg];
+    isvalididx=find(~isnan(rgcDensitySqDegRetina));
+    rgcNativeSupportPosDegRetina = rgcNativeSupportPosDegRetina(isvalididx);
+    rgcDensitySqDegRetina = rgcDensitySqDegRetina(isvalididx);
+    aggregatePosition = [aggregatePosition rgcNativeSupportPosDegRetina];
+    aggregateDensity = [aggregateDensity rgcDensitySqDegRetina];
 end
 
 % perform a least-squares spline fit with the specified knots and order
@@ -64,14 +67,14 @@ knots = BformSplineFit.knots;
 % Loop across the cardinal meridians again, and now perform the spline fit
 % with the specified knots
 for mm=1:length(p.Results.meridianAngles)
-    % load the empirical cone density measured by Curcio
-    [coneDensitySqDeg, coneNativeSupportPosDeg] = loadRawConeDensityByEccen(p.Results.meridianAngles(mm));
+    % load the empirical rgc density measured by Curcio
+    [rgcDensitySqDegRetina, rgcNativeSupportPosDegRetina] = loadRawRGCDensityByEccen(p.Results.meridianAngles(mm));
     % remove nan values
-    isvalididx=find(~isnan(coneDensitySqDeg));
-    coneNativeSupportPosDeg = coneNativeSupportPosDeg(isvalididx);
-    coneDensitySqDeg = coneDensitySqDeg(isvalididx);
+    isvalididx=find(~isnan(rgcDensitySqDegRetina));
+    rgcNativeSupportPosDegRetina = rgcNativeSupportPosDegRetina(isvalididx);
+    rgcDensitySqDegRetina = rgcDensitySqDegRetina(isvalididx);
     % Perform the spline fit
-    BformSplineFit=spap2(knots, p.Results.splineOrder, coneNativeSupportPosDeg', coneDensitySqDeg');
+    BformSplineFit=spap2(knots, p.Results.splineOrder, rgcNativeSupportPosDegRetina', rgcDensitySqDegRetina');
     % convert from B-form to piecewise polynomial form
     ppFormSplineFits{mm} = fn2fm(BformSplineFit,'pp');
 end
@@ -111,8 +114,8 @@ ppFormSplineInterp = ppFormSplineFits{1};
 ppFormSplineInterp.coefs = interpCoefs;
 
 % Create an anonymous function using the interpolated spline. This function
-% will return cone density as a function of eccentricity in degrees
-coneDensityFit = @(supportPosDeg) fnval(ppFormSplineInterp,supportPosDeg');
+% will return rgc density as a function of eccentricity in degrees.
+fitRGCDensitySqDegRetina = @(supportPosDeg) fnval(ppFormSplineInterp,supportPosDeg') ; 
 
 end % function
 
