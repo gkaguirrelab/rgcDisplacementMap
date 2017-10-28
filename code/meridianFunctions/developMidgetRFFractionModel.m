@@ -85,7 +85,7 @@ p.addParameter('meridianAngles',[0, 90, 180, 270],@isnumeric);
 p.addParameter('meridianSymbols',{'.','x','o','^'},@cell);
 p.addParameter('meridiansIdxToUseForFitParams',[1 3 4],@isnumeric);
 p.addParameter('maxConeDensitySqDegRetina',[],@(x)(isempty(x) | isnumeric(x)));
-p.addParameter('minMidgetRGCToConeRatio',-0.5,@isnumeric);
+p.addParameter('minMidgetRGCToConeRatio',-0.1,@isnumeric);
 p.addParameter('maxMidgetRGCToConeRatio',2,@isnumeric);
 p.addParameter('logitFitStartPoint',[3,-1],@isnumeric);
 
