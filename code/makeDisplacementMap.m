@@ -1,4 +1,4 @@
-function [ displacementMapDeg, fitParams, meridianAngles, rgcDisplacementEachMeridian, mRGC_cumulativeEachMeridian, mRF_cumulativeEachMeridian, convergenceEccen] = makeDisplacementMap( varargin )
+function [ displacementMapDeg, fitParamsByMeridian, meridianAngles, rgcDisplacementEachMeridian, mRGC_cumulativeEachMeridian, mRF_cumulativeEachMeridian, convergenceEccen, fValsByMeridian] = makeDisplacementMap( varargin )
 % makeDisplacementMap -  This routine models retinal ganglion cell displacement.
 %
 % Our strategy is to begin with empirical measurements of cone and retinal
@@ -99,7 +99,7 @@ p.addParameter('maxModeledEccentricityDegreesRetina',30,@isnumeric);
 p.addParameter('targetConvergenceOnCardinalMeridiansDegRetina',[17 19.5 22 19.5],@isnumeric);
 p.addParameter('targetMaxDisplacementDegRetina',3.2,@isnumeric);
 p.addParameter('cardinalMeridianAngles',[0 90 180 270],@isnumeric);
-p.addParameter('meridianAngleResolutionDeg',15,@isnumeric);
+p.addParameter('meridianAngleResolutionDeg',45,@isnumeric);
 p.addParameter('displacementMapPixelsPerDegRetina',10,@isnumeric);
 p.addParameter('cone_to_mRF_linkTolerance',1.1,@isnumeric);
 p.addParameter('rgc_to_mRGC_linkTolerance',1.01,@isnumeric);
@@ -241,23 +241,23 @@ for mm = 1:length(meridianAngles)
     options = optimoptions('fmincon', 'Display', 'none', 'ConstraintTolerance', 0.1);
     
     % Fit that sucker
-    fitParams(mm,:) = fmincon(errorFunc,x0,[],[],[],[],lb,ub,nonlinconst,options);
+    [fitParamsByMeridian(mm,:), fValsByMeridian(mm)]  = fmincon(errorFunc,x0,[],[],[],[],lb,ub,nonlinconst,options);
     
     % Calculate and store displacement and cumulative functions
-    mRGC_cumulativeEachMeridian(mm,:)=mRGC_cumulative(fitParams(mm,:));
-    mRF_cumulativeEachMeridian(mm,:)=mRF_cumulative(fitParams(mm,:));
-    rgcDisplacementEachMeridian(mm,:)=calcDisplacement(regularSupportPosDegRetina, mRGC_cumulative(fitParams(mm,:)), mRF_cumulative(fitParams(mm,:)));
+    mRGC_cumulativeEachMeridian(mm,:)=mRGC_cumulative(fitParamsByMeridian(mm,:));
+    mRF_cumulativeEachMeridian(mm,:)=mRF_cumulative(fitParamsByMeridian(mm,:));
+    rgcDisplacementEachMeridian(mm,:)=calcDisplacement(regularSupportPosDegRetina, mRGC_cumulative(fitParamsByMeridian(mm,:)), mRF_cumulative(fitParamsByMeridian(mm,:)));
     
     % Report the results for this meridian
     if p.Results.verbose
         zeroPoints = find(rgcDisplacementEachMeridian(mm,:)==0);
         convergenceIdx = find(regularSupportPosDegRetina(zeroPoints) > 2,1);
         if isempty(convergenceIdx)
-            outLine = ['Polar angle: ' num2str(meridianAngles(mm)) ', max RGC displacement: ' num2str(max(rgcDisplacementEachMeridian(mm,:))) ', target convergence: ' num2str(targetConvergenceDegRetinaByMeridian(mm)) ', found convergence: FAILED TO CONVERGE\n'];
+            outLine = ['Polar angle: ' num2str(meridianAngles(mm)) ', max RGC displacement: ' num2str(max(rgcDisplacementEachMeridian(mm,:))) ', target convergence: ' num2str(targetConvergenceDegRetinaByMeridian(mm)) ', found convergence: FAILED TO CONVERGE' ', error: ' num2str(round(fValsByMeridian(mm))) '\n'];
             fprintf(outLine);
         else
             convergenceEccen(mm) = regularSupportPosDegRetina(zeroPoints(convergenceIdx));
-            outLine = ['Polar angle: ' num2str(meridianAngles(mm)) ', max RGC displacement: ' num2str(max(rgcDisplacementEachMeridian(mm,:))) ', target convergence: ' num2str(targetConvergenceDegRetinaByMeridian(mm)) ', found convergence: ' num2str(convergenceEccen(mm)) '\n'];
+            outLine = ['Polar angle: ' num2str(meridianAngles(mm)) ', max RGC displacement: ' num2str(max(rgcDisplacementEachMeridian(mm,:))) ', target convergence: ' num2str(targetConvergenceDegRetinaByMeridian(mm)) ', found convergence: ' num2str(convergenceEccen(mm)) ', error: ' num2str(round(fValsByMeridian(mm))) '\n'];
             fprintf(outLine);
         end
     end
