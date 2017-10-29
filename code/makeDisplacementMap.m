@@ -103,11 +103,11 @@ p.addParameter('cardinalMeridianAngles',[0 90 180 270],@isnumeric);
 p.addParameter('meridianAngleResolutionDeg',15,@isnumeric);
 p.addParameter('displacementMapPixelsPerDegRetina',10,@isnumeric);
 p.addParameter('cone_to_mRF_linkTolerance',1.1,@isnumeric);
-p.addParameter('rgc_to_mRGC_linkTolerance',1.05,@isnumeric);
+p.addParameter('rgc_to_mRGC_linkTolerance',1.1,@isnumeric);
 p.addParameter('rgcLinkingFunctionFlavor','Dacey',@(x)(stcmp(x,'Drasdo') | stcmp(x,'Dacey')));
 p.addParameter('rfInitialTransformParams',[],@(x)(isempty(x) | isnumeric(x)));
 p.addParameter('rgcDrasdoInitialTransformParams',[],@(x)(isempty(x) | isnumeric(x)));
-p.addParameter('rgcDaceyInitialTransformParams',[5 1.35],@(x)(isempty(x) | isnumeric(x)));
+p.addParameter('rgcDaceyInitialTransformParams',[4.5 1.5],@(x)(isempty(x) | isnumeric(x)));
 
 
 % Optional display params
