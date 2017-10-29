@@ -182,7 +182,7 @@ fitParams=median(fitParams(p.Results.meridiansIdxToUseForFitParams,:));
 if p.Results.makePlots
     xFit=0:.1:2;
     plot( xFit, ...
-        logisticFunc(fitParams(1), fitParams(2), p.Results.minMidgetFractionRatio, p.Results.maxMidgetFractionRatio, xFit),'-r')
+        logisticFunc(fitParams(1), fitParams(2), p.Results.minMidgetFractionRatio, p.Results.maxMidgetFractionRatio, xFit),'-.m')
     legend({p.Results.meridianNames{:} 'fit'},'Location','southwest');
     title('midget fraction as a function of relative RGC cumulative density');
     drawnow

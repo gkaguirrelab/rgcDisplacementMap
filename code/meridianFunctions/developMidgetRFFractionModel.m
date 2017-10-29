@@ -194,7 +194,7 @@ if p.Results.makePlots
     xFit= -2:.01:0;
     ylim([0 2.5]);
     plot( xFit, ...
-        logisticFunc(fitParams(1), fitParams(2), p.Results.minMidgetRGCToConeRatio, p.Results.maxMidgetRGCToConeRatio, xFit),'-r')
+        logisticFunc(fitParams(1), fitParams(2), p.Results.minMidgetRGCToConeRatio, p.Results.maxMidgetRGCToConeRatio, xFit),'-.m')
     legend({p.Results.meridianNames{:} 'fit'},'Location','southeast');
     title('midget RF : cone ratio as a function of relative cone density');
     drawnow
