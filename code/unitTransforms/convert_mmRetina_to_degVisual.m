@@ -5,7 +5,7 @@ function supportPosDegVisualFieldRelativeToVisualAxis = convert_mmRetina_to_degV
 %   degrees from the visual axis. It is based on Appendix 6 of Watson 2014.
 %   The core of the conversion is from Drasdo & Fowler 1974. Drasdo &
 %   Fowler's equation relates position on the retina to position in the
-%   visual field in relation to the optic axis of the eye. Watson 2014
+%   visual field relative to the optic axis of the eye. Watson 2014
 %   observed that a correction (dependent on polar angle) is necessary to
 %   correct the conversion to be relative to the visual axis (which is
 %   otherwise assumed throughout this toolbox). Watson offered
@@ -71,15 +71,15 @@ supportPosMmRetinaRelativeToOpticalAxis = ...
     (distanceMmRetinaVisualToOpticalAxis .* sin(deg2rad(polarAngle - angleVisualToOpticalAxis))).^2 ...
     );
 
-%% Perform the calciulation
+%% Perform the calculation
 supportPosDegVisualFieldRelativeToVisualAxis = ...
-    drasdoAndFowlerConversion(supportPosMmRetinaRelativeToVisualAxis - supportPosMmRetinaRelativeToOpticalAxis) + ...
-    drasdoAndFowlerConversion(supportPosMmRetinaRelativeToOpticalAxis);
+    drasdoAndFowlerConversionRetinaToField(supportPosMmRetinaRelativeToVisualAxis - supportPosMmRetinaRelativeToOpticalAxis) + ...
+    drasdoAndFowlerConversionRetinaToField(supportPosMmRetinaRelativeToOpticalAxis);
 
 end % main function
 
 % Local Drasdo & Fowler equation
-function degreesVisualRelativeToOpticAxis = drasdoAndFowlerConversion(mmRetinaRelativeToOpticAxis)
+function degreesVisualRelativeToOpticAxis = drasdoAndFowlerConversionRetinaToField(mmRetinaRelativeToOpticAxis)
 degreesVisualRelativeToOpticAxis = 3.556.*mmRetinaRelativeToOpticAxis + 0.05593.*(mmRetinaRelativeToOpticAxis.^2) - 0.007358.*(mmRetinaRelativeToOpticAxis.^3) +0.0003027.*(mmRetinaRelativeToOpticAxis.^4);
 end
 
