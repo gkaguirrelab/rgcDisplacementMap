@@ -90,7 +90,7 @@ p.addParameter('maxMidgetRGCToConeRatio',2,@isnumeric);
 p.addParameter('logitFitStartPoint',[3,-1],@isnumeric);
 
 % Optional display params
-p.addParameter('makePlots',true,@islogical);
+p.addParameter('makePlots',false,@islogical);
 
 % parse
 p.parse(varargin{:})
