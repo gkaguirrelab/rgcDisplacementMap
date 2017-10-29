@@ -15,12 +15,12 @@ p.addParameter('cardinalMeridianNames',{'nasal','superior','temporal','inferior'
 p.addParameter('cardinalMeridianPlotColors',{'r','b','g','k'},@iscell);
 p.addParameter('displacementMapPixelsPerDegRetina',10,@isnumeric);
 p.addParameter('referenceEccenDegRetina',15,@isnumeric);
+p.addParameter('subjectName', 'reportedAverage', @ischar);
 
 % Optional display and ouput params
 p.addParameter('verbose',true,@islogical);
 p.addParameter('savePlots',true,@islogical);
 p.addParameter('pathToPlotOutputDirRoot','~/Desktop/rgcDisplacementMapPlots',@ischar);
-p.addParameter('subjectName', '29986A', @ischar);
 
 % parse
 p.parse(varargin{:})
@@ -51,8 +51,8 @@ rgcDensityDataFileName = fullfile([getpref('rgcDisplacementMap','LocalDataPath')
     'maxModeledEccentricityDegreesRetina', p.Results.maxModeledEccentricityDegreesRetina, ...
     'meridianAngleResolutionDeg', p.Results.meridianAngleResolutionDeg, ...
     'displacementMapPixelsPerDegRetina', p.Results.displacementMapPixelsPerDegRetina, ...
-     'coneDensityDataFileName', coneDensityDataFileName, ...
-     'rgcDensityDataFileName', rgcDensityDataFileName, ...
+    'coneDensityDataFileName', coneDensityDataFileName, ...
+    'rgcDensityDataFileName', rgcDensityDataFileName, ...
     'verbose', p.Results.verbose);
 
 fitParams

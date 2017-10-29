@@ -11,11 +11,12 @@ p.addParameter('sampleResolutionDegrees',0.01,@isnumeric);
 p.addParameter('maxModeledEccentricity',30,@isnumeric);
 p.addParameter('meridianAngleResolutionDeg',90,@isnumeric);
 p.addParameter('displacementMapPixelsPerDeg',10,@isnumeric);
-p.addParameter('pathToPlotOutputDir','~/Desktop/rgcDisplacementMapPlots',@ischar);
+p.addParameter('subjectName', 'reportedAverage', @ischar);
 
 % Optional display and ouput params
 p.addParameter('verbose',true,@islogical);
 p.addParameter('savePlots',true,@islogical);
+p.addParameter('pathToPlotOutputDirRoot','~/Desktop/rgcDisplacementMapPlots',@ischar);
 
 % parse
 p.parse(varargin{:})
@@ -26,14 +27,18 @@ close all
 
 % check or make a directory for output
 if p.Results.savePlots
-    if exist(p.Results.pathToPlotOutputDir,'dir')==0
-        mkdir(p.Results.pathToPlotOutputDir);
+    if exist(fullfile(p.Results.pathToPlotOutputDirRoot,p.Results.subjectName),'dir')==0
+        mkdir(fullfile(p.Results.pathToPlotOutputDirRoot,p.Results.subjectName));
     end
 end
 
 % Prepare the regular eccentricity support base
 regularSupportPosDeg = ...
     0:p.Results.sampleResolutionDegrees:p.Results.maxModeledEccentricity;
+
+% Define the cone and rgc density data to operate upon
+coneDensityDataFileName = fullfile([getpref('rgcDisplacementMap','LocalDataPath') , '/Curcio_1990_JCompNeurol_HumanPhotoreceptorTopography/curcioRawConeDensity_',p.Results.subjectName,'.mat']);
+rgcDensityDataFileName = fullfile([getpref('rgcDisplacementMap','LocalDataPath') , '/Curcio_1990_JCompNeurol_GanglionCellTopography/curcioRawRGCDensity_',p.Results.subjectName,'.mat']);
 
 % Get the displacement map
 [ ~, fitParams, meridianAngles, rgcDisplacementEachMeridian, mRGC_cumulativeEachMeridian, mRF_cumulativeEachMeridian ] = ...
@@ -42,6 +47,8 @@ regularSupportPosDeg = ...
     'maxModeledEccentricity', p.Results.maxModeledEccentricity, ...
     'meridianAngleResolutionDeg', p.Results.meridianAngleResolutionDeg, ...
     'displacementMapPixelsPerDeg', p.Results.displacementMapPixelsPerDeg, ...
+    'coneDensityDataFileName', coneDensityDataFileName, ...
+    'rgcDensityDataFileName', rgcDensityDataFileName, ...
     'verbose', p.Results.verbose);
 
 
@@ -99,13 +106,13 @@ for vv = 1:length(polarMapNameList)
     titleString=tmp{1};
     c = colorbar;
     c.Label.String=titleString;
-    xlabel('Position [deg] nasal --> temporal');
-    ylabel('Position [deg] inferior --> superior');
+    xlabel('Position [retinal deg] nasal --> temporal');
+    ylabel('Position [retinal deg] inferior --> superior');
     k=(xticks.*(1/p.Results.displacementMapPixelsPerDeg)) + (-1*p.Results.maxModeledEccentricity);
     xticklabels(string(k))
     yticklabels(string(k))
     if p.Results.savePlots
-        fileOutPath = fullfile(p.Results.pathToPlotOutputDir,[titleString '.pdf']);
+        fileOutPath = fullfile(p.Results.pathToPlotOutputDirRoot,p.Results.subjectName,[titleString '.pdf']);
         saveas(figHandle,fileOutPath)
         close(figHandle);
     end
@@ -140,13 +147,13 @@ for vv = 1:length(warpMapNameList)
     titleString=tmp{1};
     c = colorbar;
     c.Label.String=['warped ' titleString ];
-    xlabel('Position [deg] nasal --> temporal');
-    ylabel('Position [deg] inferior --> superior');
+    xlabel('Position [retinal deg] nasal --> temporal');
+    ylabel('Position [retinal deg] inferior --> superior');
     k=(xticks.*(1/p.Results.displacementMapPixelsPerDeg)) + (-1*p.Results.maxModeledEccentricity);
     xticklabels(string(k))
     yticklabels(string(k))
     if p.Results.savePlots
-        fileOutPath = fullfile(p.Results.pathToPlotOutputDir,['warped' titleString '.pdf']);
+        fileOutPath = fullfile(p.Results.pathToPlotOutputDirRoot,p.Results.subjectName,['warped' titleString '.pdf']);
         saveas(figHandle,fileOutPath)
         close(figHandle);
     end
@@ -168,13 +175,13 @@ set(gca,'TickLength',[0 0])
 titleString='mRGC_cumulative_warped_minus_mRF_cumulative';
 c = colorbar;
 c.Label.String= titleString ;
-xlabel('Position [deg] nasal --> temporal');
-ylabel('Position [deg] inferior --> superior');
+xlabel('Position [retinal deg] nasal --> temporal');
+ylabel('Position [retinal deg] inferior --> superior');
 k=(xticks.*(1/p.Results.displacementMapPixelsPerDeg)) + (-1*p.Results.maxModeledEccentricity);
 xticklabels(string(k))
 yticklabels(string(k))
 if p.Results.savePlots
-    fileOutPath = fullfile(p.Results.pathToPlotOutputDir,[titleString '.pdf']);
+    fileOutPath = fullfile(p.Results.pathToPlotOutputDirRoot,p.Results.subjectName,[titleString '.pdf']);
     saveas(figHandle,fileOutPath)
     close(figHandle);
 end
@@ -188,13 +195,13 @@ set(gca,'TickLength',[0 0])
 titleString='mRF_cumulative_minus_mRGC_cumulative_warped';
 c = colorbar;
 c.Label.String= titleString ;
-xlabel('Position [deg] nasal --> temporal');
-ylabel('Position [deg] inferior --> superior');
+xlabel('Position [retinal deg] nasal --> temporal');
+ylabel('Position [retinal deg] inferior --> superior');
 k=(xticks.*(1/p.Results.displacementMapPixelsPerDeg)) + (-1*p.Results.maxModeledEccentricity);
 xticklabels(string(k))
 yticklabels(string(k))
 if p.Results.savePlots
-    fileOutPath = fullfile(p.Results.pathToPlotOutputDir,[titleString '.pdf']);
+    fileOutPath = fullfile(p.Results.pathToPlotOutputDirRoot,p.Results.subjectName,[titleString '.pdf']);
     saveas(figHandle,fileOutPath)
     close(figHandle);
 end
