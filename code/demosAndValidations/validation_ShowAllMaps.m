@@ -9,7 +9,7 @@ p = inputParser; p.KeepUnmatched = true;
 % Optional anaysis params
 p.addParameter('sampleResolutionDegrees',0.01,@isnumeric);
 p.addParameter('maxModeledEccentricity',30,@isnumeric);
-p.addParameter('meridianAngleResolutionDeg',1,@isnumeric);
+p.addParameter('meridianAngleResolutionDeg',90,@isnumeric);
 p.addParameter('displacementMapPixelsPerDeg',10,@isnumeric);
 p.addParameter('pathToPlotOutputDir','~/Desktop/rgcDisplacementMapPlots',@ischar);
 
@@ -50,7 +50,7 @@ regularSupportPosDeg = ...
 for mm = 1:length(meridianAngles)
     
     % obtain cone density
-    coneDensityFit = getSplineFitToConeDensity(meridianAngles(mm));
+    coneDensityFit = getSplineFitToConeDensitySqDegRetina(meridianAngles(mm));
     coneDensitySqDeg = coneDensityFit(regularSupportPosDeg);
     coneDensityEachMeridian(mm,:) = coneDensitySqDeg;
     
@@ -60,12 +60,12 @@ for mm = 1:length(meridianAngles)
     mRFtoConeDensityEachMeridian(mm,:) = mRFtoConeDensityRatio;
     
     % obtain the RGC density
-    rgcDensityFit = getSplineFitToRGCDensity(meridianAngles(mm));
+    rgcDensityFit = getSplineFitToRGCDensitySqDegRetina(meridianAngles(mm));
     rgcDensitySqDeg = rgcDensityFit(regularSupportPosDeg);
     rgcDensityEachMeridian(mm,:) = rgcDensitySqDeg;
     
     % obtain the mRGC density
-    [ mRGCDensitySqDeg, midgetFraction ] = transformRGCToMidgetRGCDensityDrasdo( regularSupportPosDeg, rgcDensitySqDeg', 'linkingFuncParams', fitParams(mm,3:end) );
+    [ mRGCDensitySqDeg, midgetFraction ] = transformRGCToMidgetRGCDensityDacey( regularSupportPosDeg, rgcDensitySqDeg', 'linkingFuncParams', fitParams(mm,3:end) );
     mRGCDensityEachMeridian(mm,:) = mRGCDensitySqDeg;
     midgetFractionEachMeridian(mm,:) = midgetFraction;
     

@@ -44,10 +44,10 @@ for mm = 1:length(p.Results.cardinalMeridianAngles)
     [reportedRGCDensitySqDegRetina, reportedRGCdensitySupportDegRetina] = loadRawRGCDensityByEccen(p.Results.cardinalMeridianAngles(mm), 'densityDataFileName', reportedRGCdensityFile);
     
     subplot(2,2,mm);
-    plot(calculatedRGCdensitySupportDegRetina, calculatedRGCDensitySqDegRetina, 'xb');
+    loglog(calculatedRGCdensitySupportDegRetina, calculatedRGCDensitySqDegRetina, 'xb');
     hold on
-    plot(reportedRGCdensitySupportDegRetina, reportedRGCDensitySqDegRetina, '.r');
-    plot(calculatedRGCdensitySupportDegRetina, calculatedRGCDensitySqDegRetina, '-b');
+    loglog(reportedRGCdensitySupportDegRetina, reportedRGCDensitySqDegRetina, '.r');
+    loglog(calculatedRGCdensitySupportDegRetina, calculatedRGCDensitySqDegRetina, '-b');
     xlabel('retinal degrees');
     ylabel('counts/deg2 retina');
     legend('computed','reported')
@@ -69,10 +69,10 @@ for mm = 1:length(p.Results.cardinalMeridianAngles)
     [reportedConeDensitySqDegRetina, reportedConeDensitySupportDegRetina] = loadRawConeDensityByEccen(p.Results.cardinalMeridianAngles(mm), 'densityDataFileName', reportedConeDensityFile);
     
     subplot(2,2,mm);
-    plot(calculatedConeDensitySupportDegRetina, calculatedConeDensitySqDegRetina, 'xb');
+    loglog(calculatedConeDensitySupportDegRetina, calculatedConeDensitySqDegRetina, 'xb');
     hold on
-    plot(reportedConeDensitySupportDegRetina, reportedConeDensitySqDegRetina, '.r');
-    plot(calculatedConeDensitySupportDegRetina, calculatedConeDensitySqDegRetina, '-b');
+    loglog(reportedConeDensitySupportDegRetina, reportedConeDensitySqDegRetina, '.r');
+    loglog(calculatedConeDensitySupportDegRetina, calculatedConeDensitySqDegRetina, '-b');
     xlabel('retinal degrees');
     ylabel('counts/deg2 retina');
     legend('computed','reported')
