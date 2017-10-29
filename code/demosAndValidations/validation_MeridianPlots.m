@@ -218,7 +218,7 @@ for mm=1:4
     xlabel('log10 Eccentricity [deg retina]');
     ylabel('log10 RGC density [counts / deg retina ^2]');
 end
-legend(num2str(cardinalMeridianAngles),'Location','southwest')
+legend(num2str(p.Results.cardinalMeridianAngles),'Location','southwest')
 
 subplot(1,2,2)
 interpolarMeridianAngles=[45 135 225 315];
@@ -303,9 +303,6 @@ end
 
 %% Plot the mRGC fraction for the cardinal meridians
 figHandle = figure();
-cardinalMeridianAngles=[0 90 180 270];
-meridianColors={'r','b','g','k'};
-
 for mm = 1:4
     
     meridianIdx = find(meridianAngles==p.Results.cardinalMeridianAngles(mm),1);
@@ -354,9 +351,6 @@ end
 %% Plots related to midget RF density
 
 figHandle = figure();
-cardinalMeridianAngles=[0 90 180 270];
-meridianColors={'r','b','g','k'};
-
 for mm = 1:4
     
     meridianIdx = find(meridianAngles==p.Results.cardinalMeridianAngles(mm),1);
@@ -420,7 +414,6 @@ for mm = 1:4
     pbaspect([2 1 1]);
     hold on
     
-
     
     % Plot the mRF : cone ratio for us
     subplot(2,2,4);
