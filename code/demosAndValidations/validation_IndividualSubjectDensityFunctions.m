@@ -10,9 +10,7 @@ p = inputParser;
 p.addParameter('cardinalMeridianNames',{'nasal','superior','temporal','inferior'},@iscell);
 p.addParameter('cardinalMeridianAngles',[0 90 180 270],@isnumeric);
 p.addParameter('cardinalMeridianPlotColors',{'r','b','g','k'},@iscell);
-p.addParameter('subjectNames',...
-    {'E8746R', '9387L', '6884R', '59784L', '483848L', '44985L', '29986R' ,'29986L'}, ...
-    @iscell);
+p.addParameter('subjectName', '29986A', @ischar);
 
 % Optional display and ouput params
 p.addParameter('verbose',true,@islogical);
@@ -27,10 +25,9 @@ p.parse(varargin{:})
 close all
 
 % Define the cone and RGC density files to work with
-ss = 1;
 
-coneDensityDataFileName = fullfile([getpref('rgcDisplacementMap','LocalDataPath') , '/Curcio_1990_JCompNeurol_HumanPhotoreceptorTopography/curcioRawConeDensity_',p.Results.subjectNames{ss},'.mat']);
-rgcDensityDataFileName = fullfile([getpref('rgcDisplacementMap','LocalDataPath') , '/Curcio_1990_JCompNeurol_GanglionCellTopography/curcioRawRGCDensity_',p.Results.subjectNames{ss},'.mat']);
+coneDensityDataFileName = fullfile([getpref('rgcDisplacementMap','LocalDataPath') , '/Curcio_1990_JCompNeurol_HumanPhotoreceptorTopography/curcioRawConeDensity_',p.Results.subjectName,'.mat']);
+rgcDensityDataFileName = fullfile([getpref('rgcDisplacementMap','LocalDataPath') , '/Curcio_1990_JCompNeurol_GanglionCellTopography/curcioRawRGCDensity_',p.Results.subjectName,'.mat']);
 
 [ displacementMapDeg, fitParams, meridianAngles, rgcDisplacementEachMeridian, mRGC_cumulativeEachMeridian, mRF_cumulativeEachMeridian, convergenceEccen] = ...
     makeDisplacementMap( 'coneDensityDataFileName', coneDensityDataFileName, 'rgcDensityDataFileName', rgcDensityDataFileName, 'verbose', true );
