@@ -134,14 +134,14 @@ for mm = 1:length(p.Results.meridianAngles)
     % positions. We first convert the retinal eccentricity values from
     % degrees to mm, then convert from mm to visual angle degrees.
     nativeSupportPosMmRetina = convert_degRetina_to_mmRetina(nativeSupportPosDegRetina);
-    nativeSupportPosDegVisual = convert_mmRetina_to_degVisual(nativeSupportPosMmRetina);
+    nativeSupportPosDegVisual = convert_mmRetina_to_degVisual(nativeSupportPosMmRetina, p.Results.meridianAngles(mm));
     
     % calculate the mRF density at these eccentricity locations using
     % Watson equation 8.
     [ midgetRFDensitySqDegVisual ] = calcWatsonMidgetRFDensityByEccenDegVisual(nativeSupportPosDegVisual, p.Results.meridianAngles(mm));
     
     % obtain the conversion from degree square visual to mm square retina
-    mmSqRetinaPerDegSqVisual = calc_mmSqRetina_per_degSqVisual(nativeSupportPosDegVisual);
+    mmSqRetinaPerDegSqVisual = calc_mmSqRetina_per_degSqVisual(nativeSupportPosDegVisual, p.Results.meridianAngles(mm));
     
     % convert the mRF density from degree square visual to mm square retina
     midgetRFDensitySqMmRetina = midgetRFDensitySqDegVisual ./ mmSqRetinaPerDegSqVisual;

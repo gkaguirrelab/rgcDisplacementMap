@@ -24,13 +24,7 @@ function supportPosDegVisualFieldRelativeToVisualAxis = convert_mmRetina_to_degV
 % Output:
 %   supportPosDegVisualFieldRelativeToVisualAxis
 %
-% Optional:
-%   displacementOpticalAxisFromVisualAlongNasalMeridianMm
-%   displacementOpticalAxisFromVisualAlongSuperiorMeridianMm - From Watson
-%       2014 (in turn from Charman 1991, quoting Emsley 1952), the optical
-%       axis intersects the retina 1.5 mm nasal and 0.5 mm superior to the
-%       visual axis.
-%
+
 
 
 %% Parse input and define variables
