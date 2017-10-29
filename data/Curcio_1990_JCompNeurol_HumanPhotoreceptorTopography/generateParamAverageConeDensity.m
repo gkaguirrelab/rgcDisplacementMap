@@ -8,22 +8,15 @@ p = inputParser;
 % Optional anaysis params
 p.addParameter('cardinalMeridianNames',{'nasal','superior','temporal','inferior'},@iscell);
 p.addParameter('cardinalMeridianAngles',[0 90 180 270],@isnumeric);
+p.addParameter('outputFileNameStem','curcioRawConeDensity_',@ischar);
+p.addParameter('outputSubjectName','paramAverage',@ischar);
 p.addParameter('cardinalMeridianPlotColors',{'r','b','g','k'},@iscell);
-
-% Optional display and ouput params
-p.addParameter('verbose',true,@islogical);
-p.addParameter('savePlots',true,@islogical);
-p.addParameter('pathToPlotOutputDir','~/Desktop/rgcDisplacementMapPlots',@ischar);
 p.addParameter('subjectNames',...
     {'E8746R', '9387L', '6884R', '59784L', '483848L', '44985L', '29986R' ,'29986L'}, ...
     @iscell);
 
 % parse
 p.parse(varargin{:})
-
-outputFileNameStem = 'curcioRawConeDensity_';
-
-subjectName = 'paramAverage';
 
 %% Clean up
 close all
@@ -65,10 +58,10 @@ for mm = 1:4 %length(p.Results.cardinalMeridianAngles)
 
 end % meridians
 
-curcioParamAverageConeDensity.meta.subjectName = subjectName;
+curcioParamAverageConeDensity.meta.subjectName = p.Results.outputSubjectName;
 curcioParamAverageConeDensity.meta.densityUnits = 'counts/retinalDeg2';
 curcioParamAverageConeDensity.meta.supportUnits = 'retinalDegree';
-save([outputFileNameStem subjectName], 'curcioParamAverageConeDensity');
+save([p.Results.outputFileNameStem p.Results.outputSubjectName], 'curcioParamAverageConeDensity');
 
 
 end % function
