@@ -211,6 +211,7 @@ for mm=1:4
     dispRGCNativeSupportPosDeg(1)=1e-2;
     [RGCDensityFit] = getSplineFitToRGCDensitySqDegRetina(p.Results.cardinalMeridianAngles(mm));
     loglog(dispRGCNativeSupportPosDeg,RGCDensitySqDeg,'x','Color',p.Results.cardinalMeridianPlotColors{mm});
+    ylim([1,3000]);
     xlim([0.2,70]);
     hold on
     regularSupportPosDegRetina=1e-2:0.01:70;
@@ -226,6 +227,7 @@ for mm=1:4
     [RGCDensityFit] = getSplineFitToRGCDensitySqDegRetina(interpolarMeridianAngles(mm));
     loglog(regularSupportPosDegRetina,RGCDensityFit(regularSupportPosDegRetina),'-','Color',p.Results.cardinalMeridianPlotColors{mm});
     xlim([0.2,70]);
+    ylim([1,3000]);
     xlabel('log10 Eccentricity [deg retina]');
     ylabel('log10 RGC density [counts / deg retina ^2]');
     hold on
@@ -304,9 +306,7 @@ end
 %% Plot the mRGC fraction for the cardinal meridians
 figHandle = figure();
 for mm = 1:4
-    
-    meridianIdx = find(meridianAngles==p.Results.cardinalMeridianAngles(mm),1);
-    
+        
     % Load the RGC Density Data from Curcio and Allen 1990:
     [ RGCDensitySqDeg, RGCNativeSupportPosDeg ] = loadRawRGCDensityByEccen( p.Results.cardinalMeridianAngles(mm) );
     % remove nan values
@@ -331,7 +331,7 @@ for mm = 1:4
     
     % Plot our midget fraction
     subplot(1,2,2);
-    [ ~, midgetFraction_ours ] = transformRGCToMidgetRGCDensityDacey( RGCNativeSupportPosDeg, RGCDensitySqDeg, 'linkingFuncParams', fitParams(meridianIdx,3:end) );
+    [ ~, midgetFraction_ours ] = transformRGCToMidgetRGCDensityDacey( RGCNativeSupportPosDeg, RGCDensitySqDeg, 'linkingFuncParams', fitParams(mm,3:end) );
     plot(RGCNativeSupportPosDeg,midgetFraction_ours,'-','Color',p.Results.cardinalMeridianPlotColors{mm});
     hold on
     ylim([0 1]);
@@ -352,32 +352,24 @@ end
 
 figHandle = figure();
 for mm = 1:4
-    
-    meridianIdx = find(meridianAngles==p.Results.cardinalMeridianAngles(mm),1);
-    
-    % load the empirical cone density measured by Curcio
-    [coneDensitySqDegRetina, coneNativeSupportPosDegRetina] = loadRawConeDensityByEccen(p.Results.cardinalMeridianAngles(mm));
-    % remove nan values
-    isvalididx=find(~isnan(coneDensitySqDegRetina));
-    coneNativeSupportPosDegRetina = coneNativeSupportPosDegRetina(isvalididx);
-    coneDensitySqDegRetina = coneDensitySqDegRetina(isvalididx);
-    
-    % Convert retinal units to visual units via mm retina
-    coneNativeSupportPosMmRetina = convert_degRetina_to_mmRetina(coneNativeSupportPosDegRetina);
-    coneNativeSupportPosDegVisual = convert_mmRetina_to_degVisual(coneNativeSupportPosMmRetina, p.Results.meridianAngles(mm));
-    
-    % Convert cone density from retina to visual units
+        
+    % Load the Curcio average data reported in the paper
+    [coneDensitySqDegRetina, coneDensitySupportDegRetina] = loadRawConeDensityByEccen(p.Results.cardinalMeridianAngles(mm));
+
+    % Convert to units of visual degrees
+    coneDensitySupportMmRetina = convert_degRetina_to_mmRetina(coneDensitySupportDegRetina);
+    coneDensitySupportDegVisual = convert_mmRetina_to_degVisual(coneDensitySupportMmRetina, p.Results.cardinalMeridianAngles(mm));
     coneDensitySqMmRetina = coneDensitySqDegRetina .* calc_degSqRetina_per_mmSqRetina();
-    coneDensitySqDegVisual = coneDensitySqMmRetina ./ calc_mmSqRetina_per_degSqVisual(coneNativeSupportPosDegVisual, p.Results.meridianAngles(mm));
+    coneDensitySqDegVisual = coneDensitySqMmRetina ./ calc_degSqVisual_per_mmSqRetina(coneDensitySupportMmRetina, p.Results.cardinalMeridianAngles(mm));
     
     % calculate the mRF density using Watson equation 8 at the sites of
     % empirical cone measurement
-    [ mRFDensitySqDegVisual_watson ] = calcWatsonMidgetRFDensityByEccenDegVisual(coneNativeSupportPosDegVisual, p.Results.cardinalMeridianAngles(mm));
+    [ mRFDensitySqDegVisual_watson ] = calcWatsonMidgetRFDensityByEccenDegVisual(coneDensitySupportDegVisual, p.Results.cardinalMeridianAngles(mm));
     
     % Plot the mRF density by eccentricity for Watson
     subplot(2,2,1);
     
-    loglog(coneNativeSupportPosDegVisual(2:end),mRFDensitySqDegVisual_watson(2:end),'-','Color',p.Results.cardinalMeridianPlotColors{mm});
+    loglog(coneDensitySupportDegVisual(2:end),mRFDensitySqDegVisual_watson(2:end),'-','Color',p.Results.cardinalMeridianPlotColors{mm});
     ylim([1e0 1e5]);
     xlim([1e-1 1e2]);
     xlabel('log10 eccentricity deg visual');
@@ -388,13 +380,13 @@ for mm = 1:4
     
     % Plot the mRF density by eccentricity from our functions
     subplot(2,2,2);
-    mRFDensitySqDegRetina_ours = transformConeToMidgetRFDensity(fitConeDensitySqDegRetina(coneNativeSupportPosDegRetina), ...
-        'linkingFuncParams',fitParams(meridianIdx,1:2))';
+    mRFDensitySqDegRetina_ours = transformConeToMidgetRFDensity(coneDensitySqDegRetina, ...
+        'linkingFuncParams',fitParams(mm,1:2));
     % convert from SqDegRetina to SqDegVisual field via SqMmRetina
     mRFDensitySqMmRetina_ours = mRFDensitySqDegRetina_ours .* calc_degSqRetina_per_mmSqRetina();
-    mRFDensitySqDegVisual_ours = mRFDensitySqMmRetina_ours ./ calc_mmSqRetina_per_degSqVisual(coneNativeSupportPosDegVisual, p.Results.meridianAngles(mm));
+    mRFDensitySqDegVisual_ours = mRFDensitySqMmRetina_ours ./ calc_degSqVisual_per_mmSqRetina(coneDensitySupportMmRetina, p.Results.cardinalMeridianAngles(mm));
     
-    loglog(coneNativeSupportPosDegVisual(2:end),mRFDensitySqDegVisual_ours(2:end),'-','Color',p.Results.cardinalMeridianPlotColors{mm});
+    loglog(coneDensitySupportDegVisual(2:end),mRFDensitySqDegVisual_ours(2:end),'-','Color',p.Results.cardinalMeridianPlotColors{mm});
     ylim([1e0 1e5]);
     xlim([1e-1 1e2]);
     xlabel('log10 eccentricity visual deg');
@@ -405,7 +397,7 @@ for mm = 1:4
     
     % Plot the mRF : cone ratio for Watson
     subplot(2,2,3);
-    loglog(coneNativeSupportPosDegVisual(2:end),mRFDensitySqDegVisual_watson(2:end)./coneDensitySqDegVisual(2:end),'-','Color',p.Results.cardinalMeridianPlotColors{mm});
+    loglog(coneDensitySupportDegVisual(2:end),mRFDensitySqDegVisual_watson(2:end)./coneDensitySqDegVisual(2:end),'-','Color',p.Results.cardinalMeridianPlotColors{mm});
     ylim([1e-2 10]);
     xlim([1e-1 1e2]);
     xlabel('log10 eccentricity visual degrees');
@@ -417,7 +409,7 @@ for mm = 1:4
     
     % Plot the mRF : cone ratio for us
     subplot(2,2,4);
-    loglog(coneNativeSupportPosDegVisual(2:end),mRFDensitySqDegVisual_ours(2:end)./coneDensitySqDegVisual(2:end),'-','Color',p.Results.cardinalMeridianPlotColors{mm});
+    loglog(coneDensitySupportDegVisual(2:end),mRFDensitySqDegVisual_ours(2:end)./coneDensitySqDegVisual(2:end),'-','Color',p.Results.cardinalMeridianPlotColors{mm});
     ylim([1e-2 10]);
     xlim([1e-1 1e2]);
     xlabel('log10 eccentricity visual degrees');
