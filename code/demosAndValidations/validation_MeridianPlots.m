@@ -92,7 +92,7 @@ end
 hold on
 % Add plot lines showing the fit by meridian
 for mm = 1:length(p.Results.cardinalMeridianAngles)
-    fitConeDensitySqDegRetina = getSplineFitToConeDensitySqDegRetina(meridianAngles(mm));
+    fitConeDensitySqDegRetina = getSplineFitToConeDensitySqDegRetina(p.Results.cardinalMeridianAngles(mm));
     coneDensitySqDegRetina = fitConeDensitySqDegRetina(regularSupportPosDegRetina);
     [ ~, mRFtoConeDensityRatio ] = transformConeToMidgetRFDensity( coneDensitySqDegRetina, 'linkingFuncParams', fitParams(mm,1:2) );
     xvals = log10(coneDensitySqDegRetina./max(coneDensitySqDegRetina));
@@ -111,7 +111,7 @@ hold on
 % Add plot lines showing the fit by meridian
 for mm = 1:length(p.Results.cardinalMeridianAngles)
     % Load the RGC Density Data from Curcio and Allen 1990
-    [ RGCDensitySqDegRetina, nativeSupportPosDegRetina ] = loadRawRGCDensityByEccen( meridianAngles(mm) );
+    [ RGCDensitySqDegRetina, nativeSupportPosDegRetina ] = loadRawRGCDensityByEccen( p.Results.cardinalMeridianAngles(mm) );
     
     % remove nan values
     isvalididx=find(~isnan(RGCDensitySqDegRetina)  );
