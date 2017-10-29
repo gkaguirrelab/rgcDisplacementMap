@@ -37,7 +37,7 @@ p = inputParser;
 p.addRequired('coneDensitySqDeg',@isnumeric);
 
 % Optional anaysis params
-p.addParameter('maxConeDensitySqDegRetina',[],@(x)(isempty(x) | isnumeric(x)));
+p.addParameter('maxConeDensitySqDegRetina',8.5647e+03,@(x)(isempty(x) | isnumeric(x)));
 p.addParameter('minMidgetRGCToConeRatio',-0.5,@isnumeric);
 p.addParameter('maxMidgetRGCToConeRatio',2,@isnumeric);
 p.addParameter('linkingFuncParams',[],@isnumeric);
