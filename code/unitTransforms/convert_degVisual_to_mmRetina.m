@@ -1,4 +1,4 @@
-function supportPosMmRetinaRelativeToVisualAxis = convert_degVisual_to_mmRetina(supportPosDegVisualRelativeToVisualAxis, polarAngle, varargin)
+function supportPosMmRetinaRelativeToVisualAxis = convert_degVisual_to_mmRetina(supportPosDegVisualRelativeToVisualAxis, polarAngle)
 % convert_degVisual_to_mmRetina
 %
 %   Converts visual angle in degrees from the visual axis to mm on the
@@ -24,13 +24,6 @@ function supportPosMmRetinaRelativeToVisualAxis = convert_degVisual_to_mmRetina(
 % Output:
 %   supportPosDegVisualFieldRelativeToVisualAxis
 %
-% Optional:
-%   displacementOpticalAxisFromVisualAlongNasalMeridianMm
-%   displacementOpticalAxisFromVisualAlongSuperiorMeridianMm - From Watson
-%       2014 (in turn from Charman 1991, quoting Emsley 1952), the optical
-%       axis intersects the retina 1.5 mm nasal and 0.5 mm superior to the
-%       visual axis.
-%
 
 
 %% Parse input and define variables
@@ -40,12 +33,8 @@ p = inputParser;
 p.addRequired('supportPosDegVisualRelativeToVisualAxis',@isnumeric);
 p.addRequired('polarAngle',@isnumeric);
 
-% Optional analysis params
-p.addParameter('displacementOpticalAxisFromVisualAlongNasalMeridianMm',1.5,@isnumeric);
-p.addParameter('displacementOpticalAxisFromVisualAlongSuperiorMeridianMm',0.5,@isnumeric);
-
 % parse
-p.parse(supportPosDegVisualRelativeToVisualAxis,polarAngle,varargin{:})
+p.parse(supportPosDegVisualRelativeToVisualAxis,polarAngle)
 
 
 %% Adjust for displacement of the visual from the optical axis
@@ -54,16 +43,8 @@ if polarAngle>360 || polarAngle<0
     error('Provide polarAngle between 0 and 360 degrees');
 end
 
-% Determine polarAngle value for the vector that arises from the visual
-% axis and intersects the optical axis
-angleVisualToOpticalAxis = rad2deg(tan( p.Results.displacementOpticalAxisFromVisualAlongSuperiorMeridianMm / ...
-    p.Results.displacementOpticalAxisFromVisualAlongNasalMeridianMm));
-
-% Determine the length of the vector that arises from the visual axis and
-% intersects the optical axis in units of degrees of visual field
-distanceMmRetinaVisualToOpticalAxis = sqrt(p.Results.displacementOpticalAxisFromVisualAlongSuperiorMeridianMm^2 + ...
-    p.Results.displacementOpticalAxisFromVisualAlongNasalMeridianMm^2);
-distanceDegVisualFieldVisualToOpticalAxis = convert_mmRetina_to_degVisual(distanceMmRetinaVisualToOpticalAxis, angleVisualToOpticalAxis);
+% Get the vector that connects the visual to optical axis
+[ angleVisualToOpticalAxis, distanceDegVisualFieldVisualToOpticalAxis ] = visualFieldVectorVisualToOpticalAxis();
 
 % Convert distances from visual axis to distances from optical axis
 supportPosDegVisualRelativeToOpticalAxis = ...
@@ -79,8 +60,29 @@ supportPosMmRetinaRelativeToVisualAxis = ...
 
 end % main function
 
-% Local Drasdo & Fowler equation
+
+% Local Drasdo & Fowler equations
+
 function mmRetinaRelativeToOpticAxis = drasdoAndFowlerConversionFieldToRetina(degreesVisualRelativeToOpticAxis)
-mmRetinaRelativeToOpticAxis = 0.268.*degreesVisualRelativeToOpticAxis + 0.0003427.*(degreesVisualRelativeToOpticAxis.^2) - 8.3309e-6.*(degreesVisualRelativeToOpticAxis.^3);
+%
+% In Appendix 6, Watson (2014) provides polynomial approximations to the
+% plots created by Drasdo & Fowler for the forward and inverse
+% transformation of mm on the retina to position in the visual field. We
+% find that these approximations result in discrepancies on the order of a
+% tenth of a millimeter when we attempt to recover mm after passing through
+% the forward and inverse transform. Consequently, we take the Watson 2014
+% approximation for the forward transform (mm retina --> deg visual field),
+% but for the inverse transform (deg visual field --> mm retina) we perform
+% a spline fit to the inverted output of the forward transform. This
+% provides a result that is closer to fully invertible.
+%
+supportPosMmRetinaRelativeToOpticalAxis=0:0.01:25;
+calculatedPosDegFieldRelativeToOpticalAxis = ...
+    drasdoAndFowlerConversionRetinaToField(supportPosMmRetinaRelativeToOpticalAxis);
+mmRetinaRelativeToOpticAxis = ...
+    spline(calculatedPosDegFieldRelativeToOpticalAxis,supportPosMmRetinaRelativeToOpticalAxis,degreesVisualRelativeToOpticAxis);
 end
 
+function degreesVisualRelativeToOpticAxis = drasdoAndFowlerConversionRetinaToField(mmRetinaRelativeToOpticAxis)
+degreesVisualRelativeToOpticAxis = 3.556.*mmRetinaRelativeToOpticAxis + 0.05593.*(mmRetinaRelativeToOpticAxis.^2) - 0.007358.*(mmRetinaRelativeToOpticAxis.^3) +0.0003027.*(mmRetinaRelativeToOpticAxis.^4);
+end

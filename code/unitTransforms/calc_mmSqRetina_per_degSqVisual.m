@@ -26,13 +26,6 @@ function mmSqRetinaPerDegSqVisualRelativeToVisualAxis = calc_mmSqRetina_per_degS
 %       retina for a degree of visual angle at the locations corresponding
 %       to supportPosDegVisualRelativeToVisualAxis
 %
-% Optional:
-%   displacementOpticalAxisFromVisualAlongNasalMeridianMm
-%   displacementOpticalAxisFromVisualAlongSuperiorMeridianMm - From Watson
-%       2014 (in turn from Charman 1991, quoting Emsley 1952), the optical
-%       axis intersects the retina 1.5 mm nasal and 0.5 mm superior to the
-%       visual axis.
-%
 
 
 %% Parse input and define variables
@@ -42,12 +35,8 @@ p = inputParser;
 p.addRequired('supportPosDegVisualRelativeToVisualAxis',@isnumeric);
 p.addRequired('polarAngle',@isnumeric);
 
-% Optional analysis params
-p.addParameter('displacementOpticalAxisFromVisualAlongNasalMeridianMm',1.5,@isnumeric);
-p.addParameter('displacementOpticalAxisFromVisualAlongSuperiorMeridianMm',0.5,@isnumeric);
-
 % parse
-p.parse(supportPosDegVisualRelativeToVisualAxis,polarAngle,varargin{:})
+p.parse(supportPosDegVisualRelativeToVisualAxis,polarAngle)
 
 
 %% Adjust for displacement of the visual from the optical axis
@@ -56,16 +45,23 @@ if polarAngle>360 || polarAngle<0
     error('Provide polarAngle between 0 and 360 degrees');
 end
 
+% Get the vector that connects the visual to optical axis
+[ angleVisualToOpticalAxis, distanceDegVisualFieldVisualToOpticalAxis ] = visualFieldVectorVisualToOpticalAxis();
+
+% Convert distances from visual axis to distances from optical axis
+supportPosDegVisualRelativeToOpticalAxis = ...
+    sqrt(...
+    (supportPosDegVisualRelativeToVisualAxis-(distanceDegVisualFieldVisualToOpticalAxis.*cos(deg2rad(polarAngle - angleVisualToOpticalAxis)))).^2 + ...
+    (distanceDegVisualFieldVisualToOpticalAxis .* sin(deg2rad(polarAngle - angleVisualToOpticalAxis))).^2 ...
+    );
 
 % perform the computation
-mmSqRetinaPerDegSqVisualRelativeToVisualAxis = ...
-    drasdoAndFowlerAreaEquation(supportPosDegVisualRelativeToVisualAxis - supportPosDegVisualRelativeToOpticalAxis) + ...
-    drasdoAndFowlerAreaEquation(supportPosDegVisualRelativeToOpticalAxis);
+mmSqRetinaPerDegSqVisualRelativeToVisualAxis = drasdoAndFowlerDegVisualSqToMmRetinaSq(supportPosDegVisualRelativeToOpticalAxis);
 
 end % main function
 
 % Local function
-function mmSqRetinaPerDegSqVisualRelativeToOpticalAxis = drasdoAndFowlerAreaEquation(supportPosDegVisualRelativeToOpticalAxis)
+function mmSqRetinaPerDegSqVisualRelativeToOpticalAxis = drasdoAndFowlerDegVisualSqToMmRetinaSq(supportPosDegVisualRelativeToOpticalAxis)
 mmSqRetinaPerDegSqVisualRelativeToOpticalAxis = ...
     0.0752+5.846e-5*supportPosDegVisualRelativeToOpticalAxis-1.064e-5*supportPosDegVisualRelativeToOpticalAxis.^2+4.116e-8*supportPosDegVisualRelativeToOpticalAxis.^3;
 end

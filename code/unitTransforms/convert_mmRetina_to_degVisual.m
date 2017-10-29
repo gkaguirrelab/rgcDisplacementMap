@@ -1,4 +1,4 @@
-function supportPosDegVisualFieldRelativeToVisualAxis = convert_mmRetina_to_degVisual(supportPosMmRetinaRelativeToVisualAxis, polarAngle, varargin)
+function supportPosDegVisualFieldRelativeToVisualAxis = convert_mmRetina_to_degVisual(supportPosMmRetinaRelativeToVisualAxis, polarAngle)
 % convert_mmRetina_to_degVisual
 %
 %   Converts mm on the retina from the visual axis to visual angle in
@@ -40,12 +40,8 @@ p = inputParser;
 p.addRequired('supportPosMmRetinaRelativeToVisualAxis',@isnumeric);
 p.addRequired('polarAngle',@isnumeric);
 
-% Optional analysis params
-p.addParameter('displacementOpticalAxisFromVisualAlongNasalMeridianMm',1.5,@isnumeric);
-p.addParameter('displacementOpticalAxisFromVisualAlongSuperiorMeridianMm',0.5,@isnumeric);
-
 % parse
-p.parse(supportPosMmRetinaRelativeToVisualAxis,polarAngle,varargin{:})
+p.parse(supportPosMmRetinaRelativeToVisualAxis,polarAngle)
 
 
 %% Adjust for displacement of the visual from the optical axis
@@ -54,15 +50,9 @@ if polarAngle>360 || polarAngle<0
     error('Provide polarAngle between 0 and 360 degrees');
 end
 
-% Determine polarAngle value for the vector that arises from the visual
-% axis and intersects the optical axis
-angleVisualToOpticalAxis = rad2deg(tan( p.Results.displacementOpticalAxisFromVisualAlongSuperiorMeridianMm / ...
-    p.Results.displacementOpticalAxisFromVisualAlongNasalMeridianMm));
-
-% Determine the length of the vector that arises from the visual axis and
-% intersects the optical axis
-distanceMmRetinaVisualToOpticalAxis = sqrt(p.Results.displacementOpticalAxisFromVisualAlongSuperiorMeridianMm^2 + ...
-    p.Results.displacementOpticalAxisFromVisualAlongNasalMeridianMm^2);
+% Get the vector that connects the visual to optical axis on the retinal
+% field
+[ angleVisualToOpticalAxis, distanceMmRetinaVisualToOpticalAxis ] = retinalVectorVisualToOpticalAxis();
 
 % Convert distances from visual axis to distances from optical axis
 supportPosMmRetinaRelativeToOpticalAxis = ...
