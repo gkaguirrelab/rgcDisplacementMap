@@ -9,10 +9,9 @@ function mmSqRetinaPerDegSqVisualRelativeToVisualAxis = calc_mmSqRetina_per_degS
 %   visual field relative to the optic axis of the eye. Watson 2014
 %   observed that a correction (dependent on polar angle) is necessary to
 %   correct the conversion to be relative to the visual axis (which is
-%   otherwise assumed throughout this toolbox). It is not clear from
-%   Watson's paper if he accounted for this in his implementation of this
-%   equation; here we implement the full geometric correction.
-
+%   otherwise assumed throughout this toolbox). We implement the full
+%   geometric correction here.
+%
 % Inputs:
 %   supportPosDegVisualRelativeToVisualAxis - retinal postion(s) in
 %       milimeters relative to visual axis of the eye. Either scalar value
