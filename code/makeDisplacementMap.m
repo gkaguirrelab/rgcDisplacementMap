@@ -98,16 +98,17 @@ p.addParameter('sampleResolutionDegreesRetina',0.01,@isnumeric);
 p.addParameter('maxModeledEccentricityDegreesRetina',30,@isnumeric);
 p.addParameter('targetConvergenceOnCardinalMeridiansDegRetina',[17 19.5 22 19.5],@isnumeric);
 p.addParameter('targetMaxDisplacementDegRetina',3.2,@isnumeric);
-
 p.addParameter('cardinalMeridianAngles',[0 90 180 270],@isnumeric);
 p.addParameter('meridianAngleResolutionDeg',15,@isnumeric);
 p.addParameter('displacementMapPixelsPerDegRetina',10,@isnumeric);
 p.addParameter('cone_to_mRF_linkTolerance',1.1,@isnumeric);
-p.addParameter('rgc_to_mRGC_linkTolerance',1.1,@isnumeric);
+p.addParameter('rgc_to_mRGC_linkTolerance',1.01,@isnumeric);
 p.addParameter('rgcLinkingFunctionFlavor','Dacey',@(x)(stcmp(x,'Drasdo') | stcmp(x,'Dacey')));
 p.addParameter('rfInitialTransformParams',[],@(x)(isempty(x) | isnumeric(x)));
 p.addParameter('rgcDrasdoInitialTransformParams',[],@(x)(isempty(x) | isnumeric(x)));
-p.addParameter('rgcDaceyInitialTransformParams',[4.5 1.5],@(x)(isempty(x) | isnumeric(x)));
+p.addParameter('rgcDaceyInitialTransformParams',[4.2857 1.6],@(x)(isempty(x) | isnumeric(x)));
+p.addParameter('coneDensityDataFileName', [], @(x)(isempty(x) | ischar(x)));
+p.addParameter('rgcDensityDataFileName', [], @(x)(isempty(x) | ischar(x)));
 
 
 % Optional display params
@@ -173,8 +174,10 @@ for mm = 1:length(meridianAngles)
     % to two fit parameters. This function is based upon a model of cone
     % density.
     
-    % Obtain a spline fit to the empirical cone density data of Curcio 1990
-    [fitConeDensitySqDegRetina] = getSplineFitToConeDensitySqDegRetina(meridianAngles(mm));
+    % Obtain a spline fit to the specified empirical density file
+    [fitConeDensitySqDegRetina] = ...
+        getSplineFitToConeDensitySqDegRetina(meridianAngles(mm), ...
+        'coneDensityDataFileName',p.Results.coneDensityDataFileName);
     % Create an anonymous function that returns mRF density as a function
     % of cone density, with the transform defined by the first two fitParams
     mRFDensityOverRegularSupport = ...
@@ -190,7 +193,9 @@ for mm = 1:length(meridianAngles)
     % density.
     
     % Obtain a spline fit to the empirical RGC density data of Curcio 1990
-    fitRGCDensitySqDegRetina = getSplineFitToRGCDensitySqDegRetina(meridianAngles(mm));
+    fitRGCDensitySqDegRetina = ...
+        getSplineFitToRGCDensitySqDegRetina(meridianAngles(mm), ...
+        'rgcDensityDataFileName',p.Results.rgcDensityDataFileName);
 
     % Create an anonymous function that returns mRGC density as a function of
     % RGC density, with the transform defined by the last two or three fitParams

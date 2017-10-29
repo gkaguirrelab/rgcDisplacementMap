@@ -27,10 +27,7 @@ p.addRequired('polarAngle',@isnumeric);
 p.addParameter('cardinalMeridianAngles',[0, 90, 180, 270],@isnumeric);
 p.addParameter('splineKnots',15,@isnumeric);
 p.addParameter('splineOrder',4,@isnumeric);
-
-% Optional display params
-p.addParameter('verbose',true,@islogical);
-p.addParameter('makePlots',true,@islogical);
+p.addParameter('coneDensityDataFileName', [], @(x)(isempty(x) | ischar(x)));
 
 % parse
 p.parse(polarAngle,varargin{:})
@@ -45,8 +42,18 @@ end
 aggregatePosition=[];
 aggregateDensity=[];
 for mm=1:length(p.Results.cardinalMeridianAngles)
-    % load the empirical cone density measured by Curcio
-    [coneDensitySqDegRetina, coneNativeSupportPosDegRetina] = loadRawConeDensityByEccen(p.Results.cardinalMeridianAngles(mm));
+    % get the raw density measurements
+    if isempty(p.Results.coneDensityDataFileName)
+        % load the empirical cone density measured by Curcio
+        [coneDensitySqDegRetina, coneNativeSupportPosDegRetina] = ...
+            loadRawConeDensityByEccen(p.Results.cardinalMeridianAngles(mm));
+    else
+        % or the passed cone density measurement
+        [coneDensitySqDegRetina, coneNativeSupportPosDegRetina] = ...
+            loadRawConeDensityByEccen(p.Results.cardinalMeridianAngles(mm), ...
+            'coneDensityDataFileName', p.Results.coneDensityDataFileName);
+    end
+    
     % remove nan values
     isvalididx=find(~isnan(coneDensitySqDegRetina));
     coneNativeSupportPosDegRetina = coneNativeSupportPosDegRetina(isvalididx);

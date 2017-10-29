@@ -30,7 +30,7 @@ function [rgcDensitySqDegRetina, supportPosDegRetina] = loadRawRGCDensityByEccen
 %       fovea at which the RGC density is defined
 %
 % Options:
-%  densityDataFileName - The full path to the data file. The default value
+%  rgcDensityDataFileName - The full path to the data file. The default value
 %       assigned here is the average RGC density reported in Curcio 1990.
 
 
@@ -41,7 +41,7 @@ p = inputParser;
 p.addRequired('polarAngle',@isnumeric);
 
 % Optional anaysis params
-p.addParameter('densityDataFileName', ...
+p.addParameter('rgcDensityDataFileName', ...
     fullfile([getpref('rgcDisplacementMap','LocalDataPath') , '/Curcio_1990_JCompNeurol_GanglionCellTopography/curcioRawRGCDensity_reportedAverage.mat']), ...
     @ischar);
 p.addParameter('cardinalMeridianAngles',[0 90 180 270],@isnumeric);
@@ -56,7 +56,7 @@ if sum(p.Results.cardinalMeridianAngles==polarAngle) ~= 1
 end
 
 %% Load and check the density data
-tmpLoader = load(p.Results.densityDataFileName);
+tmpLoader = load(p.Results.rgcDensityDataFileName);
 fieldNames = fields(tmpLoader);
 if length(fieldNames) ~= 1
     error('Please specify a raw datafile that contains a single structure variable');
