@@ -40,13 +40,11 @@ for mm = 1:length(p.Results.cardinalMeridianAngles)
     reportedConeDensitySqMmRetina = reportedConeDensitySqDegRetina .* calc_degSqRetina_per_mmSqRetina();
     reportedConeDensitySqDegVisual = reportedConeDensitySqMmRetina ./ calc_degSqVisual_per_mmSqRetina(reportedConeDensitySupportMmRetina, p.Results.cardinalMeridianAngles(mm));
 
-    % Plot the mRF:cone ratio    
-    [ midgetRFDensitySqDegVisual ] = calcWatsonMidgetRFDensityByEccenDegVisual(reportedConeDensitySupportDegVisual, p.Results.cardinalMeridianAngles(mm));
-%    loglog(reportedConeDensitySupportDegVisual, midgetRFDensitySqDegVisual ./ reportedConeDensitySqDegVisual, '-', 'Color', p.Results.cardinalMeridianPlotColors{mm});
-    
+    % Plot the density functions
     loglog(reportedConeDensitySupportDegVisual, reportedConeDensitySqDegVisual, '-', 'Color', p.Results.cardinalMeridianPlotColors{mm});
     hold on
     ylim([100 20000]);
+    xlim([0.1 100]);
     xlabel('degrees visual field');
     ylabel('counts/visual deg2');
     title('Watson 2014 Figure 1');    
@@ -70,9 +68,11 @@ for mm = 1:length(p.Results.cardinalMeridianAngles)
     reportedRGCDensitySqMmRetina = reportedRGCDensitySqDegRetina .* calc_degSqRetina_per_mmSqRetina();
     reportedRGCDensitySqDegVisual = reportedRGCDensitySqMmRetina ./ calc_degSqVisual_per_mmSqRetina(reportedRGCDensitySupportMmRetina, p.Results.cardinalMeridianAngles(mm));
     
+    % Plot the density functions
     loglog(reportedRGCDensitySupportDegVisual, reportedRGCDensitySqDegVisual, '-', 'Color', p.Results.cardinalMeridianPlotColors{mm});
     hold on
-        ylim([1 3000]);
+    ylim([1 3000]);
+    xlim([0.1 100]);
     xlabel('degrees visual field');
     ylabel('counts/visual deg2');
     title('Watson 2014 Figure 2');    
