@@ -5,9 +5,13 @@ tmp = diff(regularSupportPosDegRetina);
 sampleResolutionDegreesRetina = tmp(1);
 
 % Measure the displacement (in degrees). First, for each cumulative RGC
-% density value, identify the array index of the first density value that
-% equal to or greater than RF density.
-displaceInSamples=arrayfun(@(x) find(countPerRingRF>=x,1), countPerRingRGC,'UniformOutput',false);
+% density value, identify the array index of the last RF density value
+% that is less than or equal to the RGC value.
+displaceInSamples=arrayfun(@(x) find(countPerRingRF<=x,1,'last')+1, countPerRingRGC,'UniformOutput',false);
+
+% Handle the case of the initial RF values, all of which are larger than
+% the first few RGC values
+displaceInSamples(find(countPerRingRF(1)>countPerRingRGC))={1};
 
 % Now some array operations to get these values out of cells and in to a
 % numeric vector
