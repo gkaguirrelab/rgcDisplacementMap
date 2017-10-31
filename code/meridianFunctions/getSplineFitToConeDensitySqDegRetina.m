@@ -116,8 +116,11 @@ ppFormSplineInterp = ppFormSplineFits{1};
 ppFormSplineInterp.coefs = interpCoefs;
 
 % Create an anonymous function using the interpolated spline. This function
-% will return cone density as a function of eccentricity in degrees
-fitConeDensitySqDegRetina = @(supportPosDeg) fnval(ppFormSplineInterp,supportPosDeg');
+% will return cone density as a function of eccentricity in degrees.
+% The transpose operations are needed so that that the function returns a
+% row vector of density in response to a row vector of eccentricity
+% support.
+fitConeDensitySqDegRetina = @(supportPosDegRetina) fnval(ppFormSplineInterp,supportPosDegRetina')';
 
 end % function
 

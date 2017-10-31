@@ -1,4 +1,4 @@
-function [ displacementMapDegRetina, fitParamsByMeridian, meridianAngleSupport, rgcDisplacementEachMeridian, mRGC_cumulativeByMeridian, mRF_cumulativeByMeridian, convergenceEccenDegRetinaByMeridian, fValsByMeridian, regularSupportPosDegRetina] = makeDisplacementMap( varargin )
+function [ displacementMapDegRetina, fitParamsByMeridian, meridianAngleSupport, rgcDisplacementByMeridian, mRGC_cumulativeByMeridian, mRF_cumulativeByMeridian, convergenceEccenDegRetinaByMeridian, fValsByMeridian, regularSupportPosDegRetina] = makeDisplacementMap( varargin )
 % makeDisplacementMap -  This routine models retinal ganglion cell displacement.
 %
 % Our strategy is to begin with empirical measurements of cone and retinal
@@ -62,7 +62,7 @@ function [ displacementMapDegRetina, fitParamsByMeridian, meridianAngleSupport, 
 %       functions that transform cone --> mRF and RGC --> mRGC.
 %   meridianAngleSupport - an m x 1 vector of polar angle values (in
 %       degrees) that are the support for the meridian positions modeled.
-%   rgcDisplacementEachMeridian - an m x p matrix, where m is number of 
+%   rgcDisplacementByMeridian - an m x p matrix, where m is number of 
 %       meridians and p is the number of eccentricity positions (starting
 %       from zero) modeled. The values are the displacement in retinal
 %       degrees of the RGC soma away from the fovea.
@@ -159,7 +159,7 @@ p.addParameter('coneDensityDataFileName', [], @(x)(isempty(x) | ischar(x)));
 p.addParameter('rgcDensityDataFileName', [], @(x)(isempty(x) | ischar(x)));
 
 % Optional display params
-p.addParameter('verbose',false,@islogical);
+p.addParameter('verbose',true,@islogical);
 
 % parse
 p.parse(varargin{:})
@@ -171,15 +171,28 @@ regularSupportPosDegRetina = ...
     0:p.Results.sampleResolutionDegreesRetina:p.Results.maxModeledEccentricityDegreesRetina;
 
 % Prepare the set of meridian angles for which we will calculate
-% displacement
-meridianAngleSupport = 0:p.Results.meridianAngleResolutionDeg:(360-p.Results.meridianAngleResolutionDeg);
+% displacement. This is a column vector.
+meridianAngleSupport = (0:p.Results.meridianAngleResolutionDeg:(360-p.Results.meridianAngleResolutionDeg))';
 
-% Prepare the vector of targetDisplacement values. We interpolate from the
-% values given for the cardinal merdians to the other meridians
-targetValues = [p.Results.targetConvergenceOnCardinalMeridiansDegRetina p.Results.targetConvergenceOnCardinalMeridiansDegRetina(1)];
-angleBase = [p.Results.cardinalMeridianAngles 360];
-targetByAngleFit = fit(angleBase',targetValues','pchipinterp');
-targetConvergenceDegRetinaByMeridian = targetByAngleFit(meridianAngleSupport);
+% Prepare the vector targetConvergenceDegRetinaByMeridian. We interpolate
+% from the values given for the cardinal merdians to the other meridians.
+% We wrap the value at zero degrees around to 360 degrees to provide a
+% circular interpolation.
+% This is a column vector.
+targetConvergenceByMeridianFit = fit(...
+    [p.Results.cardinalMeridianAngles 360]',... % 
+    [p.Results.targetConvergenceOnCardinalMeridiansDegRetina p.Results.targetConvergenceOnCardinalMeridiansDegRetina(1)]',...
+    'pchipinterp');
+targetConvergenceDegRetinaByMeridian = targetConvergenceByMeridianFit(meridianAngleSupport);
+
+% Pre-allocated loop variables. We do not pre-allocate fitParamsByMeridian
+% as the number of returned params could differ depending upon whether we
+% go with Dacey or Drasdo model flavor
+fValsByMeridian = zeros(length(meridianAngleSupport),1);
+convergenceEccenDegRetinaByMeridian = zeros(length(meridianAngleSupport),1);
+mRGC_cumulativeByMeridian = zeros(length(meridianAngleSupport),length(regularSupportPosDegRetina));
+mRF_cumulativeByMeridian = zeros(length(meridianAngleSupport),length(regularSupportPosDegRetina));
+rgcDisplacementByMeridian = zeros(length(meridianAngleSupport),length(regularSupportPosDegRetina));
 
 
 %% Setup the initial values for the linking function parameters
@@ -229,7 +242,7 @@ for mm = 1:length(meridianAngleSupport)
     % of cone density, with the transform defined by the first two fitParams
     mRFDensityOverRegularSupport = ...
         @(fitParams) transformConeToMidgetRFDensity(fitConeDensitySqDegRetina(regularSupportPosDegRetina), ...
-        'linkingFuncParams',fitParams(1:2))';
+        'linkingFuncParams',fitParams(1:2));
     % Define anonymous function for the cumulative sum of mRF density
     mRF_cumulative = @(fitParams) calcCumulative(regularSupportPosDegRetina, mRFDensityOverRegularSupport(fitParams));
     
@@ -250,11 +263,11 @@ for mm = 1:length(meridianAngleSupport)
     switch p.Results.rgcLinkingFunctionFlavor
         case 'Drasdo'
             mRGCDensityOverRegularSupport = ...
-                @(fitParams) transformRGCToMidgetRGCDensityDrasdo(regularSupportPosDegRetina,fitRGCDensitySqDegRetina(regularSupportPosDegRetina)',...
+                @(fitParams) transformRGCToMidgetRGCDensityDrasdo(regularSupportPosDegRetina,fitRGCDensitySqDegRetina(regularSupportPosDegRetina),...
                 'linkingFuncParams',fitParams(3:end));
         case 'Dacey'
             mRGCDensityOverRegularSupport = ...
-                @(fitParams) transformRGCToMidgetRGCDensityDacey(regularSupportPosDegRetina,fitRGCDensitySqDegRetina(regularSupportPosDegRetina)',...
+                @(fitParams) transformRGCToMidgetRGCDensityDacey(regularSupportPosDegRetina,fitRGCDensitySqDegRetina(regularSupportPosDegRetina),...
                 'linkingFuncParams',fitParams(3:end));
         otherwise
             error('This is not an RGC linking function flavor that I know');
@@ -291,20 +304,21 @@ for mm = 1:length(meridianAngleSupport)
     [fitParamsByMeridian(mm,:), fValsByMeridian(mm)]  = fmincon(errorFunc,x0,[],[],[],[],lb,ub,nonlinconst,options);
     
     % Calculate and store displacement and cumulative functions
-    mRGC_cumulativeByMeridian(mm,:)=mRGC_cumulative(fitParamsByMeridian(mm,:));
-    mRF_cumulativeByMeridian(mm,:)=mRF_cumulative(fitParamsByMeridian(mm,:));
-    rgcDisplacementEachMeridian(mm,:)=calcDisplacement(regularSupportPosDegRetina, mRGC_cumulative(fitParamsByMeridian(mm,:)), mRF_cumulative(fitParamsByMeridian(mm,:)));
+    mRGC_cumulativeByMeridian(mm,:) = mRGC_cumulative(fitParamsByMeridian(mm,:));
+    mRF_cumulativeByMeridian(mm,:) = mRF_cumulative(fitParamsByMeridian(mm,:));
+    rgcDisplacementByMeridian(mm,:) = ...
+        calcDisplacement(regularSupportPosDegRetina, mRGC_cumulative(fitParamsByMeridian(mm,:)), mRF_cumulative(fitParamsByMeridian(mm,:)));
     
     % Report the results for this meridian
     if p.Results.verbose
-        zeroPoints = find(rgcDisplacementEachMeridian(mm,:)==0);
+        zeroPoints = find(rgcDisplacementByMeridian(mm,:)==0);
         convergenceIdx = find(regularSupportPosDegRetina(zeroPoints) > 2,1);
         if isempty(convergenceIdx)
-            outLine = ['Polar angle: ' num2str(meridianAngleSupport(mm)) ', max RGC displacement: ' num2str(max(rgcDisplacementEachMeridian(mm,:))) ', target convergence: ' num2str(targetConvergenceDegRetinaByMeridian(mm)) ', found convergence: FAILED TO CONVERGE' ', error: ' num2str(round(fValsByMeridian(mm))) '\n'];
+            outLine = ['Polar angle: ' num2str(meridianAngleSupport(mm)) ', max RGC displacement: ' num2str(max(rgcDisplacementByMeridian(mm,:))) ', target convergence: ' num2str(targetConvergenceDegRetinaByMeridian(mm)) ', found convergence: FAILED TO CONVERGE' ', error: ' num2str(round(fValsByMeridian(mm))) '\n'];
             fprintf(outLine);
         else
             convergenceEccenDegRetinaByMeridian(mm) = regularSupportPosDegRetina(zeroPoints(convergenceIdx));
-            outLine = ['Polar angle: ' num2str(meridianAngleSupport(mm)) ', max RGC displacement: ' num2str(max(rgcDisplacementEachMeridian(mm,:))) ', target convergence: ' num2str(targetConvergenceDegRetinaByMeridian(mm)) ', found convergence: ' num2str(convergenceEccenDegRetinaByMeridian(mm)) ', error: ' num2str(round(fValsByMeridian(mm))) '\n'];
+            outLine = ['Polar angle: ' num2str(meridianAngleSupport(mm)) ', max RGC displacement: ' num2str(max(rgcDisplacementByMeridian(mm,:))) ', target convergence: ' num2str(targetConvergenceDegRetinaByMeridian(mm)) ', found convergence: ' num2str(convergenceEccenDegRetinaByMeridian(mm)) ', error: ' num2str(round(fValsByMeridian(mm))) '\n'];
             fprintf(outLine);
         end
     end
@@ -313,7 +327,7 @@ end % loop over meridians
 
 % Create the displacement map
 imRdim = (p.Results.maxModeledEccentricityDegreesRetina * p.Results.displacementMapPixelsPerDegRetina * 2)-1;
-displacementMapDegRetina = convertPolarMapToImageMap(rgcDisplacementEachMeridian, imRdim);
+displacementMapDegRetina = convertPolarMapToImageMap(rgcDisplacementByMeridian, imRdim);
 
 
 end % calcDisplacementMap
@@ -322,13 +336,20 @@ end % calcDisplacementMap
 %% LOCAL FUNCTIONS
 
 function [c,ceq] = constrainCumulativeAndDisplacement(regularSupportPosDeg, countPerRingRF, countPerRingRGC, targetConvergencePointDegRetina, targetMaxDisplacementDegRetina)
+% We implement two non-linear constraints. The first is that the mRGC
+% cumulative values should not exceed the mRF cumulative values at any
+% point prior to the convergence point. The second constraint is that the
+% degree of displacement at any point should not exceed the maximum allowed
+% displacement.
 
+% First constraint:
 % If there are any cumulative RGC values that are greater than the RF
 % values at eccentricities less than the displacementPoint, then this
 % violates the nonlinear fit constraint
 withinRangeIdx = find(regularSupportPosDeg < targetConvergencePointDegRetina);
 c = sum(countPerRingRGC(withinRangeIdx) > countPerRingRF(withinRangeIdx));
 
+% Second constraint:
 % Calculate how many values in the displacement function exceed the maximum
 % desired displacement.
 displaceInDeg = calcDisplacement(regularSupportPosDeg, countPerRingRGC, countPerRingRF);
@@ -336,8 +357,8 @@ ceq = sum(displaceInDeg > targetMaxDisplacementDegRetina);
 
 end
 
-function error = errorMatchingRFandRGC(regularSupportPosDeg, countPerRingRF, countPerRingRGC, targetConvergencePointDegRetina)
 
+function error = errorMatchingRFandRGC(regularSupportPosDeg, countPerRingRF, countPerRingRGC, targetConvergencePointDegRetina)
 % The error is calculated as the SSQ of the absolute difference between the
 % cumulative RF and RGC counts at retinal positions past the point where
 % displacement should have ended
