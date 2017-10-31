@@ -32,7 +32,7 @@ figure;
 for mm = 1:length(p.Results.cardinalMeridianAngles)
     % Load the Curcio average data reported in the paper
     reportedConeDensityFile = fullfile([getpref('rgcDisplacementMap','LocalDataPath') , '/Curcio_1990_JCompNeurol_HumanPhotoreceptorTopography/curcioRawConeDensity_reportedAverage.mat']);
-    [reportedConeDensitySqDegRetina, reportedConeDensitySupportDegRetina] = loadRawConeDensityByEccen(p.Results.cardinalMeridianAngles(mm), 'densityDataFileName', reportedConeDensityFile);
+    [reportedConeDensitySqDegRetina, reportedConeDensitySupportDegRetina] = loadRawConeDensityByEccen(p.Results.cardinalMeridianAngles(mm), 'coneDensityDataFileName', reportedConeDensityFile);
 
     % Convert to units of visual degrees
     reportedConeDensitySupportMmRetina = convert_degRetina_to_mmRetina(reportedConeDensitySupportDegRetina);
@@ -60,7 +60,7 @@ figure;
 for mm = 1:length(p.Results.cardinalMeridianAngles)
     % Load the Curcio average data reported in the paper
     reportedRGCDensityFile = fullfile([getpref('rgcDisplacementMap','LocalDataPath') , '/Curcio_1990_JCompNeurol_GanglionCellTopography/curcioRawRGCDensity_reportedAverage.mat']);
-    [reportedRGCDensitySqDegRetina, reportedRGCDensitySupportDegRetina] = loadRawRGCDensityByEccen(p.Results.cardinalMeridianAngles(mm), 'densityDataFileName', reportedRGCDensityFile);
+    [reportedRGCDensitySqDegRetina, reportedRGCDensitySupportDegRetina] = loadRawRGCDensityByEccen(p.Results.cardinalMeridianAngles(mm), 'rgcDensityDataFileName', reportedRGCDensityFile);
 
     % Convert to units of visual degrees
     reportedRGCDensitySupportMmRetina = convert_degRetina_to_mmRetina(reportedRGCDensitySupportDegRetina);
