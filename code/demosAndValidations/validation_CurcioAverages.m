@@ -5,9 +5,9 @@ function validation_CurcioAverages(varargin)
 % Christine Curcio's two 1990 J Comp Neurology papers to the averages that
 % we compute from the raw individual data that she has provided.
 %
-% We find that the reported RGC averages in the Curcio paper are not equal
-% to the average of the individual subject values. It seems likely
-% that the average values reported in the paper were derived from an
+% We find that the reported RGC averages in the Curcio paper have some
+% slight differences at some points to the computed average. It seems
+% likely that the average values reported in the paper were derived from an
 % intermediate modeling step that we cannot currently reconstruct.
 
 %% Parse input and define variables
@@ -40,8 +40,8 @@ for mm = 1:length(p.Results.cardinalMeridianAngles)
     calculateRGCdensityFile = fullfile([getpref('rgcDisplacementMap','LocalDataPath') , '/Curcio_1990_JCompNeurol_GanglionCellTopography/curcioRawRGCDensity_computedAverage.mat']);
     reportedRGCdensityFile = fullfile([getpref('rgcDisplacementMap','LocalDataPath') , '/Curcio_1990_JCompNeurol_GanglionCellTopography/curcioRawRGCDensity_reportedAverage.mat']);
     
-    [calculatedRGCDensitySqDegRetina, calculatedRGCdensitySupportDegRetina] = loadRawRGCDensityByEccen(p.Results.cardinalMeridianAngles(mm), 'densityDataFileName', calculateRGCdensityFile);
-    [reportedRGCDensitySqDegRetina, reportedRGCdensitySupportDegRetina] = loadRawRGCDensityByEccen(p.Results.cardinalMeridianAngles(mm), 'densityDataFileName', reportedRGCdensityFile);
+    [calculatedRGCDensitySqDegRetina, calculatedRGCdensitySupportDegRetina] = loadRawRGCDensityByEccen(p.Results.cardinalMeridianAngles(mm), 'rgcDensityDataFileName', calculateRGCdensityFile);
+    [reportedRGCDensitySqDegRetina, reportedRGCdensitySupportDegRetina] = loadRawRGCDensityByEccen(p.Results.cardinalMeridianAngles(mm), 'rgcDensityDataFileName', reportedRGCdensityFile);
     
     subplot(2,2,mm);
     loglog(calculatedRGCdensitySupportDegRetina, calculatedRGCDensitySqDegRetina, 'xb');
@@ -51,7 +51,7 @@ for mm = 1:length(p.Results.cardinalMeridianAngles)
     xlabel('retinal degrees');
     ylabel('counts/deg2 retina');
     legend('computed','reported')
-    title(p.Results.cardinalMeridianNames{mm});    
+    title(['Curcio average RGC density, computed vs. reported - ' p.Results.cardinalMeridianNames{mm}]);    
 end % loop over meridians
 
 
@@ -65,8 +65,8 @@ for mm = 1:length(p.Results.cardinalMeridianAngles)
     calculateConeDensityFile = fullfile([getpref('rgcDisplacementMap','LocalDataPath') , '/Curcio_1990_JCompNeurol_HumanPhotoreceptorTopography/curcioRawConeDensity_computedAverage.mat']);
     reportedConeDensityFile = fullfile([getpref('rgcDisplacementMap','LocalDataPath') , '/Curcio_1990_JCompNeurol_HumanPhotoreceptorTopography/curcioRawConeDensity_reportedAverage.mat']);
     
-    [calculatedConeDensitySqDegRetina, calculatedConeDensitySupportDegRetina] = loadRawConeDensityByEccen(p.Results.cardinalMeridianAngles(mm), 'densityDataFileName', calculateConeDensityFile);
-    [reportedConeDensitySqDegRetina, reportedConeDensitySupportDegRetina] = loadRawConeDensityByEccen(p.Results.cardinalMeridianAngles(mm), 'densityDataFileName', reportedConeDensityFile);
+    [calculatedConeDensitySqDegRetina, calculatedConeDensitySupportDegRetina] = loadRawConeDensityByEccen(p.Results.cardinalMeridianAngles(mm), 'coneDensityDataFileName', calculateConeDensityFile);
+    [reportedConeDensitySqDegRetina, reportedConeDensitySupportDegRetina] = loadRawConeDensityByEccen(p.Results.cardinalMeridianAngles(mm), 'coneDensityDataFileName', reportedConeDensityFile);
     
     subplot(2,2,mm);
     loglog(calculatedConeDensitySupportDegRetina, calculatedConeDensitySqDegRetina, 'xb');
@@ -76,7 +76,7 @@ for mm = 1:length(p.Results.cardinalMeridianAngles)
     xlabel('retinal degrees');
     ylabel('counts/deg2 retina');
     legend('computed','reported')
-    title(p.Results.cardinalMeridianNames{mm});    
+    title(['Curcio average cone density, computed vs. reported - ' p.Results.cardinalMeridianNames{mm}]);    
 end % loop over meridians
 
 

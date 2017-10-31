@@ -1,7 +1,8 @@
 
 function countsPerRing = calcCumulative(regularSupportPosDeg, densityFunction)
 
-ringArea = [0,diff(regularSupportPosDeg.^2 * pi)];
+extendedRegularSupportPosDeg = [regularSupportPosDeg (regularSupportPosDeg(end)+diff(regularSupportPosDeg(1:2)))];
+ringArea = diff(extendedRegularSupportPosDeg.^2 * pi);
 countsPerRing = cumsum(densityFunction.*ringArea);
 
 end

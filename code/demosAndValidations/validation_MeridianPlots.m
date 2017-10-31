@@ -15,11 +15,12 @@ p.addParameter('cardinalMeridianNames',{'nasal','superior','temporal','inferior'
 p.addParameter('cardinalMeridianPlotColors',{'r','b','g','k'},@iscell);
 p.addParameter('displacementMapPixelsPerDegRetina',10,@isnumeric);
 p.addParameter('referenceEccenDegRetina',15,@isnumeric);
+p.addParameter('subjectName', 'computedAverage', @ischar);
 
 % Optional display and ouput params
 p.addParameter('verbose',true,@islogical);
 p.addParameter('savePlots',true,@islogical);
-p.addParameter('pathToPlotOutputDir','~/Desktop/rgcDisplacementMapPlots',@ischar);
+p.addParameter('pathToPlotOutputDirRoot','~/Desktop/rgcDisplacementMapPlots',@ischar);
 
 % parse
 p.parse(varargin{:})
@@ -30,14 +31,18 @@ close all
 
 % check or make a directory for output
 if p.Results.savePlots
-    if exist(p.Results.pathToPlotOutputDir,'dir')==0
-        mkdir(p.Results.pathToPlotOutputDir);
+    if exist(fullfile(p.Results.pathToPlotOutputDirRoot,p.Results.subjectName),'dir')==0
+        mkdir(fullfile(p.Results.pathToPlotOutputDirRoot,p.Results.subjectName));
     end
 end
 
 % Prepare the regular eccentricity support base
 regularSupportPosDegRetina = ...
     0:p.Results.sampleResolutionDegreesRetina:p.Results.maxModeledEccentricityDegreesRetina;
+
+% Define the cone and rgc density data to operate upon
+coneDensityDataFileName = fullfile([getpref('rgcDisplacementMap','LocalDataPath') , '/Curcio_1990_JCompNeurol_HumanPhotoreceptorTopography/curcioRawConeDensity_',p.Results.subjectName,'.mat']);
+rgcDensityDataFileName = fullfile([getpref('rgcDisplacementMap','LocalDataPath') , '/Curcio_1990_JCompNeurol_GanglionCellTopography/curcioRawRGCDensity_',p.Results.subjectName,'.mat']);
 
 % make the displacement map for the cardinal meridians
 [ ~, fitParams, ~, rgcDisplacementDegRetinaEachMeridian, mRGC_cumulativeEachMeridian, mRF_cumulativeEachMeridian ] = ...
@@ -46,6 +51,8 @@ regularSupportPosDegRetina = ...
     'maxModeledEccentricityDegreesRetina', p.Results.maxModeledEccentricityDegreesRetina, ...
     'meridianAngleResolutionDeg', p.Results.meridianAngleResolutionDeg, ...
     'displacementMapPixelsPerDegRetina', p.Results.displacementMapPixelsPerDegRetina, ...
+    'coneDensityDataFileName', coneDensityDataFileName, ...
+    'rgcDensityDataFileName', rgcDensityDataFileName, ...
     'verbose', p.Results.verbose);
 
 fitParams
@@ -59,6 +66,7 @@ for mm = 1:length(p.Results.cardinalMeridianAngles)
     plot(regularSupportPosDegRetina,rgcDisplacementDegRetinaEachMeridian(mm,:),'-r')
     axis off;
     ylim([-.5 4.0]);
+    title(p.Results.cardinalMeridianNames{mm});
     if mm == length(p.Results.cardinalMeridianAngles)
         axis on;
         xlabel('eccentricity [deg retina]');
@@ -69,6 +77,7 @@ for mm = 1:length(p.Results.cardinalMeridianAngles)
     subplot(length(p.Results.cardinalMeridianAngles),2,mm*2-1);
     plot(regularSupportPosDegRetina,mRGC_cumulativeEachMeridian(mm,:),'-k')
     axis off;
+    title(p.Results.cardinalMeridianNames{mm});
     if mm == length(p.Results.cardinalMeridianAngles)
         axis on;
         xlabel('eccentricity [deg retina]');
@@ -79,12 +88,64 @@ for mm = 1:length(p.Results.cardinalMeridianAngles)
     ylim([0 8e5]);
     hold off
     drawnow
+    
 end
 if p.Results.savePlots
-    fileOutPath = fullfile(p.Results.pathToPlotOutputDir,'cumulativeAndDisplaceByMeridian.pdf');
+    fileOutPath = fullfile(p.Results.pathToPlotOutputDirRoot,p.Results.subjectName,'cumulativeAndDisplaceByMeridian.pdf');
     saveas(figHandle,fileOutPath)
     close(figHandle);
 end
+
+
+% Test the displacement
+figHandle = figure();
+hold on
+for mm = 1:length(p.Results.cardinalMeridianAngles)
+    % Load the cone density function
+    fitConeDensitySqDegRetina = getSplineFitToConeDensitySqDegRetina(p.Results.cardinalMeridianAngles(mm));
+    coneDensitySqDegRetina = fitConeDensitySqDegRetina(regularSupportPosDegRetina)';
+    [ mRFDensitySqDegRetina ] = transformConeToMidgetRFDensity( coneDensitySqDegRetina, 'linkingFuncParams', fitParams(mm,1:2) );
+    
+    % Load the RGC density function
+    fitRGCDensitySqDegRetina = getSplineFitToRGCDensitySqDegRetina(p.Results.cardinalMeridianAngles(mm));
+    RGCDensitySqDegRetina = fitRGCDensitySqDegRetina(regularSupportPosDegRetina)';
+    [ mRGCDensitySqDegRetina ] = transformRGCToMidgetRGCDensityDacey( regularSupportPosDegRetina, RGCDensitySqDegRetina, 'linkingFuncParams', fitParams(mm,3:end) );
+    extendedRegularSupportPosDegRetina = [regularSupportPosDegRetina (regularSupportPosDegRetina(end)+diff(regularSupportPosDegRetina(1:2)))];
+    ringArea = diff(extendedRegularSupportPosDegRetina.^2 * pi);
+    mRGCCountsPerSector = mRGCDensitySqDegRetina .* ringArea;
+    mRFCountsPerSector = mRFDensitySqDegRetina .* ringArea;
+    
+    % Displace the mRGC density values to the cone locations
+    mRGCCountsPerSectorAtConeLocations = applyDisplacement(mRGCCountsPerSector, rgcDisplacementDegRetinaEachMeridian(mm,:), regularSupportPosDegRetina);
+    
+    % Down-sample the displaced values and support
+    binSize = 25;
+    coarse_regularSupportPosDegRetina=[];
+    coarse_mRGCCountsPerSectorAtConeLocations=[];
+    for kk = 1:floor(length(regularSupportPosDegRetina)/binSize)
+        coarse_regularSupportPosDegRetina(kk)=mean(regularSupportPosDegRetina((kk-1)*binSize+1:kk*binSize));
+        coarse_mRGCCountsPerSectorAtConeLocations(kk)=mean(mRGCCountsPerSectorAtConeLocations((kk-1)*binSize+1:kk*binSize));
+    end
+    
+    % plot the displacement
+    subplot(length(p.Results.cardinalMeridianAngles),1,mm);
+    plot(regularSupportPosDegRetina,mRFCountsPerSector,'-k')
+    hold on
+    plot(coarse_regularSupportPosDegRetina,coarse_mRGCCountsPerSectorAtConeLocations,'.r')
+    title(p.Results.cardinalMeridianNames{mm});
+    if mm == length(p.Results.cardinalMeridianAngles)
+        axis on;
+        xlabel('eccentricity [deg retina]');
+        ylabel('counts per sector');
+        legend({'mRF','displaced mRGC'});
+    end
+end
+if p.Results.savePlots
+    fileOutPath = fullfile(p.Results.pathToPlotOutputDirRoot,p.Results.subjectName,'mRGCDensityDisplacedToConeLocations.pdf');
+    saveas(figHandle,fileOutPath)
+    close(figHandle);
+end
+
 
 
 % Show the cone --> mRF model
@@ -100,7 +161,7 @@ for mm = 1:length(p.Results.cardinalMeridianAngles)
 end
 hold off
 if p.Results.savePlots
-    fileOutPath = fullfile(p.Results.pathToPlotOutputDir,'cone --> mRF RatioModel.pdf');
+    fileOutPath = fullfile(p.Results.pathToPlotOutputDirRoot,p.Results.subjectName,'cone --> mRF RatioModel.pdf');
     saveas(figHandle,fileOutPath)
     close(figHandle);
 end
@@ -129,18 +190,18 @@ for mm = 1:length(p.Results.cardinalMeridianAngles)
     refPointIdx= ...
         find((regularSupportPosDegRetina-p.Results.referenceEccenDegRetina)== ...
         min(abs(regularSupportPosDegRetina-p.Results.referenceEccenDegRetina)));
-
+    
     % Calculate a proportion of the cumulative RGC density counts, relative
     % to the reference point (which is assigned a value of unity)
     propRGC_ringcount=RGC_ringcount./RGC_ringcount(refPointIdx);
-
+    
     [ ~, midgetFraction ] = transformRGCToMidgetRGCDensityDacey( regularSupportPosDegRetina, RGCDensitySqDegRetinaFit(regularSupportPosDegRetina)', 'linkingFuncParams', fitParams(mm,3:end) );
     xvals = propRGC_ringcount;
     plot(xvals,midgetFraction,'-','Color',p.Results.cardinalMeridianPlotColors{mm});
 end
 hold off
 if p.Results.savePlots
-    fileOutPath = fullfile(p.Results.pathToPlotOutputDir,'RGC --> mRGC RatioModel.pdf');
+    fileOutPath = fullfile(p.Results.pathToPlotOutputDirRoot,p.Results.subjectName,'RGC --> mRGC RatioModel.pdf');
     saveas(figHandle,fileOutPath)
     close(figHandle);
 end
@@ -160,7 +221,7 @@ xlabel('log10 proportion max cone density');
 ylabel('mRF density : cone density');
 legend(num2str(p.Results.cardinalMeridianAngles),'Location','southwest')
 if p.Results.savePlots
-    fileOutPath = fullfile(p.Results.pathToPlotOutputDir,'cone --> mRF model by meridian.pdf');
+    fileOutPath = fullfile(p.Results.pathToPlotOutputDirRoot,p.Results.subjectName,'cone --> mRF model by meridian.pdf');
     saveas(figHandle,fileOutPath)
     close(figHandle);
 end
@@ -196,7 +257,7 @@ for mm=1:4
 end
 legend(num2str(interpolarMeridianAngles),'Location','southwest')
 if p.Results.savePlots
-    fileOutPath = fullfile(p.Results.pathToPlotOutputDir,'coneDensitySplineModel.pdf');
+    fileOutPath = fullfile(p.Results.pathToPlotOutputDirRoot,p.Results.subjectName,'coneDensitySplineModel.pdf');
     saveas(figHandle,fileOutPath)
     close(figHandle);
 end
@@ -234,7 +295,7 @@ for mm=1:4
 end
 legend(num2str(interpolarMeridianAngles),'Location','southwest')
 if p.Results.savePlots
-    fileOutPath = fullfile(p.Results.pathToPlotOutputDir,'rgcDensitySplineModel.pdf');
+    fileOutPath = fullfile(p.Results.pathToPlotOutputDirRoot,p.Results.subjectName,'rgcDensitySplineModel.pdf');
     saveas(figHandle,fileOutPath)
     close(figHandle);
 end
@@ -268,7 +329,7 @@ loglog(regularSupportPosDegRetina,RGCDensityFit(regularSupportPosDegRetina),'-',
 xlabel('Eccentricity [deg]');
 ylabel('RGC density [counts / deg retina ^2]');
 if p.Results.savePlots
-    fileOutPath = fullfile(p.Results.pathToPlotOutputDir,'splineFitConeRGCLinearSpace.pdf');
+    fileOutPath = fullfile(p.Results.pathToPlotOutputDirRoot,p.Results.subjectName,'splineFitConeRGCLinearSpace.pdf');
     saveas(figHandle,fileOutPath)
     close(figHandle);
 end
@@ -297,7 +358,7 @@ ylim([0,2500]);
 xlabel('Eccentricity [deg retina]');
 ylabel('mRGC density [counts / deg retina^2]');
 if p.Results.savePlots
-    fileOutPath = fullfile(p.Results.pathToPlotOutputDir,'mRGCmRF_linearOneMeridian.pdf');
+    fileOutPath = fullfile(p.Results.pathToPlotOutputDirRoot,p.Results.subjectName,'mRGCmRF_linearOneMeridian.pdf');
     saveas(figHandle,fileOutPath)
     close(figHandle);
 end
@@ -306,7 +367,7 @@ end
 %% Plot the mRGC fraction for the cardinal meridians
 figHandle = figure();
 for mm = 1:4
-        
+    
     % Load the RGC Density Data from Curcio and Allen 1990:
     [ RGCDensitySqDeg, RGCNativeSupportPosDeg ] = loadRawRGCDensityByEccen( p.Results.cardinalMeridianAngles(mm) );
     % remove nan values
@@ -343,7 +404,7 @@ for mm = 1:4
     drawnow
 end
 if p.Results.savePlots
-    fileOutPath = fullfile(p.Results.pathToPlotOutputDir,'mRGCFractionByMeridian.pdf');
+    fileOutPath = fullfile(p.Results.pathToPlotOutputDirRoot,p.Results.subjectName,'mRGCFractionByMeridian.pdf');
     saveas(figHandle,fileOutPath)
     close(figHandle);
 end
@@ -352,10 +413,10 @@ end
 
 figHandle = figure();
 for mm = 1:4
-        
+    
     % Load the Curcio average data reported in the paper
     [coneDensitySqDegRetina, coneDensitySupportDegRetina] = loadRawConeDensityByEccen(p.Results.cardinalMeridianAngles(mm));
-
+    
     % Convert to units of visual degrees
     coneDensitySupportMmRetina = convert_degRetina_to_mmRetina(coneDensitySupportDegRetina);
     coneDensitySupportDegVisual = convert_mmRetina_to_degVisual(coneDensitySupportMmRetina, p.Results.cardinalMeridianAngles(mm));
@@ -421,7 +482,7 @@ for mm = 1:4
     
 end
 if p.Results.savePlots
-    fileOutPath = fullfile(p.Results.pathToPlotOutputDir,'mRFDensityAndRatioByMeridian.pdf');
+    fileOutPath = fullfile(p.Results.pathToPlotOutputDirRoot,p.Results.subjectName,'mRFDensityAndRatioByMeridian.pdf');
     saveas(figHandle,fileOutPath)
     close(figHandle);
 end

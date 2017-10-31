@@ -32,10 +32,8 @@ p.addParameter('meridianAngles',[0, 90, 180, 270],@isnumeric);
 p.addParameter('meridiansForKnotDefinition',[3,4],@isnumeric);
 p.addParameter('splineKnots',20,@isnumeric);
 p.addParameter('splineOrder',4,@isnumeric);
+p.addParameter('rgcDensityDataFileName', [], @(x)(isempty(x) | ischar(x)));
 
-% Optional display params
-p.addParameter('verbose',true,@islogical);
-p.addParameter('makePlots',true,@islogical);
 
 % parse
 p.parse(polarAngle,varargin{:})
@@ -50,8 +48,17 @@ end
 aggregatePosition=[];
 aggregateDensity=[];
 for mm=p.Results.meridiansForKnotDefinition(1):p.Results.meridiansForKnotDefinition(2)
-    % load the empirical RGC density measured by Curcio
-    [rgcDensitySqDegRetina, rgcNativeSupportPosDegRetina] = loadRawRGCDensityByEccen(p.Results.meridianAngles(mm));
+    % get the raw density measurements
+    if isempty(p.Results.rgcDensityDataFileName)
+        % load the empirical RGC density measured by Curcio
+        [rgcDensitySqDegRetina, rgcNativeSupportPosDegRetina] = ...
+            loadRawRGCDensityByEccen(p.Results.meridianAngles(mm));
+    else
+        % or the passed RGC density measurement
+        [rgcDensitySqDegRetina, rgcNativeSupportPosDegRetina] = ...
+            loadRawRGCDensityByEccen(p.Results.meridianAngles(mm), ...
+            'rgcDensityDataFileName', p.Results.rgcDensityDataFileName);
+    end
     % remove nan values
     isvalididx=find(~isnan(rgcDensitySqDegRetina));
     rgcNativeSupportPosDegRetina = rgcNativeSupportPosDegRetina(isvalididx);
@@ -115,7 +122,7 @@ ppFormSplineInterp.coefs = interpCoefs;
 
 % Create an anonymous function using the interpolated spline. This function
 % will return rgc density as a function of eccentricity in degrees.
-fitRGCDensitySqDegRetina = @(supportPosDeg) fnval(ppFormSplineInterp,supportPosDeg') ; 
+fitRGCDensitySqDegRetina = @(supportPosDeg) fnval(ppFormSplineInterp,supportPosDeg') ;
 
 end % function
 
