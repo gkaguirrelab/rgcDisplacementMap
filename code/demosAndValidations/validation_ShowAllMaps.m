@@ -9,7 +9,7 @@ p = inputParser; p.KeepUnmatched = true;
 % Optional anaysis params
 p.addParameter('sampleResolutionDegrees',0.01,@isnumeric);
 p.addParameter('maxModeledEccentricity',30,@isnumeric);
-p.addParameter('meridianAngleResolutionDeg',1,@isnumeric);
+p.addParameter('meridianAngleResolutionDeg',90,@isnumeric);
 p.addParameter('displacementMapPixelsPerDeg',10,@isnumeric);
 p.addParameter('subjectName', 'reportedAverage', @ischar);
 
@@ -72,7 +72,7 @@ for mm = 1:length(meridianAngles)
     rgcDensityEachMeridian(mm,:) = rgcDensitySqDeg;
     
     % obtain the mRGC density
-    [ mRGCDensitySqDeg, midgetFraction ] = transformRGCToMidgetRGCDensityDacey( regularSupportPosDeg, rgcDensitySqDeg', 'linkingFuncParams', fitParams(mm,3:end) );
+    [ mRGCDensitySqDeg, midgetFraction ] = transformRGCToMidgetRGCDensityDacey( regularSupportPosDeg, rgcDensitySqDeg, 'linkingFuncParams', fitParams(mm,3:end) );
     mRGCDensityEachMeridian(mm,:) = mRGCDensitySqDeg;
     midgetFractionEachMeridian(mm,:) = midgetFraction;
     
@@ -99,7 +99,7 @@ for vv = 1:length(polarMapNameList)
     mapImage = feval('convertPolarMapToImageMap', eval(polarMapNameList{vv}), imRdim);
     figHandle = figure();
     climVals = [0,ceil(max(max(mapImage)))];
-    imagesc(mapImage, climVals);
+    nanAwarenanAwareImageSC(mapImage, climVals);
     axis square
     set(gca,'TickLength',[0 0])
     tmp = strsplit(polarMapNameList{vv},'EachMeridian');
@@ -140,7 +140,7 @@ for vv = 1:length(warpMapNameList)
     smoothImage = fillAndSmoothMap(warpImage,sampleBaseX,sampleBaseY);
     figHandle = figure();
     climVals = [0,ceil(max(max(smoothImage)))];
-    imagesc(smoothImage, climVals);
+    nanAwareImageSC(smoothImage, climVals);
     axis square
     set(gca,'TickLength',[0 0])
     tmp = strsplit(warpMapNameList{vv},'EachMeridian');
@@ -169,7 +169,7 @@ smoothImageB = fillAndSmoothMap(mapImageB,sampleBaseX,sampleBaseY);
 mapImage = smoothImageB - mapImageA;
 figHandle = figure();
 climVals = [0, 1e4];
-imagesc(mapImage, climVals);
+nanAwareImageSC(mapImage, climVals);
 axis square
 set(gca,'TickLength',[0 0])
 titleString='mRGC_cumulative_warped_minus_mRF_cumulative';
@@ -189,7 +189,7 @@ end
 mapImage = mapImageA - smoothImageB;
 figHandle = figure();
 climVals = [0, 1e4];
-imagesc(mapImage, climVals);
+nanAwareImageSC(mapImage, climVals);
 axis square
 set(gca,'TickLength',[0 0])
 titleString='mRF_cumulative_minus_mRGC_cumulative_warped';
@@ -207,3 +207,12 @@ if p.Results.savePlots
 end
 
 end % function
+
+
+function nanAwarenanAwareImageSC(image, clim)
+[nr,nc] = size(image);
+pcolor([image nan(nr,1); nan(1,nc+1)]);
+caxis(clim);
+shading flat;
+set(gca, 'ydir', 'reverse');
+end

@@ -347,13 +347,13 @@ function [c,ceq] = constrainCumulativeAndDisplacement(regularSupportPosDeg, coun
 % values at eccentricities less than the displacementPoint, then this
 % violates the nonlinear fit constraint
 withinRangeIdx = find(regularSupportPosDeg < targetConvergencePointDegRetina);
-c = sum(countPerRingRGC(withinRangeIdx) > countPerRingRF(withinRangeIdx));
+c = nansum(countPerRingRGC(withinRangeIdx) > countPerRingRF(withinRangeIdx));
 
 % Second constraint:
 % Calculate how many values in the displacement function exceed the maximum
 % desired displacement.
 displaceInDeg = calcDisplacement(regularSupportPosDeg, countPerRingRGC, countPerRingRF);
-ceq = sum(displaceInDeg > targetMaxDisplacementDegRetina);
+ceq = nansum(displaceInDeg > targetMaxDisplacementDegRetina);
 
 end
 
@@ -364,8 +364,7 @@ function error = errorMatchingRFandRGC(regularSupportPosDeg, countPerRingRF, cou
 % displacement should have ended
 
 withinRangeIdx = find(regularSupportPosDeg > targetConvergencePointDegRetina);
-error = sqrt(sum((countPerRingRGC(withinRangeIdx) - countPerRingRF(withinRangeIdx)).^2));
+error = sqrt(nansum((countPerRingRGC(withinRangeIdx) - countPerRingRF(withinRangeIdx)).^2));
 end
-
 
 
