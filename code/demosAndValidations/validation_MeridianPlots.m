@@ -103,12 +103,12 @@ hold on
 for mm = 1:length(p.Results.cardinalMeridianAngles)
     % Load the cone density function
     fitConeDensitySqDegRetina = getSplineFitToConeDensitySqDegRetina(p.Results.cardinalMeridianAngles(mm));
-    coneDensitySqDegRetina = fitConeDensitySqDegRetina(regularSupportPosDegRetina)';
+    coneDensitySqDegRetina = fitConeDensitySqDegRetina(regularSupportPosDegRetina);
     [ mRFDensitySqDegRetina ] = transformConeToMidgetRFDensity( coneDensitySqDegRetina, 'linkingFuncParams', fitParams(mm,1:2) );
     
     % Load the RGC density function
     fitRGCDensitySqDegRetina = getSplineFitToRGCDensitySqDegRetina(p.Results.cardinalMeridianAngles(mm));
-    RGCDensitySqDegRetina = fitRGCDensitySqDegRetina(regularSupportPosDegRetina)';
+    RGCDensitySqDegRetina = fitRGCDensitySqDegRetina(regularSupportPosDegRetina);
     [ mRGCDensitySqDegRetina ] = transformRGCToMidgetRGCDensityDacey( regularSupportPosDegRetina, RGCDensitySqDegRetina, 'linkingFuncParams', fitParams(mm,3:end) );
     extendedRegularSupportPosDegRetina = [regularSupportPosDegRetina (regularSupportPosDegRetina(end)+diff(regularSupportPosDegRetina(1:2)))];
     ringArea = diff(extendedRegularSupportPosDegRetina.^2 * pi);
@@ -351,7 +351,7 @@ ylabel('mRF density [counts / deg retina ^2]');
 
 subplot(2,1,2)
 [RGCDensityFit] = getSplineFitToRGCDensitySqDegRetina(p.Results.cardinalMeridianAngles(mm));
-[ mRGCDensitySqDeg ] = transformRGCToMidgetRGCDensityDacey( regularSupportPosDegRetina, RGCDensityFit(regularSupportPosDegRetina)', 'linkingFuncParams', fitParams(mm,3:end) );
+[ mRGCDensitySqDeg ] = transformRGCToMidgetRGCDensityDacey( regularSupportPosDegRetina, RGCDensityFit(regularSupportPosDegRetina), 'linkingFuncParams', fitParams(mm,3:end) );
 plot(regularSupportPosDegRetina,mRGCDensitySqDeg,'-','Color',p.Results.cardinalMeridianPlotColors{mm});
 xlim([0,30]);
 ylim([0,2500]);
