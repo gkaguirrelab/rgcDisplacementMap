@@ -1,17 +1,17 @@
 function [ displacementMapDegRetina, fitParamsByMeridian, meridianAngleSupport, rgcDisplacementByMeridian, mRGC_cumulativeByMeridian, mRF_cumulativeByMeridian, convergenceEccenDegRetinaByMeridian, fValsByMeridian, regularSupportPosDegRetina] = makeDisplacementMap( varargin )
 % makeDisplacementMap -  This routine models retinal ganglion cell displacement.
 %
-% Our strategy is to begin with empirical measurements of cone and retinal
-% ganglion cell densities obtained from each of the four cardinal meridians
-% of the human retina. The data we use are from two papers published by
-% Curcio and colleagues in 1990.
+% We begin with empirical measurements of cone and retinal ganglion cell
+% densities obtained from each of the four cardinal meridians of the human
+% retina. The data we use to build the model are from two papers published
+% by Curcio and colleagues in 1990.
 %
 % We then engage in a modeling exercise to find a low-dimensional
-% parameterization of the transformation of cone density into midget
-% ganglion cell receptive field density (mRF) and of retinal ganglion cell
-% density into midget retinal ganglion cell density (mRGC). In each case,
-% the models do not make use of explicit information regarding the retinal
-% position of the measurement to be transformed.
+% parameterization that transform of cone density into midget ganglion cell
+% receptive field density (mRF) and of retinal ganglion cell density into
+% midget retinal ganglion cell density (mRGC). In each case, the models do
+% not make use of explicit information regarding the retinal position of
+% the measurement to be transformed.
 %
 % We are then in a position to model mRGC and mRF density as a function of
 % cone and RGC density, subject to a small number of parameters. Each of
@@ -135,7 +135,6 @@ function [ displacementMapDegRetina, fitParamsByMeridian, meridianAngleSupport, 
 %       initial definition of the linking function parameters are not
 %       changed by this setting.
 %   rgcDensityDataFileName - As above, but for RGC density.
-%
 %   verbose - Do we give you the text?
 
 %% Parse input and define variables
@@ -157,6 +156,7 @@ p.addParameter('rgcDrasdoInitialTransformParams',[],@(x)(isempty(x) | isnumeric(
 p.addParameter('rgcDaceyInitialTransformParams',[4.2857 1.6],@(x)(isempty(x) | isnumeric(x)));
 p.addParameter('coneDensityDataFileName', [], @(x)(isempty(x) | ischar(x)));
 p.addParameter('rgcDensityDataFileName', [], @(x)(isempty(x) | ischar(x)));
+
 
 % Optional display params
 p.addParameter('verbose',true,@islogical);
