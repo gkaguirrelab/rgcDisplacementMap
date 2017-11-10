@@ -59,12 +59,12 @@ distanceToOpticDiscCenterDegRetina = sqrt(...
 
 % This calculation is valid if the position in regularSupportPosDeg is less
 % than opticDiscParameters.e
-alpha_case1 = rad2deg(asin(sin(deg2rad(polarAngle)).*regularSupportPosDegRetina./distanceToOpticDiscCenterDegRetina));
+alpha_case1 = rad2deg(asin(sin(deg2rad(polarAngle-opticDiscParameters.m)).*regularSupportPosDegRetina./distanceToOpticDiscCenterDegRetina));
 
 % This calculation is valid if the position in regularSupportPosDeg is
 % greater than opticDiscParameters.e
-alpha_case2 = 180 - polarAngle - ...
-    rad2deg(asin(sin(deg2rad(polarAngle)).*regularSupportPosDegRetina./opticDiscParameters.e));
+alpha_case2 = 180 - (polarAngle-opticDiscParameters.m) - ...
+    rad2deg(asin(sin(deg2rad(polarAngle-opticDiscParameters.m))./distanceToOpticDiscCenterDegRetina.*opticDiscParameters.e));
 
 % store the correct alpha for each regularSupportPosDeg
 alpha=nan(size(alpha_case1));
@@ -76,7 +76,7 @@ alpha(regularSupportPosDegRetina > opticDiscParameters.e) = ...
 % Now derive the angle (beta) between the center of the optic disc and
 % each point in regularSupportPosDeg, relative to the major axis of the
 % optic disc.
-beta = 180 - (opticDiscParameters.theta + polarAngle + alpha);
+beta = opticDiscParameters.theta + opticDiscParameters.m - alpha;
 
 
 % For each support position, determine if distanceToOpticDiscCenterDegRetina
