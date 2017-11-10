@@ -9,7 +9,7 @@ p = inputParser; p.KeepUnmatched = true;
 % Optional anaysis params
 p.addParameter('sampleResolutionDegrees',0.01,@isnumeric);
 p.addParameter('maxModeledEccentricity',30,@isnumeric);
-p.addParameter('meridianAngleResolutionDeg',5,@isnumeric);
+p.addParameter('meridianAngleResolutionDeg',1,@isnumeric);
 p.addParameter('displacementMapPixelsPerDeg',10,@isnumeric);
 p.addParameter('subjectName', 'reportedAverage', @ischar);
 
@@ -99,7 +99,7 @@ for vv = 1:length(polarMapNameList)
     mapImage = feval('convertPolarMapToImageMap', eval(polarMapNameList{vv}), imRdim);
     figHandle = figure();
     climVals = [0,ceil(max(max(mapImage)))];
-    nanAwareImageSC(mapImage, climVals);
+    nanAwareAxisAwareImageSC(mapImage, climVals);
     axis square
     set(gca,'TickLength',[0 0])
     tmp = strsplit(polarMapNameList{vv},'EachMeridian');
@@ -110,7 +110,7 @@ for vv = 1:length(polarMapNameList)
     ylabel('Position [retinal deg] inferior --> superior');
     k=(xticks.*(1/p.Results.displacementMapPixelsPerDeg)) + (-1*p.Results.maxModeledEccentricity);
     xticklabels(string(k))
-    yticklabels(string(k))
+    yticklabels(string(fliplr(k)))
     if p.Results.savePlots
         fileOutPath = fullfile(p.Results.pathToPlotOutputDirRoot,p.Results.subjectName,[titleString '.pdf']);
         saveas(figHandle,fileOutPath)
@@ -140,7 +140,7 @@ for vv = 1:length(warpMapNameList)
     smoothImage = fillAndSmoothMap(warpImage,sampleBaseX,sampleBaseY);
     figHandle = figure();
     climVals = [0,ceil(max(max(smoothImage)))];
-    nanAwareImageSC(smoothImage, climVals);
+    nanAwareAxisAwareImageSC(smoothImage, climVals);
     axis square
     set(gca,'TickLength',[0 0])
     tmp = strsplit(warpMapNameList{vv},'EachMeridian');
@@ -151,7 +151,7 @@ for vv = 1:length(warpMapNameList)
     ylabel('Position [retinal deg] inferior --> superior');
     k=(xticks.*(1/p.Results.displacementMapPixelsPerDeg)) + (-1*p.Results.maxModeledEccentricity);
     xticklabels(string(k))
-    yticklabels(string(k))
+    yticklabels(string(fliplr(k)))
     if p.Results.savePlots
         fileOutPath = fullfile(p.Results.pathToPlotOutputDirRoot,p.Results.subjectName,['warped' titleString '.pdf']);
         saveas(figHandle,fileOutPath)
@@ -169,7 +169,7 @@ smoothImageB = fillAndSmoothMap(mapImageB,sampleBaseX,sampleBaseY);
 mapImage = smoothImageB - mapImageA;
 figHandle = figure();
 climVals = [0, 1e4];
-nanAwareImageSC(mapImage, climVals);
+nanAwareAxisAwareImageSC(mapImage, climVals);
 axis square
 set(gca,'TickLength',[0 0])
 titleString='mRGC_cumulative_warped_minus_mRF_cumulative';
@@ -179,7 +179,7 @@ xlabel('Position [retinal deg] nasal --> temporal');
 ylabel('Position [retinal deg] inferior --> superior');
 k=(xticks.*(1/p.Results.displacementMapPixelsPerDeg)) + (-1*p.Results.maxModeledEccentricity);
 xticklabels(string(k))
-yticklabels(string(k))
+yticklabels(string(fliplr(k)))
 if p.Results.savePlots
     fileOutPath = fullfile(p.Results.pathToPlotOutputDirRoot,p.Results.subjectName,[titleString '.pdf']);
     saveas(figHandle,fileOutPath)
@@ -189,7 +189,7 @@ end
 mapImage = mapImageA - smoothImageB;
 figHandle = figure();
 climVals = [0, 1e4];
-nanAwareImageSC(mapImage, climVals);
+nanAwareAxisAwareImageSC(mapImage, climVals);
 axis square
 set(gca,'TickLength',[0 0])
 titleString='mRF_cumulative_minus_mRGC_cumulative_warped';
@@ -199,7 +199,7 @@ xlabel('Position [retinal deg] nasal --> temporal');
 ylabel('Position [retinal deg] inferior --> superior');
 k=(xticks.*(1/p.Results.displacementMapPixelsPerDeg)) + (-1*p.Results.maxModeledEccentricity);
 xticklabels(string(k))
-yticklabels(string(k))
+yticklabels(string(fliplr(k)))
 if p.Results.savePlots
     fileOutPath = fullfile(p.Results.pathToPlotOutputDirRoot,p.Results.subjectName,[titleString '.pdf']);
     saveas(figHandle,fileOutPath)
@@ -209,9 +209,9 @@ end
 end % function
 
 
-function nanAwareImageSC(image, clim)
+function nanAwareAxisAwareImageSC(image, clim)
 [nr,nc] = size(image);
-pcolor([image nan(nr,1); nan(1,nc+1)]);
+pcolor([flipup(image) nan(nr,1); nan(1,nc+1)]);
 caxis(clim);
 shading flat;
 set(gca, 'ydir', 'reverse');
