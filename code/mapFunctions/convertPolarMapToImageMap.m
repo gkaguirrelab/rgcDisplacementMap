@@ -9,6 +9,6 @@ imageMap = imrotate(imR .* maxMapDensity,-90);
 distanceMap = zeros(size(imageMap));
 distanceMap(ceil(imRdim/2),ceil(imRdim/2))=1;
 distanceMap=bwdist(distanceMap,'euclidean');
-imageMap(distanceMap>(imRdim/2))=nan;
+imageMap(distanceMap>(floor(imRdim/2)))=nan;
 
 end
