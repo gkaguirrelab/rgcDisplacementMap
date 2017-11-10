@@ -309,6 +309,13 @@ for mm = 1:length(meridianAngleSupport)
     rgcDisplacementByMeridian(mm,:) = ...
         calcDisplacement(regularSupportPosDegRetina, mRGC_cumulative(fitParamsByMeridian(mm,:)), mRF_cumulative(fitParamsByMeridian(mm,:)));
     
+    % Place nans on this meridian at points corresponding to the optic
+    % disc. This is a hack, as we should model the optic disc from the
+    % initial cone and RGC densities on forward. This will do for now.
+    mRGC_cumulativeByMeridian(mm,findOpticDiscPositions(regularSupportPosDegRetina, meridianAngleSupport(mm)))=nan;
+    mRF_cumulativeByMeridian(mm,findOpticDiscPositions(regularSupportPosDegRetina, meridianAngleSupport(mm)))=nan;
+    rgcDisplacementByMeridian(mm,findOpticDiscPositions(regularSupportPosDegRetina, meridianAngleSupport(mm)))=nan;
+    
     % Report the results for this meridian
     if p.Results.verbose
         zeroPoints = find(rgcDisplacementByMeridian(mm,:)==0);
