@@ -211,7 +211,7 @@ end % function
 
 function nanAwareAxisAwareImageSC(image, clim)
 [nr,nc] = size(image);
-pcolor([flipup(image) nan(nr,1); nan(1,nc+1)]);
+pcolor([flipud(image) nan(nr,1); nan(1,nc+1)]);
 caxis(clim);
 shading flat;
 set(gca, 'ydir', 'reverse');
