@@ -99,7 +99,7 @@ for vv = 1:length(polarMapNameList)
     mapImage = feval('convertPolarMapToImageMap', eval(polarMapNameList{vv}), imRdim);
     figHandle = figure();
     climVals = [0,ceil(max(max(mapImage)))];
-    nanAwarenanAwareImageSC(mapImage, climVals);
+    nanAwareImageSC(mapImage, climVals);
     axis square
     set(gca,'TickLength',[0 0])
     tmp = strsplit(polarMapNameList{vv},'EachMeridian');
@@ -209,7 +209,7 @@ end
 end % function
 
 
-function nanAwarenanAwareImageSC(image, clim)
+function nanAwareImageSC(image, clim)
 [nr,nc] = size(image);
 pcolor([image nan(nr,1); nan(1,nc+1)]);
 caxis(clim);
