@@ -9,7 +9,7 @@ p = inputParser; p.KeepUnmatched = true;
 % Optional anaysis params
 p.addParameter('sampleResolutionDegrees',0.01,@isnumeric);
 p.addParameter('maxModeledEccentricity',30,@isnumeric);
-p.addParameter('meridianAngleResolutionDeg',1,@isnumeric);
+p.addParameter('meridianAngleResolutionDeg',90,@isnumeric);
 p.addParameter('displacementMapPixelsPerDeg',10,@isnumeric);
 p.addParameter('subjectName', 'reportedAverage', @ischar);
 
@@ -99,18 +99,9 @@ for vv = 1:length(polarMapNameList)
     mapImage = feval('convertPolarMapToImageMap', eval(polarMapNameList{vv}), imRdim);
     figHandle = figure();
     climVals = [0,ceil(max(max(mapImage)))];
-    nanAwareAxisAwareImageSC(mapImage, climVals);
-    axis square
-    set(gca,'TickLength',[0 0])
     tmp = strsplit(polarMapNameList{vv},'EachMeridian');
     titleString=tmp{1};
-    c = colorbar;
-    c.Label.String=titleString;
-    xlabel('Position [retinal deg] nasal --> temporal');
-    ylabel('Position [retinal deg] inferior --> superior');
-    k=(xticks.*(1/p.Results.displacementMapPixelsPerDeg)) + (-1*p.Results.maxModeledEccentricity);
-    xticklabels(string(k))
-    yticklabels(string(fliplr(k)))
+    displayRetinalImage(mapImage, climVals, p.Results.displacementMapPixelsPerDeg, p.Results.maxModeledEccentricity, titleString);
     if p.Results.savePlots
         fileOutPath = fullfile(p.Results.pathToPlotOutputDirRoot,p.Results.subjectName,[titleString '.pdf']);
         saveas(figHandle,fileOutPath)
@@ -140,18 +131,8 @@ for vv = 1:length(warpMapNameList)
     smoothImage = fillAndSmoothMap(warpImage,sampleBaseX,sampleBaseY);
     figHandle = figure();
     climVals = [0,ceil(max(max(smoothImage)))];
-    nanAwareAxisAwareImageSC(smoothImage, climVals);
-    axis square
-    set(gca,'TickLength',[0 0])
     tmp = strsplit(warpMapNameList{vv},'EachMeridian');
-    titleString=tmp{1};
-    c = colorbar;
-    c.Label.String=['warped ' titleString ];
-    xlabel('Position [retinal deg] nasal --> temporal');
-    ylabel('Position [retinal deg] inferior --> superior');
-    k=(xticks.*(1/p.Results.displacementMapPixelsPerDeg)) + (-1*p.Results.maxModeledEccentricity);
-    xticklabels(string(k))
-    yticklabels(string(fliplr(k)))
+    displayRetinalImage(smoothImage, climVals, p.Results.displacementMapPixelsPerDeg, p.Results.maxModeledEccentricity, ['warped ' tmp{1} ]);
     if p.Results.savePlots
         fileOutPath = fullfile(p.Results.pathToPlotOutputDirRoot,p.Results.subjectName,['warped' titleString '.pdf']);
         saveas(figHandle,fileOutPath)
@@ -165,41 +146,24 @@ mapImageA = convertPolarMapToImageMap(mRF_cumulativeEachMeridian, imRdim);
 mapImageB = applyDisplacementMap( ...
     convertPolarMapToImageMap(mRGC_cumulativeEachMeridian, imRdim), ...
     displacementMapDeg, sampleBaseX, sampleBaseY);
-smoothImageB = fillAndSmoothMap(mapImageB,sampleBaseX,sampleBaseY);
-mapImage = smoothImageB - mapImageA;
+mapImageBminusA = mapImageB-mapImageA;
+smoothImage = fillAndSmoothMap(mapImageBminusA,sampleBaseX,sampleBaseY);
 figHandle = figure();
 climVals = [0, 1e4];
-nanAwareAxisAwareImageSC(mapImage, climVals);
-axis square
-set(gca,'TickLength',[0 0])
 titleString='mRGC_cumulative_warped_minus_mRF_cumulative';
-c = colorbar;
-c.Label.String= titleString ;
-xlabel('Position [retinal deg] nasal --> temporal');
-ylabel('Position [retinal deg] inferior --> superior');
-k=(xticks.*(1/p.Results.displacementMapPixelsPerDeg)) + (-1*p.Results.maxModeledEccentricity);
-xticklabels(string(k))
-yticklabels(string(fliplr(k)))
+displayRetinalImage(smoothImage, climVals, p.Results.displacementMapPixelsPerDeg, p.Results.maxModeledEccentricity, titleString);
 if p.Results.savePlots
     fileOutPath = fullfile(p.Results.pathToPlotOutputDirRoot,p.Results.subjectName,[titleString '.pdf']);
     saveas(figHandle,fileOutPath)
     close(figHandle);
 end
 
-mapImage = mapImageA - smoothImageB;
+mapImageAminusB = mapImageA-mapImageB;
+smoothImage = fillAndSmoothMap(mapImageAminusB,sampleBaseX,sampleBaseY);
 figHandle = figure();
 climVals = [0, 1e4];
-nanAwareAxisAwareImageSC(mapImage, climVals);
-axis square
-set(gca,'TickLength',[0 0])
 titleString='mRF_cumulative_minus_mRGC_cumulative_warped';
-c = colorbar;
-c.Label.String= titleString ;
-xlabel('Position [retinal deg] nasal --> temporal');
-ylabel('Position [retinal deg] inferior --> superior');
-k=(xticks.*(1/p.Results.displacementMapPixelsPerDeg)) + (-1*p.Results.maxModeledEccentricity);
-xticklabels(string(k))
-yticklabels(string(fliplr(k)))
+displayRetinalImage(smoothImage, climVals, p.Results.displacementMapPixelsPerDeg, p.Results.maxModeledEccentricity, titleString);
 if p.Results.savePlots
     fileOutPath = fullfile(p.Results.pathToPlotOutputDirRoot,p.Results.subjectName,[titleString '.pdf']);
     saveas(figHandle,fileOutPath)
@@ -207,12 +171,3 @@ if p.Results.savePlots
 end
 
 end % function
-
-
-function nanAwareAxisAwareImageSC(image, clim)
-[nr,nc] = size(image);
-pcolor([flipud(image) nan(nr,1); nan(1,nc+1)]);
-caxis(clim);
-shading flat;
-set(gca, 'ydir', 'reverse');
-end
