@@ -257,9 +257,9 @@ for mm = 1:length(meridianAngleSupport)
         getSplineFitToRGCDensitySqDegRetina(meridianAngleSupport(mm), ...
         'rgcDensityDataFileName',p.Results.rgcDensityDataFileName);
 
-    % Create an anonymous function that returns mRGC density as a function of
-    % RGC density, with the transform defined by the last two or three fitParams
-    % This function can be set up with Drasdo or Dacey flavor
+    % Create an anonymous function that returns mRGC density as a function
+    % of RGC density, with the transform defined by the last two or three
+    % fitParams This function can be set up with Drasdo or Dacey flavor
     switch p.Results.rgcLinkingFunctionFlavor
         case 'Drasdo'
             mRGCDensityOverRegularSupport = ...
@@ -318,7 +318,7 @@ for mm = 1:length(meridianAngleSupport)
             fprintf(outLine);
         else
             convergenceEccenDegRetinaByMeridian(mm) = regularSupportPosDegRetina(zeroPoints(convergenceIdx));
-            outLine = ['Polar angle: ' num2str(meridianAngleSupport(mm)) ', max RGC displacement: ' num2str(max(rgcDisplacementByMeridian(mm,:))) ', target convergence: ' num2str(targetConvergenceDegRetinaByMeridian(mm)) ', found convergence: ' num2str(convergenceEccenDegRetinaByMeridian(mm)) ', error: ' num2str(round(fValsByMeridian(mm))) '\n'];
+            outLine = ['Polar angle: ' num2str(meridianAngleSupport(mm)) ', max RGC displacement: ' num2str(max(rgcDisplacementByMeridian(mm,:))) ', target convergence: ' num2str(targetConvergenceDegRetinaByMeridian(mm)) ', found convergence: ' num2str(convergenceEccenDegRetinaByMeridian(mm)) ', RMSE: ' num2str(round(fValsByMeridian(mm))) '\n'];
             fprintf(outLine);
         end
     end
@@ -366,12 +366,12 @@ end
 
 
 function error = errorMatchingRFandRGC(regularSupportPosDeg, countPerRingRF, countPerRingRGC, targetConvergencePointDegRetina)
-% The error is calculated as the SSQ of the absolute difference between the
+% The error is calculated as the RMSE of difference between the
 % cumulative RF and RGC counts at retinal positions past the point where
 % displacement should have ended
 
 withinRangeIdx = find(regularSupportPosDeg > targetConvergencePointDegRetina);
-error = sqrt(nansum((countPerRingRGC(withinRangeIdx) - countPerRingRF(withinRangeIdx)).^2));
+error = sqrt(nanmean((countPerRingRGC(withinRangeIdx) - countPerRingRF(withinRangeIdx)).^2));
 end
 
 
