@@ -9,7 +9,7 @@ p = inputParser; p.KeepUnmatched = true;
 % Optional anaysis params
 p.addParameter('sampleResolutionDegrees',0.01,@isnumeric);
 p.addParameter('maxModeledEccentricity',30,@isnumeric);
-p.addParameter('meridianAngleResolutionDeg',90,@isnumeric);
+p.addParameter('meridianAngleResolutionDeg',1,@isnumeric);
 p.addParameter('displacementMapPixelsPerDeg',10,@isnumeric);
 p.addParameter('subjectName', 'reportedAverage', @ischar);
 
@@ -33,7 +33,7 @@ if p.Results.savePlots
 end
 
 % Prepare the regular eccentricity support base
-regularSupportPosDeg = ...
+regularSupportPosDegRetina = ...
     0:p.Results.sampleResolutionDegrees:p.Results.maxModeledEccentricity;
 
 % Define the cone and rgc density data to operate upon
@@ -41,7 +41,7 @@ coneDensityDataFileName = fullfile([getpref('rgcDisplacementMap','LocalDataPath'
 rgcDensityDataFileName = fullfile([getpref('rgcDisplacementMap','LocalDataPath') , '/Curcio_1990_JCompNeurol_GanglionCellTopography/curcioRawRGCDensity_',p.Results.subjectName,'.mat']);
 
 % Get the displacement map
-[ ~, fitParams, meridianAngles, rgcDisplacementEachMeridian, mRGC_cumulativeEachMeridian, mRF_cumulativeEachMeridian ] = ...
+[ ~, fitParams, meridianAngleSupport, rgcDisplacementEachMeridian, mRGC_cumulativeEachMeridian, mRF_cumulativeEachMeridian ] = ...
     makeDisplacementMap(...
     'sampleResolutionDegrees', p.Results.sampleResolutionDegrees, ...
     'maxModeledEccentricity', p.Results.maxModeledEccentricity, ...
@@ -54,11 +54,11 @@ rgcDensityDataFileName = fullfile([getpref('rgcDisplacementMap','LocalDataPath')
 
 %% Loop over the meridians
 % Create cone density and RGC density polar maps
-for mm = 1:length(meridianAngles)
+for mm = 1:length(meridianAngleSupport)
     
     % obtain cone density
-    coneDensityFit = getSplineFitToConeDensitySqDegRetina(meridianAngles(mm));
-    coneDensitySqDeg = coneDensityFit(regularSupportPosDeg);
+    fitConeDensitySqDegRetina = getSplineFitToConeDensitySqDegRetina(meridianAngleSupport(mm));
+    coneDensitySqDeg = zeroOpticDiscPoints(fitConeDensitySqDegRetina(regularSupportPosDegRetina),regularSupportPosDegRetina, meridianAngleSupport(mm));
     coneDensityEachMeridian(mm,:) = coneDensitySqDeg;
     
     % obtain the mRF density
@@ -67,12 +67,12 @@ for mm = 1:length(meridianAngles)
     mRFtoConeDensityEachMeridian(mm,:) = mRFtoConeDensityRatio;
     
     % obtain the RGC density
-    rgcDensityFit = getSplineFitToRGCDensitySqDegRetina(meridianAngles(mm));
-    rgcDensitySqDeg = rgcDensityFit(regularSupportPosDeg);
+    fitRGCDensitySqDegRetina = getSplineFitToRGCDensitySqDegRetina(meridianAngleSupport(mm));
+    rgcDensitySqDeg = zeroOpticDiscPoints(fitRGCDensitySqDegRetina(regularSupportPosDegRetina),regularSupportPosDegRetina, meridianAngleSupport(mm));
     rgcDensityEachMeridian(mm,:) = rgcDensitySqDeg;
     
     % obtain the mRGC density
-    [ mRGCDensitySqDeg, midgetFraction ] = transformRGCToMidgetRGCDensityDacey( regularSupportPosDeg, rgcDensitySqDeg, 'linkingFuncParams', fitParams(mm,3:end) );
+    [ mRGCDensitySqDeg, midgetFraction ] = transformRGCToMidgetRGCDensityDacey( regularSupportPosDegRetina, rgcDensitySqDeg, 'linkingFuncParams', fitParams(mm,3:end) );
     mRGCDensityEachMeridian(mm,:) = mRGCDensitySqDeg;
     midgetFractionEachMeridian(mm,:) = midgetFraction;
     
@@ -171,3 +171,12 @@ if p.Results.savePlots
 end
 
 end % function
+
+
+%% LOCAL FUNCTIONS
+
+function vectorOut = zeroOpticDiscPoints(vectorIn, regularSupportPosDegRetina, polarAngle)
+	opticDiscIndices = findOpticDiscPositions(regularSupportPosDegRetina, polarAngle);
+    vectorOut = vectorIn;
+    vectorOut(opticDiscIndices) = 0;
+end

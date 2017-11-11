@@ -238,10 +238,14 @@ for mm = 1:length(meridianAngleSupport)
     [fitConeDensitySqDegRetina] = ...
         getSplineFitToConeDensitySqDegRetina(meridianAngleSupport(mm), ...
         'coneDensityDataFileName',p.Results.coneDensityDataFileName);
+    % Define a variable with cone density over regular support and zero
+    % values at the optic disc positions
+    coneDensityOverRegularSupport = ...
+        zeroOpticDiscPoints(fitConeDensitySqDegRetina(regularSupportPosDegRetina),regularSupportPosDegRetina, meridianAngleSupport(mm));
     % Create an anonymous function that returns mRF density as a function
     % of cone density, with the transform defined by the first two fitParams
     mRFDensityOverRegularSupport = ...
-        @(fitParams) transformConeToMidgetRFDensity(fitConeDensitySqDegRetina(regularSupportPosDegRetina), ...
+        @(fitParams) transformConeToMidgetRFDensity(coneDensityOverRegularSupport, ...
         'linkingFuncParams',fitParams(1:2));
     % Define anonymous function for the cumulative sum of mRF density
     mRF_cumulative = @(fitParams) calcCumulative(regularSupportPosDegRetina, mRFDensityOverRegularSupport(fitParams));
@@ -256,6 +260,10 @@ for mm = 1:length(meridianAngleSupport)
     fitRGCDensitySqDegRetina = ...
         getSplineFitToRGCDensitySqDegRetina(meridianAngleSupport(mm), ...
         'rgcDensityDataFileName',p.Results.rgcDensityDataFileName);
+    % Define a variable with RGC density over regular support and zero
+    % values at the optic disc positions
+    RGCDensityOverRegularSupport = ...
+        zeroOpticDiscPoints(fitRGCDensitySqDegRetina(regularSupportPosDegRetina),regularSupportPosDegRetina, meridianAngleSupport(mm));
 
     % Create an anonymous function that returns mRGC density as a function
     % of RGC density, with the transform defined by the last two or three
@@ -263,11 +271,11 @@ for mm = 1:length(meridianAngleSupport)
     switch p.Results.rgcLinkingFunctionFlavor
         case 'Drasdo'
             mRGCDensityOverRegularSupport = ...
-                @(fitParams) transformRGCToMidgetRGCDensityDrasdo(regularSupportPosDegRetina,fitRGCDensitySqDegRetina(regularSupportPosDegRetina),...
+                @(fitParams) transformRGCToMidgetRGCDensityDrasdo(regularSupportPosDegRetina,RGCDensityOverRegularSupport,...
                 'linkingFuncParams',fitParams(3:end));
         case 'Dacey'
             mRGCDensityOverRegularSupport = ...
-                @(fitParams) transformRGCToMidgetRGCDensityDacey(regularSupportPosDegRetina,fitRGCDensitySqDegRetina(regularSupportPosDegRetina),...
+                @(fitParams) transformRGCToMidgetRGCDensityDacey(regularSupportPosDegRetina,RGCDensityOverRegularSupport,...
                 'linkingFuncParams',fitParams(3:end));
         otherwise
             error('This is not an RGC linking function flavor that I know');
@@ -322,14 +330,7 @@ for mm = 1:length(meridianAngleSupport)
             fprintf(outLine);
         end
     end
-
-    % Place nans on this meridian at points corresponding to the optic
-    % disc. This is a hack, as we should model the optic disc from the
-    % initial cone and RGC densities on forward. This will do for now.
-    mRGC_cumulativeByMeridian(mm,findOpticDiscPositions(regularSupportPosDegRetina, meridianAngleSupport(mm)))=nan;
-    mRF_cumulativeByMeridian(mm,findOpticDiscPositions(regularSupportPosDegRetina, meridianAngleSupport(mm)))=nan;
-    rgcDisplacementByMeridian(mm,findOpticDiscPositions(regularSupportPosDegRetina, meridianAngleSupport(mm)))=nan;
-
+    
 end % loop over meridians
 
 % Create the displacement map
@@ -342,7 +343,14 @@ end % calcDisplacementMap
 
 %% LOCAL FUNCTIONS
 
-function [c,ceq] = constrainCumulativeAndDisplacement(regularSupportPosDeg, countPerRingRF, countPerRingRGC, targetConvergencePointDegRetina, targetMaxDisplacementDegRetina)
+function vectorOut = zeroOpticDiscPoints(vectorIn, regularSupportPosDegRetina, polarAngle)
+	opticDiscIndices = findOpticDiscPositions(regularSupportPosDegRetina, polarAngle);
+    vectorOut = vectorIn;
+    vectorOut(opticDiscIndices) = 0;
+end
+
+
+function [c,ceq] = constrainCumulativeAndDisplacement(regularSupportPosDegRetina, countPerRingRF, countPerRingRGC, targetConvergencePointDegRetina, targetMaxDisplacementDegRetina)
 % We implement two non-linear constraints. The first is that the mRGC
 % cumulative values should not exceed the mRF cumulative values at any
 % point prior to the convergence point. The second constraint is that the
@@ -353,13 +361,13 @@ function [c,ceq] = constrainCumulativeAndDisplacement(regularSupportPosDeg, coun
 % If there are any cumulative RGC values that are greater than the RF
 % values at eccentricities less than the displacementPoint, then this
 % violates the nonlinear fit constraint
-withinRangeIdx = find(regularSupportPosDeg < targetConvergencePointDegRetina);
+withinRangeIdx = find(regularSupportPosDegRetina < targetConvergencePointDegRetina);
 c = nansum(countPerRingRGC(withinRangeIdx) > countPerRingRF(withinRangeIdx));
 
 % Second constraint:
 % Calculate how many values in the displacement function exceed the maximum
 % desired displacement.
-displaceInDeg = calcDisplacement(regularSupportPosDeg, countPerRingRGC, countPerRingRF);
+displaceInDeg = calcDisplacement(regularSupportPosDegRetina, countPerRingRGC, countPerRingRF);
 ceq = nansum(displaceInDeg > targetMaxDisplacementDegRetina);
 
 end
