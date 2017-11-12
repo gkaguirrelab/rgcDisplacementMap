@@ -1,4 +1,4 @@
-function [ meridianAngleSupport, regularSupportPosDegRetina, rgcDisplacementByMeridian, opticDiscLocationByMeridian, mRGC_cumulativeByMeridian, mRF_cumulativeByMeridian, fitParamsByMeridian, fValsByMeridian, convergenceEccenDegRetinaByMeridian ] = createDisplacementModel( varargin )
+function [ rgcDisplacementByMeridian, meridianAngleSupport, regularSupportPosDegRetina, opticDiscLocationByMeridian, mRGC_cumulativeByMeridian, mRF_cumulativeByMeridian, fitParamsByMeridian, fValsByMeridian, convergenceEccenDegRetinaByMeridian ] = createDisplacementModel( varargin )
 % createDisplacementModel -  Model retinal ganglion cell displacement.
 %
 % We begin with empirical measurements of cone and retinal ganglion cell
@@ -47,15 +47,15 @@ function [ meridianAngleSupport, regularSupportPosDegRetina, rgcDisplacementByMe
 % including in degrees in visual field and mm on the retina.
 %
 % OUTPUT
+%   rgcDisplacementByMeridian - an m x p matrix, where m is number of 
+%       meridians and p is the number of eccentricity positions (starting
+%       from zero) modeled. The values are the displacement in retinal
+%       degrees of the RGC soma away from the fovea.
 %   meridianAngleSupport - an m x 1 vector of polar angle values (in
 %       degrees) that are the support for the meridian positions modeled.
 %   regularSupportPosDegRetina - a 1 x p vector that contains the
 %       eccentricity in retinal degrees at which the model was evaluated
 %       along each meridian
-%   rgcDisplacementByMeridian - an m x p matrix, where m is number of 
-%       meridians and p is the number of eccentricity positions (starting
-%       from zero) modeled. The values are the displacement in retinal
-%       degrees of the RGC soma away from the fovea.
 %   mRGC_cumulativeByMeridian - an m x p matrix. The cumulative cell counts
 %       at each location.
 %   mRF_cumulativeByMeridian - an m x p matrix. The comulative cell counts
