@@ -5,9 +5,9 @@ function validation_CurcioAverages(varargin)
 % Christine Curcio's two 1990 J Comp Neurology papers to the averages that
 % we compute from the raw individual data that she has provided.
 %
-% We find that the reported RGC averages in the Curcio paper have some
-% slight differences at some points to the computed average. It seems
-% likely that the average values reported in the paper were derived from an
+% We find that the reported RGC averages in the Curcio paper have slight
+% differences at some points to the computed average. It seems likely that
+% the average values reported in the paper were derived from an
 % intermediate modeling step that we cannot currently reconstruct.
 
 %% Parse input and define variables

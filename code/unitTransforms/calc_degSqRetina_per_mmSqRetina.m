@@ -21,7 +21,7 @@ function degSqRetinaPerMmSqRetina = calc_degSqRetina_per_mmSqRetina(varargin)
 p = inputParser;
 
 % Optional anaysis params
-p.addParameter('radiusCurvatureRetinaMm',11.5566,@isnumeric);
+p.addParameter('radiusCurvatureRetinaMm',11.95,@isnumeric);
 
 % parse
 p.parse(varargin{:})

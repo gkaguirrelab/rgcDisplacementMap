@@ -21,7 +21,7 @@ function supportPosDegRetina = convert_mmRetina_to_degRetina(supportPosMmRetina,
 p = inputParser;
 
 % Optional anaysis params
-p.addParameter('radiusCurvatureRetinaMm',11.5566,@isnumeric);
+p.addParameter('radiusCurvatureRetinaMm',11.95,@isnumeric);
 
 % parse
 p.parse(varargin{:})
