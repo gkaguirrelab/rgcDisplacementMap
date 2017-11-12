@@ -298,7 +298,7 @@ for mm = 1:length(meridianAngleSupport)
     x0 = [rfInitialTransformParams rgcInitialTransformParams];
     
     % Set up the options
-    options = optimoptions('fmincon', 'Display', 'none', 'ConstraintTolerance', 0.1);
+    options = optimoptions('fmincon', 'Algorithm','sqp','Display', 'none', 'ConstraintTolerance', 0.1);
     
     % Fit that sucker
     [fitParamsByMeridian(mm,:), fValsByMeridian(mm)]  = fmincon(errorFunc,x0,[],[],[],[],lb,ub,nonlinconst,options);
