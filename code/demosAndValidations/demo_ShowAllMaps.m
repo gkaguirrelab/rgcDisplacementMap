@@ -181,12 +181,12 @@ for vv = 1:length(warpMapNameList)
     plot(opticDiscBoundaryArray(dashIndices,2),opticDiscBoundaryArray(dashIndices,1),'.','Color',opticDiscBorderColor);
     if p.Results.saveRasterPlots
         % save a rasterized figure without the optic disc marker
-        fileOutPath = fullfile(p.Results.pathToPlotOutputDirRoot,p.Results.subjectName,[titleString '.png']);
+        fileOutPath = fullfile(p.Results.pathToPlotOutputDirRoot,p.Results.subjectName,[titleString '_warped.png']);
         print(fileOutPath,'-dtiffn','-r300');
     end
     if p.Results.saveVectorPlots
         % save a vector figure with the optic disc marker
-        fileOutPath = fullfile(p.Results.pathToPlotOutputDirRoot,p.Results.subjectName,[titleString '.pdf']);
+        fileOutPath = fullfile(p.Results.pathToPlotOutputDirRoot,p.Results.subjectName,[titleString '_warped.pdf']);
         saveas(figHandle,fileOutPath)
     end
     close(figHandle);
