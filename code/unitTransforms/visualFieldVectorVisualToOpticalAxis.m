@@ -1,5 +1,5 @@
 function [ angleVisualToOpticalAxis, distanceDegVisualFieldVisualToOpticalAxis ] = visualFieldVectorVisualToOpticalAxis( varargin )
-% retinalVectorVisualToOpticalAxis
+% visualFieldVectorVisualToOpticalAxis
 %
 % Returns the polar angle and distance in degrees within the visual field
 % of the vector that arises at the visual axis of the eye and terminates at

@@ -4,13 +4,12 @@ function mmSqRetinaPerDegSqVisualRelativeToVisualAxis = calc_mmSqRetina_per_degS
 %   Returns the mm^2 on the retina per square degree of visual angle as a
 %   function of position in degrees visual angle relative to the visual
 %   axis of the eye. It is based on Appendix 6 of Watson 2014, which in
-%   turn is derived from Drasdo & Fowler 1974. Drasdo &
-%   Fowler's equation relates position on the retina to position in the
-%   visual field relative to the optic axis of the eye. Watson 2014
-%   observed that a correction (dependent on polar angle) is necessary to
-%   correct the conversion to be relative to the visual axis (which is
-%   otherwise assumed throughout this toolbox). We implement the full
-%   geometric correction here.
+%   turn is derived from Drasdo & Fowler 1974. Drasdo & Fowler's equation
+%   relates position on the retina to position in the visual field relative
+%   to the optic axis of the eye. Watson 2014 observed that a correction
+%   (dependent on polar angle) is necessary to correct the conversion to be
+%   relative to the visual axis (which is otherwise assumed throughout this
+%   toolbox). We implement the full geometric correction here.
 %
 % Inputs:
 %   supportPosDegVisualRelativeToVisualAxis - retinal postion(s) in
@@ -45,7 +44,8 @@ if polarAngle>360 || polarAngle<0
 end
 
 % Get the vector that connects the visual to optical axis
-[ angleVisualToOpticalAxis, distanceDegVisualFieldVisualToOpticalAxis ] = visualFieldVectorVisualToOpticalAxis();
+[ angleVisualToOpticalAxis, distanceDegVisualFieldVisualToOpticalAxis ] = ...
+    visualFieldVectorVisualToOpticalAxis();
 
 % Convert distances from visual axis to distances from optical axis
 supportPosDegVisualRelativeToOpticalAxis = ...
@@ -55,7 +55,8 @@ supportPosDegVisualRelativeToOpticalAxis = ...
     );
 
 % perform the computation
-mmSqRetinaPerDegSqVisualRelativeToVisualAxis = drasdoAndFowlerDegVisualSqToMmRetinaSq(supportPosDegVisualRelativeToOpticalAxis);
+mmSqRetinaPerDegSqVisualRelativeToVisualAxis = ...
+    drasdoAndFowlerDegVisualSqToMmRetinaSq(supportPosDegVisualRelativeToOpticalAxis);
 
 end % main function
 

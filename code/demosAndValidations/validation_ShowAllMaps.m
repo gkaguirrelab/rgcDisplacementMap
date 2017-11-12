@@ -109,7 +109,7 @@ for vv = 1:length(polarMapNameList)
     tmp = strsplit(polarMapNameList{vv},'ByMeridian');
     titleString=tmp{1};
     % Handle the special case of the clim for mRFtoConeDensityByMeridian
-    if strcmp(titleString,'mRFtoConeDensityByMeridian')
+    if strcmp(titleString,'mRFtoConeDensity')
         climVals(2)=2;
     end
     displayRetinalImage(mapImage, climVals, p.Results.displacementMapPixelsPerDegRetina, p.Results.maxModeledEccentricityDegreesRetina, titleString);
