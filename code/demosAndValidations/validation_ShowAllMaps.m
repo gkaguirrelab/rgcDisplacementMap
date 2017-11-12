@@ -77,7 +77,7 @@ for mm = 1:length(meridianAngleSupport)
 end
 
 % Define the image sample base for transform from polar coords
-imRdim = (p.Results.maxModeledEccentricity * p.Results.displacementMapPixelsPerDeg * 2) -1;
+imRdim = (p.Results.maxModeledEccentricityDegreesRetina * p.Results.displacementMapPixelsPerDegRetina * 2) -1;
 
 % Show and save the maps
 polarMapNameList = {...
@@ -112,7 +112,7 @@ for vv = 1:length(polarMapNameList)
     if strcmp(titleString,'mRFtoConeDensityByMeridian')
         climVals(2)=2;
     end
-    displayRetinalImage(mapImage, climVals, p.Results.displacementMapPixelsPerDeg, p.Results.maxModeledEccentricity, titleString);
+    displayRetinalImage(mapImage, climVals, p.Results.displacementMapPixelsPerDegRetina, p.Results.maxModeledEccentricityDegreesRetina, titleString);
     hold on
     if median(arrayfun(@(x) mapImage(opticDiscBoundaryArray(x,1),opticDiscBoundaryArray(x,2)),1:1:size(opticDiscBoundaryArray,1))) > max(climVals)/2
         opticDiscBorderColor = [0.25 0.25 0.25];
@@ -142,8 +142,8 @@ warpMapNameList = {...
     };
 
 % create a sample space for the warped map
-eccenExtent = p.Results.maxModeledEccentricity - (1/p.Results.displacementMapPixelsPerDeg)/2;
-smps = -eccenExtent+(1/p.Results.displacementMapPixelsPerDeg)/2:1/p.Results.displacementMapPixelsPerDeg:eccenExtent-(1/p.Results.displacementMapPixelsPerDeg)/2;
+eccenExtent = p.Results.maxModeledEccentricityDegreesRetina - (1/p.Results.displacementMapPixelsPerDegRetina)/2;
+smps = -eccenExtent+(1/p.Results.displacementMapPixelsPerDegRetina)/2:1/p.Results.displacementMapPixelsPerDegRetina:eccenExtent-(1/p.Results.displacementMapPixelsPerDegRetina)/2;
 [sampleBaseX,sampleBaseY] = meshgrid(smps,smps);
 
 % obtain the displacement map
@@ -159,7 +159,7 @@ for vv = 1:length(warpMapNameList)
     climVals = [0,ceil(max(max(smoothImage)))];
     tmp = strsplit(warpMapNameList{vv},'ByMeridian');
     titleString=tmp{1};
-    displayRetinalImage(smoothImage, climVals, p.Results.displacementMapPixelsPerDeg, p.Results.maxModeledEccentricity, ['warped ' tmp{1} ]);
+    displayRetinalImage(smoothImage, climVals, p.Results.displacementMapPixelsPerDegRetina, p.Results.maxModeledEccentricityDegreesRetina, ['warped ' tmp{1} ]);
     hold on
     if median(arrayfun(@(x) smoothImage(opticDiscBoundaryArray(x,1),opticDiscBoundaryArray(x,2)),1:1:size(opticDiscBoundaryArray,1))) > max(climVals)/2
         opticDiscBorderColor = [0.25 0.25 0.25];
@@ -193,7 +193,7 @@ figHandle = figure();
 figHandle.Renderer='Painters';
 climVals = [0, 1e4];
 titleString='mRGC_cumulative_warped_minus_mRF_cumulative';
-displayRetinalImage(smoothImage, climVals, p.Results.displacementMapPixelsPerDeg, p.Results.maxModeledEccentricity, titleString);
+displayRetinalImage(smoothImage, climVals, p.Results.displacementMapPixelsPerDegRetina, p.Results.maxModeledEccentricityDegreesRetina, titleString);
 hold on
 if median(arrayfun(@(x) smoothImage(opticDiscBoundaryArray(x,1),opticDiscBoundaryArray(x,2)),1:1:size(opticDiscBoundaryArray,1))) > max(climVals)/2
     opticDiscBorderColor = [0.25 0.25 0.25];
@@ -220,7 +220,7 @@ figHandle = figure();
 figHandle.Renderer='Painters';
 climVals = [0, 1e4];
 titleString='mRF_cumulative_minus_mRGC_cumulative_warped';
-displayRetinalImage(smoothImage, climVals, p.Results.displacementMapPixelsPerDeg, p.Results.maxModeledEccentricity, titleString);
+displayRetinalImage(smoothImage, climVals, p.Results.displacementMapPixelsPerDegRetina, p.Results.maxModeledEccentricityDegreesRetina, titleString);
 hold on
 if median(arrayfun(@(x) smoothImage(opticDiscBoundaryArray(x,1),opticDiscBoundaryArray(x,2)),1:1:size(opticDiscBoundaryArray,1))) > max(climVals)/2
     opticDiscBorderColor = [0.25 0.25 0.25];
