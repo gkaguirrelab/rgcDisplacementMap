@@ -20,9 +20,8 @@ c = colorbar;
 c.Label.String=titleString;
 xlabel('Position [retinal deg] nasal --> temporal');
 ylabel('Position [retinal deg] inferior --> superior');
-k=(xticks.*(1/pixelsPerDegree)) + (-1*maxEccentricity);
-xticklabels(string(k))
-yticklabels(string(fliplr(k)))
+xticklabels(string((xticks.*(1/pixelsPerDegree)) + (-1*maxEccentricity)));
+yticklabels(string( (xticks.*(1/pixelsPerDegree)) + (-1*maxEccentricity) - (maxEccentricity/length(xticks)) ));
 
 
 end

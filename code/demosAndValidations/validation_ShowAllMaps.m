@@ -9,7 +9,7 @@ p = inputParser; p.KeepUnmatched = true;
 % Optional anaysis params
 p.addParameter('sampleResolutionDegrees',0.01,@isnumeric);
 p.addParameter('maxModeledEccentricity',30,@isnumeric);
-p.addParameter('meridianAngleResolutionDeg',1,@isnumeric);
+p.addParameter('meridianAngleResolutionDeg',4,@isnumeric);
 p.addParameter('displacementMapPixelsPerDeg',10,@isnumeric);
 p.addParameter('subjectName', 'reportedAverage', @ischar);
 
@@ -132,6 +132,7 @@ for vv = 1:length(warpMapNameList)
     figHandle = figure();
     climVals = [0,ceil(max(max(smoothImage)))];
     tmp = strsplit(warpMapNameList{vv},'EachMeridian');
+    titleString=tmp{1};
     displayRetinalImage(smoothImage, climVals, p.Results.displacementMapPixelsPerDeg, p.Results.maxModeledEccentricity, ['warped ' tmp{1} ]);
     if p.Results.savePlots
         fileOutPath = fullfile(p.Results.pathToPlotOutputDirRoot,p.Results.subjectName,['warped' titleString '.pdf']);
