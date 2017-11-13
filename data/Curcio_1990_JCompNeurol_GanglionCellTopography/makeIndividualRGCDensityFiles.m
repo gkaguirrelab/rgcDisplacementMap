@@ -20,11 +20,11 @@ for tt = 1:length(tableFileNames)
             rowIdx=find( strcmp(table2array(T(:,1)),subjectName) .* strcmp(table2array(T(:,2)),thisMeridianName) );
             curcioRawRGCDensity.(lower(thisMeridianName)) = table2array(T(rowIdx,4:end));
         end
-        curcioRawRGCDensity.meta.subjectName = upper(subjectName);
+        curcioRawRGCDensity.meta.subjectName = subjectName;
         curcioRawRGCDensity.meta.dataTableName = tableFileNames{tt};
         curcioRawRGCDensity.meta.densityUnits = T.Units{rowIdx};
         curcioRawRGCDensity.meta.supportUnits = T.Units{1};
-        save([outputFileNameStem upper(subjectName)], 'curcioRawRGCDensity');
+        save([outputFileNameStem subjectName], 'curcioRawRGCDensity');
     end % loop over subjects
     
 end % loop over tables
