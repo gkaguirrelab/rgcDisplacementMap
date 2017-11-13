@@ -11,7 +11,7 @@ function demo_MeridianPlots(varargin)
 %   reportedAverage - the values reported in the Curcio 1990 papers
 %   computedAverage - our derivation of average values from the Curcio data
 %   29986A - data from subject 29986, averaged over both eyes.
-%   
+%   9387L - data from the left eye of subject 9387
 
 
 %% Parse input and define variables
