@@ -17,12 +17,12 @@ function opticDiscIndices = findOpticDiscPositions(regularSupportPosDegRetina, p
 % This paper provides mean (across subject) values for the distance of the
 % optic disc center from the fovea. From these values I derived the polar
 % angle (5.6° visual) and the eccentricity (15.5724° visual). The
-% eccentricity was then converted to retinal degrees.
+% eccentricity is then converted to retinal degrees.
 %
 % - Drasdo & Fowler 1974
 %
-% This paper provides the length (in mm) of the major (vertical) and minor
-% axes of the optic disc. These were converted to retinal degrees.
+% This paper provides the length (in mm) of the major (1.8 mm) and minor
+% (1.6 mm) axes of the optic disc. These are converted to retinal degrees.
 %
 % We assume that major axis of the optic disc is vertical (90°), but we are
 % aware that this can vary, and that in myopia the disc is noted to tilt
@@ -36,7 +36,14 @@ p.addRequired('regularSupportPosDeg',@isnumeric);
 p.addRequired('polarAngle',@isnumeric);
 
 % Optional analysis params
-p.addParameter('opticDiscParameters',struct('m',5.6,'e',21.1639,'major',9.2216,'minor',8.6762,'theta',90),@isstruct);
+p.addParameter('opticDiscParameters', ...
+    struct(...
+    'm',5.6, ...
+    'e',convert_mmRetina_to_degRetina(convert_degVisual_to_mmRetina(15.5724, 5.6)),...
+    'major',convert_mmRetina_to_degRetina(1.8),...
+    'minor',convert_mmRetina_to_degRetina(1.6),...
+    'theta',90),...
+    @isstruct);
 
 % parse
 p.parse(regularSupportPosDegRetina, polarAngle, varargin{:})
