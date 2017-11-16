@@ -48,6 +48,7 @@ end
 fprintf('\n');
 
 [Xout, Yout, Zout, Cmap] = sphere3d(fliplr(flipud(rgcDensityByMeridian))',0,deg2rad(23*15),deg2rad(-90),deg2rad(-60),10,.25,'surf',1e-6);
+set(findobj(gcf, 'type', 'surface'),'edgecolor','none');
 
 end
 
