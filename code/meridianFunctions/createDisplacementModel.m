@@ -149,9 +149,8 @@ p.addParameter('rgcDaceyInitialTransformParams',[4.2857 1.6],@(x)(isempty(x) | i
 p.addParameter('coneDensityDataFileName', [], @(x)(isempty(x) | ischar(x)));
 p.addParameter('rgcDensityDataFileName', [], @(x)(isempty(x) | ischar(x)));
 
-
 % Optional display params
-p.addParameter('verbose',true,@islogical);
+p.addParameter('verbose',false,@islogical);
 
 % parse
 p.parse(varargin{:})

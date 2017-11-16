@@ -7,7 +7,7 @@
 % degrees of the RGC soma away from the fovea. The next two variables are
 % the support for the m and p dimensions, respectively.
 [rgcDisplacementByMeridian, meridianAngleSupport, regularSupportPosDegRetina] = ...
-    createDisplacementModel();
+    createDisplacementModel('verbose',true);
 
 
 %% Display the displacement image
