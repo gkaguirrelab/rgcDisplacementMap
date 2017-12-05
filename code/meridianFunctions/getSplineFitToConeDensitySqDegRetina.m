@@ -1,21 +1,34 @@
 function [fitConeDensitySqDegRetina] = getSplineFitToConeDensitySqDegRetina(polarAngle, varargin)
-% getSplineFitToConeDensitySqDegRetina(angle)
+% Returns a fit to cone density data
 %
-% This routine returns a fit to cone density data. Raw cone density data
-% are taken from Curcio et al (1990) unless otherwise specified.
-% Fits to the cardinal meridians are obtained. Interpolation over the
-% parameters of the fit are used to produce a function that returns cone
-% density for an arbitrary meridian angle.
+% Description:
+%   This routine returns a fit to cone density data. Raw cone density data
+%   are taken from Curcio et al (1990) unless otherwise specified. Fits to
+%   the cardinal meridians are obtained. Interpolation over the parameters
+%   of the fit are used to produce a function that returns cone density for
+%   an arbitrary meridian angle.
 %
 % Inputs:
-%   polarAngle - The desired angle of the density function on the retinal
-%                 field. (0=nasal;90=superior;180=temporal;270=inferior)
-% Outputs:
-%   fitConeDensitySqDegRetina - handle of a fitting function that returns
-%       cone density values for the specified meridian angle across retinal
-%       eccentricity in polarAngle
+%   polarAngle            - The desired angle of the density function on 
+%                           the retinal field. (0=nasal;90=superior;
+%                           180=temporal;270=inferior)
 %
-% Options:
+% Optional key/value pairs:
+%  'cardinalMeridianAngles' - The polar angles corresponding to the
+%                           cardinal medians
+%  'splineKnots'          - The number of spline knots to use in the fit
+%  'splineOrder'          - The polynomial order of the spline
+%  'coneDensityDataFileName' - The filename of the cone density file to be
+%                           passed to loadRawConeDensityByEccen. If set to
+%                           empty, then the default setting in the load
+%                           routine will be used.
+%
+% Outputs:
+%	fitConeDensitySqDegRetina - handle of a fitting function that returns
+%                           rgc density values for the specified meridian
+%                           angle across retinal eccentricity in polarAngle
+%
+
 
 %% Parse input and define variables
 p = inputParser;
