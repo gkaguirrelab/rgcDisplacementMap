@@ -1,24 +1,29 @@
 function [fitRGCDensitySqDegRetina] = getSplineFitToRGCDensitySqDegRetina(polarAngle, varargin)
-% getSplineFitToRGCDensity(angle)
+% Returns a fit to RGC density data
 %
-% This routine returns a fit to RGC density data. Raw RGC density data are
-% taken from Curcio et al (1990) unless otherwise specified. Fits to the
-% cardinal meridians are obtained. Interpolation over the parameters of the
-% fit are used to produce a function that returns RGC density for an
-% arbitrary meridian angle.
+% Description:
+%   This routine returns a fit to RGC density data. Raw RGC density data
+%   are taken from Curcio et al (1990) unless otherwise specified. Fits to
+%   the cardinal meridians are obtained. Interpolation over the parameters
+%   of the fit are used to produce a function that returns RGC density for
+%   an arbitrary meridian angle.
 %
 % Inputs:
-%   polarAngle - The desired angle of the density function on the retinal field.
-%                (0=nasal;90=superior;180=temporal;270=inferior)
-% Outputs:
-%   fitRGCDensitySqDegRetina - handle of a fitting function that returns
-%       rgc density values for the specified meridian angle across retinal
-%       eccentricity in polarAngle
+%   polarAngle            - The desired angle of the density function on 
+%                           the retinal field. (0=nasal;90=superior;
+%                           180=temporal;270=inferior)
 %
-% Options:
-%   meridiansForKnotDefinition - We find that the knots must be defined
-%       using only the 180 and 270 degree meridians to produce knots that
-%       work for all meridians. This is a hack.
+% Optional key/value pairs:
+%  'meridiansForKnotDefinition' - We find that the knots must be defined
+%                           using only the 180 and 270 degree meridians to
+%                           produce knots that work for all meridians. This
+%                           is a hack.
+%
+% Outputs:
+%	fitRGCDensitySqDegRetina - handle of a fitting function that returns
+%                           rgc density values for the specified meridian
+%                           angle across retinal eccentricity in polarAngle
+%
 
 %% Parse input and define variables
 p = inputParser;

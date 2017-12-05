@@ -1,32 +1,59 @@
-
 function opticDiscIndices = findOpticDiscPositions(regularSupportPosDegRetina, polarAngle, varargin)
+% Model the spatial position of the optic disc on the retinal field
+%
+% Description:
+%   Returns a vector that indicates if a given location in the input vector
+%   of positions is located within the optic disc.
+%
+%   The default values were derived from the following sources:
+%
+%   K Rohrschneider. Determination of the Location of the Fovea on the
+%		Fundus. Invest. Ophthalmol. Vis. Sci. 2004;45(9):3257-3258
+%
+%       This paper provides mean (across subject) values for the distance
+%       of the optic disc center from the fovea. From these values I
+%       derived the polar angle (5.6° visual) and the eccentricity
+%       (15.5724° visual). The eccentricity is then converted to retinal
+%       degrees.
+%
+% 	Drasdo & Fowler 1974
+%
+%       This paper provides the length (in mm) of the major (1.8 mm) and
+%       minor (1.6 mm) axes of the optic disc. These are converted to
+%       retinal degrees.
+%
+%   We assume that major axis of the optic disc is vertical (90°), but we
+%   are aware that this can vary, and that in myopia the disc is noted to
+%   tilt towards the fovea.
+%
+% Inputs:
+%   regularSupportPosDegRetina - A 1 x p vector that contains the
+%                           eccentricity in retinal degrees at which to
+%                           determine the presence of the optic disc
+%   polarAngle            - A scalar that specifies the polar angle (in
+%                           degrees) for the meridian to be evalauted
+%
+% Optional key/value pairs:
+%   opticDiscParameters   - The model of the optic disc is govened by
+%                           [ m, e, major, minor, theta]:
+%                           m - meridian in degrees relative to the nasal
+%                               meridian
+%                           e - eccentricity of the center of the optic
+%                               disc in deg retina
+%                           major - length of the major axis in degrees
+%                               retina
+%                           minor - length of the minor axis in degrees 
+%                               retina
+%                           theta - orientation of the ellipse in meridian
+%                               degrees
+%
+% Outputs:
+%   opticDiscIndices      - A 1 x p vector (correspoinding to the input
+%                           regularSupportPosDegRetina) that indicates (1
+%                           or 0) if the optic disc is present at this
+%                           location
+%
 
-%   opticDiscParameters - The model of the optic disc is govened by:
-%       [ m, e, major, minor, theta]
-%           m - meridian in degrees relative to the nasal meridian
-%           e - eccentricity of the center of the optic disc in deg retina
-%           major - length of the major axis in degrees retina
-%           minor - length of the minor axis in degrees retina
-%           theta - orientation of the ellipse in meridian degrees
-%
-% The default values were derived from the following sources:
-%
-% - K Rohrschneider. Determination of the Location of the Fovea on the
-%	Fundus. Invest. Ophthalmol. Vis. Sci. 2004;45(9):3257-3258
-%
-% This paper provides mean (across subject) values for the distance of the
-% optic disc center from the fovea. From these values I derived the polar
-% angle (5.6° visual) and the eccentricity (15.5724° visual). The
-% eccentricity is then converted to retinal degrees.
-%
-% - Drasdo & Fowler 1974
-%
-% This paper provides the length (in mm) of the major (1.8 mm) and minor
-% (1.6 mm) axes of the optic disc. These are converted to retinal degrees.
-%
-% We assume that major axis of the optic disc is vertical (90°), but we are
-% aware that this can vary, and that in myopia the disc is noted to tilt
-% towards the fovea.
 
 %% Parse input and define variables
 p = inputParser;

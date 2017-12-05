@@ -1,133 +1,159 @@
 function [ rgcDisplacementByMeridian, meridianAngleSupport, regularSupportPosDegRetina, opticDiscLocationByMeridian, mRGC_cumulativeByMeridian, mRF_cumulativeByMeridian, fitParamsByMeridian, fValsByMeridian, convergenceEccenDegRetinaByMeridian ] = createDisplacementModel( varargin )
-% createDisplacementModel -  Model retinal ganglion cell displacement.
+% Creates a model of retinal ganglion cell displacement
 %
-% We begin with empirical measurements of cone and retinal ganglion cell
-% densities obtained from each of the four cardinal meridians of the human
-% retina. The data we use to build the model are from two papers published
-% by Curcio and colleagues in 1990.
+% Description:
+%   We begin with empirical measurements of cone and retinal ganglion cell
+%   densities obtained from each of the four cardinal meridians of the
+%   human retina. The data we use to build the model are from two papers
+%   published by Curcio and colleagues in 1990.
 %
-% We then engage in a modeling exercise to find a low-dimensional
-% parameterization that transform of cone density into midget ganglion cell
-% receptive field density (mRF) and of retinal ganglion cell density into
-% midget retinal ganglion cell density (mRGC). In each case, the models do
-% not make use of explicit information regarding the retinal position of
-% the measurement to be transformed.
+%   We then engage in a modeling exercise to find a low-dimensional
+%   parameterization that transforms cone density into midget ganglion
+%   cell receptive field density (mRF) and retinal ganglion cell density
+%   into midget retinal ganglion cell density (mRGC). In each case, the
+%   models do not make use of explicit information regarding the retinal
+%   position of the measurement to be transformed.
 %
-% We are then in a position to model mRGC and mRF density as a function of
-% cone and RGC density, subject to a small number of parameters. Each of
-% these functions in turn can be expressed as a cumulative mRGC and mRF
-% count across the radial eccentricity of the retina.
+%   We are then in a position to model mRGC and mRF density as a function
+%   of cone and RGC density, subject to a small number of parameters. Each
+%   of these functions in turn can be expressed as a cumulative mRGC and
+%   mRF count across the radial eccentricity of the retina.
 %
-% As described by Drasdo (2007), the cumulative counts of mRF and mRGCs
-% will become equal at the eccentricity at which the RGCs are no longer
-% displaced. Further, the mRF and mRGC cumulative counts should be
-% equivalent beyond this point.
+%   As described by Drasdo (2007), the cumulative counts of mRF and mRGCs
+%   will become equal at the eccentricity at which the RGCs are no longer
+%   displaced. Further, the mRF and mRGC cumulative counts should be
+%   equivalent beyond this point.
 %
-% We engage in a non-linear model fit of the parameters that transform cone
-% density --> mRF density and RGC density --> mRGC density, subject to the
-% constraint that the cumulative mRF density must be greater than the
-% cumulative mRGC density within the displacement zone, and we minimize an
-% error function defined as the difference in mRGC and mRF cumulative
-% counts beyond the displacement zone. We set a convergence target based
-% upon the empirical measurements of Drasdo 2007.
+%   We engage in a non-linear model fit of the parameters that transform
+%   cone density --> mRF density and RGC density --> mRGC density, subject
+%   to the constraint that the cumulative mRF density must be greater than
+%   the cumulative mRGC density within the displacement zone, and we
+%   minimize an error function defined as the difference in mRGC and mRF
+%   cumulative counts beyond the displacement zone. We set a convergence
+%   target based upon the empirical measurements of Drasdo 2007.
 %
-% We find that a single set of parameters that governs the RGC --> mRGC
-% transform is sufficient to model the data from all four meridians.
-% Further, we find sets of parameters that vary only slightly between the
-% meridians in the transform of cone density --> mRF density.
+%   We find that a single set of parameters that governs the RGC --> mRGC
+%   transform is sufficient to model the data from all four meridians.
+%   Further, we find sets of parameters that vary only slightly between the
+%   meridians in the transform of cone density --> mRF density.
 %
-% UNITS:
-% All position values are on the retinal field, assuming a spherical eye
-% with the origin at the visual axis. Polar angle is assigned zero for the
-% nasal meridian on the retina, 90 degrees for the superior meridian on the
-% retina, etc. Eccentricity is defined in degrees of distance from the
-% visual axis along the spherical retina away from the visual axis. The
-% radius of the eye in mm is set as a parameter in the unit conversion
-% routines. Some routines internally represent data in different units,
-% including in degrees in visual field and mm on the retina.
+% Notes:
+%   Units - All position values are on the retinal field, assuming a
+%   spherical eye with the origin at the visual axis. Polar angle is
+%   assigned zero for the nasal meridian on the retina, 90 degrees for the
+%   superior meridian on the retina, etc. Eccentricity is defined in
+%   degrees of distance from the visual axis along the spherical retina
+%   away from the visual axis. The radius of the eye in mm is set as a
+%   parameter in the unit conversion routines. Some routines internally
+%   represent data in different units, including in degrees in visual field
+%   and mm on the retina.
 %
-% OUTPUT
-%   rgcDisplacementByMeridian - an m x p matrix, where m is number of 
-%       meridians and p is the number of eccentricity positions (starting
-%       from zero) modeled. The values are the displacement in retinal
-%       degrees of the RGC soma away from the fovea.
-%   meridianAngleSupport - an m x 1 vector of polar angle values (in
-%       degrees) that are the support for the meridian positions modeled.
-%   regularSupportPosDegRetina - a 1 x p vector that contains the
-%       eccentricity in retinal degrees at which the model was evaluated
-%       along each meridian
-%   mRGC_cumulativeByMeridian - an m x p matrix. The cumulative cell counts
-%       at each location.
-%   mRF_cumulativeByMeridian - an m x p matrix. The comulative cell counts
-%       at each location.
-%   opticDiscLocationByMeridian - an m x p matrix. Is zero everywhere
-%       except at positions within the optic where it has a value of unity.
-%   fitParamsByMeridian - an m x k matrix, where m is the number of
-%       meridians and k is the number of parameters that define the linking
-%       functions that transform cone --> mRF and RGC --> mRGC.
-%   fValsByMeridian - an m x 1 vector with the values providing the error
-%       in minimizing the difference between mRF and mRGC cumulatives
-%       beyond the convergence point.
-%   convergenceEccenDegRetinaByMeridian - an m x 1 vector with the values
-%       providing the location (in retinal degrees) at whicih the mRGC and
-%       mRF cumulative functions were found to converge.
+% Inputs:
+%   None
+%
+% Optional key/value pairs:
+%  'sampleResolutionDegreesRetina' - The calculations are performed across
+%                           a regular sampling of eccentricity. This param
+%                           defines sample resolution The sample resolution
+%                           must be sufficient fine so that the cumulative
+%                           is an accurate estimate of the integral.
+%  'maxModeledEccentricityDegreesRetina' - The eccentricity extent of the
+%                           model. This value must be sufficiently beyond
+%                           the convergence zone so that there is a portion
+%                           of the cumulative to match between the mRF and
+%                           mRGC functions, but not so large as to venture
+%                           into the periphery where our transform models
+%                           are less accurate. We find that our results
+%                           depend in unpredictable ways on the particular
+%                           value selected, which is unfortunate.
+%  'targetConvergenceOnCardinalMeridiansDegRetina' - The point in degrees
+%                           at which displacement should become zero for
+%                           each cadinal meridian. The default values were
+%                           set by taking the apparent convergence points
+%                           from Figure 2 of Drasdo 2007, and converting
+%                           the values from mm retina to degrees retina.
+%                           This provided values for the nasal and temporal
+%                           meridians, and the inferior and superior
+%                           meridian target values are simply the
+%                           midpoints.
+%  'targetMaxDisplacementDegRetina' - The desired maximum displacement
+%                           value in retinal degrees. Taken from the maxium
+%                           y-axis value from Figure 2 of Drasdo 2007,
+%                           converted from mm retina to deg retina.
+%  'meridianAngleResolutionDeg' - The resolution across polar angle for
+%                           which displacements are calculated.
+%  'displacementMapPixelsPerDegRetina' - The resolution in pixels per degree
+%                           in which the displacement map is rendered.
+%  'cone_to_mRF_linkTolerance' - We derive initial parameters for the
+%                           linking function that converts cone density to
+%                           mRF density. These values are used as the
+%                           starting point for a search that aims to
+%                           produce convergence of the mRF and mRGC
+%                           cumulative functions (as well as other
+%                           constraints). This parameter defines the upper
+%                           and lower bounds for the search across the
+%                           parameters as a multiplicative function.
+%  'rgc_to_mRGC_linkTolerance' - Same as the prior param, except for the
+%                           linking function of mRGC to RGC density.
+%  'rgcLinkingFunctionFlavor' - Can use either the Dacey or Drasdo model to
+%                           define the mapping of RGC --> mRGC
+%  'rfInitialTransformParams' - Values for the linking function. If set to
+%                           empty, these will be calculated using the
+%                           develop model routine.
+%  'rgcDrasdoInitialTransformParams' - Values for the linking function. If
+%                           set to empty, these will be calculated using
+%                           the develop model routine.
+%  'rgcDaceyInitialTransformParams' - Values for the linking function. If
+%                           set to empty, these will be calculated using
+%                           the develop model routine. We find that our
+%                           model requires parameters quite different from
+%                           those that would be suggested by Dacey's
+%                           values, so we define the default parameters
+%                           here.
+%  'coneDensityDataFileName' - The full path to a file (in standard form)
+%                           the provides cone densities along the cardinal
+%                           meridians. If left empty, the computed average
+%                           Curcio values are used. Note that this setting
+%                           controls the input to the calculation of
+%                           displacement. The initial definition of the
+%                           linking function parameters are not changed by
+%                           this setting.
+%  'rgcDensityDataFileName' - As above, but for RGC density.
+%  'verbose'              - Do we give you the text?
 %
 %
-% OPTIONS
-%   sampleResolutionDegreesRetina - The calculations are performed across
-%       a regular sampling of eccentricity. This param defines sample
-%       resolution The sample resolution must be sufficient fine so that
-%       the cumulative is an accurate estimate of the integral.
-%   maxModeledEccentricityDegreesRetina - The eccentricity extent of the
-%       model. This value must be sufficiently beyond the convergence zone
-%       so that there is a portion of the cumulative to match between the
-%       mRF and mRGC functions, but not so large as to venture into the
-%       periphery where our transform models are less accurate. We find
-%       that our results depend in unpredictable ways on the particular
-%       value selected, which is unfortunate.
-%   targetConvergenceOnCardinalMeridiansDegRetina - The point in degrees
-%       at which displacement should become zero for each cadinal meridian.
-%       The default values were set by taking the apparent convergence
-%       points from Figure 2 of Drasdo 2007, and converting the values from
-%       mm retina to degrees retina. This provided values for the nasal and
-%       temporal meridians, and the inferior and superior meridian target
-%       values are simply the midpoints.
-%   targetMaxDisplacementDegRetina - The desired maximum displacement
-%       value in retinal degrees. Taken from the maxium y-axis value from
-%       Figure 2 of Drasdo 2007, converted from mm retina to deg retina.
-%   meridianAngleResolutionDeg - The resolution across polar angle for
-%       which displacements are calculated.
-%   displacementMapPixelsPerDegRetina - The resolution in pixels per degree
-%       in which the displacement map is rendered.
-%   cone_to_mRF_linkTolerance - We derive initial parameters for the
-%       linking function that converts cone density to mRF density. These
-%       values are used as the starting point for a search that aims to
-%       produce convergence of the mRF and mRGC cumulative functions (as
-%       well as other constraints). This parameter defines the upper and
-%       lower bounds for the search across the parameters as a
-%       multiplicative function.
-%   rgc_to_mRGC_linkTolerance - Same as the prior param, except for the
-%       linking function of mRGC to RGC density.
-%   rgcLinkingFunctionFlavor - Can use either the Dacey or Drasdo model to
-%       define the mapping of RGC --> mRGC
-%   rfInitialTransformParams - values for the linking function. If set to
-%       empty, these will be calculated using the develop model routine.
-%   rgcDrasdoInitialTransformParams - values for the linking function. If
-%       set to empty, these will be calculated using the develop model
-%       routine.
-%   rgcDaceyInitialTransformParams - values for the linking function. If
-%       set to empty, these will be calculated using the develop model
-%       routine. We find that our model requires parameters quite different
-%       from those that would be suggested by Dacey's values, so we define
-%       the default parameters here.
-%   coneDensityDataFileName - The full path to a file (in standard form)
-%       the provides cone densities along the cardinal meridians. If left
-%       empty, the computed average Curcio values are used. Note that this
-%       setting controls the input to the calculation of displacement. The
-%       initial definition of the linking function parameters are not
-%       changed by this setting.
-%   rgcDensityDataFileName - As above, but for RGC density.
-%   verbose - Do we give you the text?
+% Outputs:
+%   rgcDisplacementByMeridian - An m x p matrix, where m is number of 
+%                           meridians and p is the number of eccentricity
+%                           positions (starting from zero) modeled. The
+%                           values are the displacement in retinal degrees
+%                           of the RGC soma away from the fovea.
+%   meridianAngleSupport  - An m x 1 vector of polar angle values (in
+%                           degrees) that are the support for the meridian
+%                           positions modeled.
+%   regularSupportPosDegRetina - A 1 x p vector that contains the
+%                           eccentricity in retinal degrees at which the
+%                           model was evaluated along each meridian
+%   mRGC_cumulativeByMeridian - An m x p matrix. The cumulative cell counts
+%                           at each location.
+%   mRF_cumulativeByMeridian - An m x p matrix. The comulative cell counts
+%                           at each location.
+%   opticDiscLocationByMeridian - An m x p matrix. Is zero everywhere
+%                           except at positions within the optic where it
+%                           has a value of unity.
+%   fitParamsByMeridian   - An m x k matrix, where m is the number of
+%                           meridians and k is the number of parameters
+%                           that define the linking functions that
+%                           transform cone --> mRF and RGC --> mRGC.
+%   fValsByMeridian       - An m x 1 vector with the values providing the
+%                           error in minimizing the difference between mRF
+%                           and mRGC cumulatives beyond the convergence
+%                           point.
+%   convergenceEccenDegRetinaByMeridian - An m x 1 vector with the values
+%                           providing the location (in retinal degrees) at
+%                           whicih the mRGC and mRF cumulative functions
+%                           were found to converge.
+%
 
 %% Parse input and define variables
 p = inputParser; p.KeepUnmatched = true;
