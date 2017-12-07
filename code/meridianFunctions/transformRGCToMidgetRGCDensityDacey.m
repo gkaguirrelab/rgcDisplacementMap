@@ -56,7 +56,7 @@ function [ mRGCDensitySqDegRetina, midgetFraction ] = transformRGCToMidgetRGCDen
 p = inputParser;
 
 % required input
-p.addRequired('referenceEccenDegRetina',@isnumeric);
+p.addRequired('regularSupportPosDegRetina',@isnumeric);
 p.addRequired('rgcDensitySqDegRetina',@isnumeric);
 
 % Optional anaysis params
@@ -78,7 +78,7 @@ logisticFunc = fittype( @(slope,inflect,minMidgetFractionRatio,maxMidgetFraction
     'independent','x','dependent','y','problem',{'minMidgetFractionRatio','maxMidgetFractionRatio'});
 
 % Obtain the cumulative RGC function
-RGC_ringcount = calcCumulative(regularSupportPosDegRetina,rgcDensitySqDegRetina);
+RGC_ringcount = calcRingCumulative(regularSupportPosDegRetina,rgcDensitySqDegRetina);
 
 % Find the index position in the regularSupportPosDeg that is as close
 % as possible to the referenceEccenDegRetina
