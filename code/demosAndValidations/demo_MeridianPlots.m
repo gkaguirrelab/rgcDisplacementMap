@@ -193,7 +193,7 @@ for mm = 1:length(p.Results.cardinalMeridianAngles)
         zeroOpticDiscPoints(RGCDensitySqDegRetinaFit(regularSupportPosDegRetina),regularSupportPosDegRetina, meridianAngleSupport(mm));
 
     % Obtain the cumulative RGC function
-    RGC_ringcount = calcCumulative(regularSupportPosDegRetina,RGCDensityOverRegularSupport');
+    RGC_ringcount = calcRingCumulative(regularSupportPosDegRetina,RGCDensityOverRegularSupport');
     
     % Find the index position in the regularSupportPosDegRetina that is as close
     % as possible to the referenceEccenDegRetinaDegRetina
