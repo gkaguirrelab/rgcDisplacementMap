@@ -52,7 +52,7 @@ coneDensityDataFileName = fullfile([getpref('rgcDisplacementMap','LocalDataPath'
 rgcDensityDataFileName = fullfile([getpref('rgcDisplacementMap','LocalDataPath') , '/Curcio_1990_JCompNeurol_GanglionCellTopography/curcioRawRGCDensity_',p.Results.subjectName,'.mat']);
 
 % Create the displacement model
-[ rgcDisplacementByMeridian, meridianAngleSupport, regularSupportPosDegRetina, ~, mRGC_cumulativeByMeridian, mRF_cumulativeByMeridian, fitParamsByMeridian, ~, ~ ] = ...
+[ rgcDisplacementByMeridian, meridianAngleSupport, regularSupportPosDegRetina, ~, mRF_RingCumulativeByMeridian, mRGC_RingCumulativeByMeridian, fitParamsByMeridian, ~, ~ ] = ...
     createDisplacementModel(...
     'sampleResolutionDegreesRetina', p.Results.sampleResolutionDegreesRetina, ...
     'maxModeledEccentricityDegreesRetina', p.Results.maxModeledEccentricityDegreesRetina, ...
@@ -80,7 +80,7 @@ for mm = 1:length(p.Results.cardinalMeridianAngles)
     
     % Plot the cumulative functions
     subplot(length(p.Results.cardinalMeridianAngles),2,mm*2-1);
-    plot(regularSupportPosDegRetina,mRGC_cumulativeByMeridian(mm,:),'-k')
+    plot(regularSupportPosDegRetina,mRGC_RingCumulativeByMeridian(mm,:),'-k')
     axis off;
     title(p.Results.cardinalMeridianNames{mm});
     if mm == length(p.Results.cardinalMeridianAngles)
@@ -89,7 +89,7 @@ for mm = 1:length(p.Results.cardinalMeridianAngles)
         ylabel('cells per sector');
     end
     hold on
-    plot(regularSupportPosDegRetina,mRF_cumulativeByMeridian(mm,:),'-b')
+    plot(regularSupportPosDegRetina,mRF_RingCumulativeByMeridian(mm,:),'-b')
     ylim([0 8e5]);
     hold off
     drawnow

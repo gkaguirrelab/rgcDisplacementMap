@@ -1,4 +1,4 @@
-function [ rgcDisplacementByMeridian, meridianAngleSupport, regularSupportPosDegRetina, opticDiscLocationByMeridian, mRGC_RingCumulativeByMeridian, mRF_RingCumulativeByMeridian, fitParamsByMeridian, fValsByMeridian, convergenceEccenDegRetinaByMeridian ] = createDisplacementModel( varargin )
+function [ rgcDisplacementByMeridian, meridianAngleSupport, regularSupportPosDegRetina, opticDiscLocationByMeridian, mRF_RingCumulativeByMeridian, mRGC_RingCumulativeByMeridian, fitParamsByMeridian, fValsByMeridian, convergenceEccenDegRetinaByMeridian ] = createDisplacementModel( varargin )
 % Creates a model of retinal ganglion cell displacement
 %
 % Description:
@@ -134,10 +134,10 @@ function [ rgcDisplacementByMeridian, meridianAngleSupport, regularSupportPosDeg
 %   regularSupportPosDegRetina - A 1 x p vector that contains the
 %                           eccentricity in retinal degrees at which the
 %                           model was evaluated along each meridian
+%   mRF_cumulativeByMeridian - An m x p matrix. The cumulative RF counts
+%                           across areal rings at each location.
 %   mRGC_cumulativeByMeridian - An m x p matrix. The cumulative cell counts
-%                           at each location.
-%   mRF_cumulativeByMeridian - An m x p matrix. The comulative cell counts
-%                           at each location.
+%                           across areal rings at each location.
 %   opticDiscLocationByMeridian - An m x p matrix. Is zero everywhere
 %                           except at positions within the optic where it
 %                           has a value of unity.
