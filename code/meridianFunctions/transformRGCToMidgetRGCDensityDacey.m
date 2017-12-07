@@ -1,53 +1,63 @@
-function [ mRGCDensitySqDegRetina, midgetFraction ] = transformRGCToMidgetRGCDensity( regularSupportPosDegRetina, rgcDensitySqDegRetina, varargin )
-% transformRGCToMidgetRGCDensity( regularSupportPosDeg, rgcDensitySqDeg, varargin )
+function [ mRGCDensitySqDegRetina, midgetFraction ] = transformRGCToMidgetRGCDensityDacey( regularSupportPosDegRetina, rgcDensitySqDegRetina, varargin )
+% Transform a vector of RGC densities to midget RGC densities (Dacey)
 %
-% This function transforms a vector of RGC density measurements into
-% corresponding midget RGC density measurements. The eccentricity location
-% of the measurements are not used explicitly in the calculation, instead
-% the cumulative sum of the RGC density.
+% Description:
+%   This function transforms a vector of RGC density measurements into
+%   corresponding midget RGC density measurements. The eccentricity
+%   location of the measurements are not used explicitly in the
+%   calculation, instead the cumulative sum of the RGC density.
 %
-% This transformation is under the control of four parameters. Two of these
-% are the max and min midget ratios found in the fovea and periphery,
-% respectively; these are treated as fixed parameters of the model. The
-% other two parameters are the slope and inflection point of the logisitic
-% fit.
+%   This transformation is under the control of four parameters. Two of
+%   these are the max and min midget ratios found in the fovea and
+%   periphery, respectively; these are treated as fixed parameters of the
+%   model. The other two parameters are the slope and inflection point of
+%   the logisitic fit.
 %
-% If x is the proportion of the cumulative RGC density function at a given
-% location, then:
+%   If x is the proportion of the cumulative RGC density function at a
+%   given location, then:
 %
-%   midgetFraction = minMidgetFractionRatio+(maxMidgetFractionRatio-minMidgetFractionRatio)./(1+sign(x./inflect).*abs((x./inflect).^slope))
+%   midgetFraction = 
+%       minMidgetFractionRatio + 
+%       (maxMidgetFractionRatio-minMidgetFractionRatio) ./ 
+%       (1+sign(x./inflect).*abs((x./inflect).^slope))
 %
-% where inflect and slope are free paramters of the logisitic fit, and
-% maxMidgetFractionRatio and minMidgetFractionRatio are the values of the midget fraction at the fovea
-% and periphery, respectivey.
+%   where inflect and slope are free paramters of the logisitic fit, and
+%   maxMidgetFractionRatio and minMidgetFractionRatio are the values of the
+%   midget fraction at the fovea and periphery, respectivey.
 %
-% INPUT
-%   regularSupportPosDeg - The eccentricity values that support
-%       rgcDensitySqDeg.
-%   rgcDensitySqDeg - RGC density at each eccentricity location in units of
-%      cells / degree^2
+% Inputs:
+%   regularSupportPosDegRetina - A 1 x p vector that contains the
+%                           eccentricity in retinal degrees at which the
+%                           model was evaluated along each meridian
+%   rgcDensitySqDegRetina - A 1 x p vector of RGC density at each
+%                           eccentricity location in units of cells /
+%                           degree^2
 %
-% OUTPUT
-%   mRGCDensitySqDeg - midget RGC density at each eccentricity location
-%   midgetFraction - the midget fraction at each eccentricity location
+% Optional key/value pairs:
+%  'referenceEccenDegRetina' - The reference eccentricity for the
+%                           proportion of the cumulative RGC density. The
+%                           proportion function will have a value of unity
+%                           at this point.
+%  'maxMidgetFractionRatio' - The midget fraction assigned to the fovea
+%  'minMidgetFractionRatio' - The midget fraction assigned to the far
+%                           periphery
+%  'linkingFuncParams'    - The slope and inflection parameters that are
+%                           used in the logisitic function.
 %
-% OPTIONS
-%   referenceEccenDegRetina - the reference eccentricity for the proportion of
-%       the cumulative RGC density. The proportion function will have a
-%       value of unity at this point.
-%   maxMidgetFractionRatio - The midget fraction assigned to the fovea
-%   minMidgetFractionRatio - The midget fraction assigned to the far periphery
-%   linkingFuncParams - the slope and inflection parameters that are used in
-%       the logisitic function.
-%   verbose - Controls text output to console
-%   makePlots - Do we make a figure?
+% Outputs:
+%   mRGCDensitySqDegRetina - Midget RGC density at each eccentricity
+%                           location
+%   midgetFraction        - The midget fraction at each eccentricity
+%                           location
+%
+
 
 %% Parse input and define variables
 p = inputParser;
 
 % required input
-p.addRequired('regularSupportPosDeg',@isnumeric);
-p.addRequired('rgcDensitySqDeg',@isnumeric);
+p.addRequired('referenceEccenDegRetina',@isnumeric);
+p.addRequired('rgcDensitySqDegRetina',@isnumeric);
 
 % Optional anaysis params
 p.addParameter('referenceEccenDegRetina',15,@isnumeric);

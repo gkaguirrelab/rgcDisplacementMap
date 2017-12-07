@@ -1,4 +1,4 @@
-function [ rgcDisplacementByMeridian, meridianAngleSupport, regularSupportPosDegRetina, opticDiscLocationByMeridian, mRGC_cumulativeByMeridian, mRF_cumulativeByMeridian, fitParamsByMeridian, fValsByMeridian, convergenceEccenDegRetinaByMeridian ] = createDisplacementModel( varargin )
+function [ rgcDisplacementByMeridian, meridianAngleSupport, regularSupportPosDegRetina, opticDiscLocationByMeridian, mRGC_RingCumulativeByMeridian, mRF_RingCumulativeByMeridian, fitParamsByMeridian, fValsByMeridian, convergenceEccenDegRetinaByMeridian ] = createDisplacementModel( varargin )
 % Creates a model of retinal ganglion cell displacement
 %
 % Description:
@@ -207,8 +207,8 @@ targetConvergenceDegRetinaByMeridian = targetConvergenceByMeridianFit(meridianAn
 % go with Dacey or Drasdo model flavor
 fValsByMeridian = zeros(length(meridianAngleSupport),1);
 convergenceEccenDegRetinaByMeridian = zeros(length(meridianAngleSupport),1);
-mRGC_cumulativeByMeridian = zeros(length(meridianAngleSupport),length(regularSupportPosDegRetina));
-mRF_cumulativeByMeridian = zeros(length(meridianAngleSupport),length(regularSupportPosDegRetina));
+mRGC_RingCumulativeByMeridian = zeros(length(meridianAngleSupport),length(regularSupportPosDegRetina));
+mRF_RingCumulativeByMeridian = zeros(length(meridianAngleSupport),length(regularSupportPosDegRetina));
 rgcDisplacementByMeridian = zeros(length(meridianAngleSupport),length(regularSupportPosDegRetina));
 opticDiscLocationByMeridian = zeros(length(meridianAngleSupport),length(regularSupportPosDegRetina));
 
@@ -265,7 +265,7 @@ for mm = 1:length(meridianAngleSupport)
         @(fitParams) transformConeToMidgetRFDensity(coneDensityOverRegularSupport, ...
         'linkingFuncParams',fitParams(1:2));
     % Define anonymous function for the cumulative sum of mRF density
-    mRF_cumulative = @(fitParams) calcCumulative(regularSupportPosDegRetina, mRFDensityOverRegularSupport(fitParams));
+    mRF_RingCumulative = @(fitParams) calcRingCumulative(regularSupportPosDegRetina, mRFDensityOverRegularSupport(fitParams));
     
     
     %% mRGC_cumulative function
@@ -299,18 +299,18 @@ for mm = 1:length(meridianAngleSupport)
     end
 
     % Define anonymous function for the cumulative sum of mRGC density
-    mRGC_cumulative = @(fitParams) calcCumulative(regularSupportPosDegRetina, mRGCDensityOverRegularSupport(fitParams));
+    mRGC_RingCumulative = @(fitParams) calcRingCumulative(regularSupportPosDegRetina, mRGCDensityOverRegularSupport(fitParams));
     
     
     %% Non-linear constraint and error functions
     % Create a non-linear constraint that tests if the RF cumulative values
     % are greater than the RGC cumulative values at eccentricities less
     % than the displacement point
-    nonlinconst = @(fitParams) constrainCumulativeAndDisplacement(regularSupportPosDegRetina, mRF_cumulative(fitParams), mRGC_cumulative(fitParams), targetConvergenceDegRetinaByMeridian(mm), p.Results.targetMaxDisplacementDegRetina);
+    nonlinconst = @(fitParams) constrainCumulativeAndDisplacement(regularSupportPosDegRetina, mRF_RingCumulative(fitParams), mRGC_RingCumulative(fitParams), targetConvergenceDegRetinaByMeridian(mm), p.Results.targetMaxDisplacementDegRetina);
     
     % The error function acts to minimize the diffrence between the
     % mRF and mRGC cumulative functions past the displacement point
-    errorFunc = @(fitParams) errorMatchingRFandRGC(regularSupportPosDegRetina, mRF_cumulative(fitParams), mRGC_cumulative(fitParams), targetConvergenceDegRetinaByMeridian(mm));
+    errorFunc = @(fitParams) errorMatchingRFandRGC(regularSupportPosDegRetina, mRF_RingCumulative(fitParams), mRGC_RingCumulative(fitParams), targetConvergenceDegRetinaByMeridian(mm));
     
     
     %% Perform the fit
@@ -329,10 +329,10 @@ for mm = 1:length(meridianAngleSupport)
     [fitParamsByMeridian(mm,:), fValsByMeridian(mm)]  = fmincon(errorFunc,x0,[],[],[],[],lb,ub,nonlinconst,options);
     
     % Calculate and store the cumulative, displacement, and optic disc fxns
-    mRGC_cumulativeByMeridian(mm,:) = mRGC_cumulative(fitParamsByMeridian(mm,:));
-    mRF_cumulativeByMeridian(mm,:) = mRF_cumulative(fitParamsByMeridian(mm,:));
+    mRGC_RingCumulativeByMeridian(mm,:) = mRGC_RingCumulative(fitParamsByMeridian(mm,:));
+    mRF_RingCumulativeByMeridian(mm,:) = mRF_RingCumulative(fitParamsByMeridian(mm,:));
     rgcDisplacementByMeridian(mm,:) = ...
-        calcDisplacement(regularSupportPosDegRetina, mRGC_cumulative(fitParamsByMeridian(mm,:)), mRF_cumulative(fitParamsByMeridian(mm,:)));
+        calcDisplacement(regularSupportPosDegRetina, mRF_RingCumulative(fitParamsByMeridian(mm,:)), mRGC_RingCumulative(fitParamsByMeridian(mm,:)));
     opticDiscLocationByMeridian(mm,findOpticDiscPositions(regularSupportPosDegRetina, meridianAngleSupport(mm)))=1;
     
     % Report the results for this meridian
@@ -364,7 +364,7 @@ function vectorOut = zeroOpticDiscPoints(vectorIn, regularSupportPosDegRetina, p
 end
 
 
-function [c,ceq] = constrainCumulativeAndDisplacement(regularSupportPosDegRetina, countPerRingRF, countPerRingRGC, targetConvergencePointDegRetina, targetMaxDisplacementDegRetina)
+function [c,ceq] = constrainCumulativeAndDisplacement(regularSupportPosDegRetina, mRF_RingCumulative, mRGC_RingCumulative, targetConvergencePointDegRetina, targetMaxDisplacementDegRetina)
 % We implement two non-linear constraints. The first is that the mRGC
 % cumulative values should not exceed the mRF cumulative values at any
 % point prior to the convergence point. The second constraint is that the
@@ -376,24 +376,24 @@ function [c,ceq] = constrainCumulativeAndDisplacement(regularSupportPosDegRetina
 % values at eccentricities less than the displacementPoint, then this
 % violates the nonlinear fit constraint
 withinRangeIdx = find(regularSupportPosDegRetina < targetConvergencePointDegRetina);
-c = nansum(countPerRingRGC(withinRangeIdx) > countPerRingRF(withinRangeIdx));
+c = nansum(mRGC_RingCumulative(withinRangeIdx) > mRF_RingCumulative(withinRangeIdx));
 
 % Second constraint:
 % Calculate how many values in the displacement function exceed the maximum
 % desired displacement.
-displaceInDeg = calcDisplacement(regularSupportPosDegRetina, countPerRingRGC, countPerRingRF);
+displaceInDeg = calcDisplacement(regularSupportPosDegRetina, mRF_RingCumulative, mRGC_RingCumulative);
 ceq = nansum(displaceInDeg > targetMaxDisplacementDegRetina);
 
 end
 
 
-function error = errorMatchingRFandRGC(regularSupportPosDeg, countPerRingRF, countPerRingRGC, targetConvergencePointDegRetina)
-% The error is calculated as the RMSE of difference between the
+function error = errorMatchingRFandRGC(regularSupportPosDeg, mRF_RingCumulative, mRGC_RingCumulative, targetConvergencePointDegRetina)
+% The error is calculated as the RMSE of difference between the ring
 % cumulative RF and RGC counts at retinal positions past the point where
 % displacement should have ended
 
 withinRangeIdx = find(regularSupportPosDeg > targetConvergencePointDegRetina);
-error = sqrt(nanmean((countPerRingRGC(withinRangeIdx) - countPerRingRF(withinRangeIdx)).^2));
+error = sqrt(nanmean((mRGC_RingCumulative(withinRangeIdx) - mRF_RingCumulative(withinRangeIdx)).^2));
 end
 
 

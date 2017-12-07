@@ -1,12 +1,31 @@
 function midgetFraction = calcDaceyMidgetFractionByEccenDegRetina(supportPosDegRetina, varargin)
-% calcDaceyMidgetFractionByEccen - midget fraction as a function of eccentricity
+% Calculate the midget fraction as a function of eccentricity
 %
-% This routine returns, for each of the locations in supportPosDegRetina,
-% the fraction of retinal ganglion cells that are midget RGCs. The
-% calculation is based upon the values provided in Dacey (1993) J Neurosci.
-% A logisitic function is fit to the data from the Dacey paper which then
-% allows for interpolation to intermediate values.
+% Description:
+%   This routine returns, for each of the locations in supportPosDegRetina,
+%   the fraction of retinal ganglion cells that are midget RGCs. The
+%   calculation is based upon the values provided in Dacey (1993) J
+%   Neurosci. A logisitic function is fit to the data from the Dacey paper
+%   which then allows for interpolation to intermediate values.
 %
+% Inputs:
+%   supportPosDegRetina   - A 1 x p vector that identifies the eccentricity
+%                           positions (in retinal degrees relative to the 
+%                           fovea) at which to perform the calculation.
+%
+% Optional key/value pairs:
+%  'minRatio'             - The minimum value to use for the logistic fit
+%                           to the Dacey plot.
+%  'maxRatio'             - The maximum value to be used for the logistic 
+%                           fit to the Dacey plot.
+%  'logitFitStartPoint'   - Initial values to be used for the slope and 
+%                           inflection point values of the logisitic fit.
+%
+% Outputs:
+%   midgetFraction        - A 1 x p vector that contains the fraction of
+%                           midget receptive fields at each eccentricity
+%                           location.
+
 
 %% Parse input and define variables
 p = inputParser;

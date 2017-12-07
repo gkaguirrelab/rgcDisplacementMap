@@ -1,29 +1,50 @@
 function [ mRGCDensitySqDeg, midgetFraction ] = transformRGCToMidgetRGCDensityDrasdo( regularSupportPosDeg, rgcDensitySqDeg, varargin )
-% transformRGCToMidgetRGCDensity( regularSupportPosDeg, rgcDensitySqDeg, varargin )
+% Transform a vector of RGC densities to midget RGC densities (Drasdo)
 %
-% This function transforms a vector of RGC density measurements into
-% corresponding midget RGC density measurements. The eccentricity location
-% of the measurements are not used explicitly in the calculation, instead
-% the cumulative sum of the RGC density.
+% Description:
+%   This function transforms a vector of RGC density measurements into
+%   corresponding midget RGC density measurements. The eccentricity
+%   location of the measurements are not used explicitly in the
+%   calculation, instead the cumulative sum of the RGC density.
 %
-% This transformation is under the control of four parameters. The first is
-% the f0 value (from Eq 7 of Watson 2014 JoV) that defines the midget
-% fraction at the fovea. The next three are parameters of a reciprocal
-% function.
+%   This transformation is under the control of four parameters. The first is
+%   the f0 value (from Eq 7 of Watson 2014 JoV) that defines the midget
+%   fraction at the fovea. The next three are parameters of a reciprocal
+%   function.
 %
-% If x is the proportion of the cumulative RGC density function at a given
-% location, then:
+%   If x is the proportion of the cumulative RGC density function at a given
+%   location, then:
 %
-%   midgetFraction =  f0 - [(1./(a+(b.* log10(x) )))+c]
+%       midgetFraction =  f0 - [(1./(a+(b.* log10(x) )))+c]
 %
-% where f0 is the maximum midget fraction found at the fovea, given by
-% Watson / Drasdo as 0.8928.
+%   where f0 is the maximum midget fraction found at the fovea, given by
+%   Watson / Drasdo as 0.8928.
 %
-% INPUT
-%   regularSupportPosDeg - The eccentricity values that support
-%       rgcDensitySqDeg.
-%   rgcDensitySqDeg - RGC density at each eccentricity location in units of
-%      cells / degree^2
+% Inputs:
+%   regularSupportPosDegRetina - A 1 x p vector that contains the
+%                           eccentricity in retinal degrees at which the
+%                           model was evaluated along each meridian
+%   rgcDensitySqDegRetina - A 1 x p vector of RGC density at each
+%                           eccentricity location in units of cells /
+%                           degree^2
+%
+% Optional key/value pairs:
+%  'referenceEccenDegRetina' - The reference eccentricity for the
+%                           proportion of the cumulative RGC density. The
+%                           proportion function will have a value of unity
+%                           at this point.
+%  'maxMidgetFractionRatio' - The midget fraction assigned to the fovea
+%  'minMidgetFractionRatio' - The midget fraction assigned to the far
+%                           periphery
+%  'linkingFuncParams'    - The slope and inflection parameters that are
+%                           used in the logisitic function.
+%
+% Outputs:
+%   mRGCDensitySqDegRetina - Midget RGC density at each eccentricity
+%                           location
+%   midgetFraction        - The midget fraction at each eccentricity
+%                           location
+%
 %
 % OUTPUT
 %   mRGCDensitySqDeg - midget RGC density at each eccentricity location
@@ -47,7 +68,7 @@ p.addRequired('regularSupportPosDeg',@isnumeric);
 p.addRequired('rgcDensitySqDeg',@isnumeric);
 
 % Optional anaysis params
-p.addParameter('referenceEccen',15,@isnumeric);
+p.addParameter('referenceEccenDegRetina',15,@isnumeric);
 p.addParameter('watsonEq8_f0',0.8928,@isnumeric);
 p.addParameter('linkingFuncParams',[2.4026 -8.0877 -0.0139],@isnumeric);
 
@@ -66,7 +87,7 @@ RGC_ringcount = calcCumulative(regularSupportPosDeg,rgcDensitySqDeg);
 
 % Find the index position in the regularSupportPosDeg that is as close
 % as possible to the referenceEccen
-[ ~, refPointIdx ] = min(abs(regularSupportPosDeg-p.Results.referenceEccen));
+[ ~, refPointIdx ] = min(abs(regularSupportPosDeg-p.Results.referenceEccenDegRetina));
 % Calculate a proportion of the cumulative RGC density counts, relative
 % to the reference point (which is assigned a value of unity)
 propRGC_ringcount=RGC_ringcount./RGC_ringcount(refPointIdx);
