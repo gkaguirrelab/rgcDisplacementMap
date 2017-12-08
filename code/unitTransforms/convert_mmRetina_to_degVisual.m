@@ -1,7 +1,8 @@
 function supportPosDegVisualFieldRelativeToVisualAxis = convert_mmRetina_to_degVisual(supportPosMmRetinaRelativeToVisualAxis, polarAngle)
-% convert_mmRetina_to_degVisual
+% Convert mm on the retina to visual angle in degrees
 %
-%   Converts mm on the retina from the visual axis to visual angle in
+% Description:
+%	Converts mm on the retina from the visual axis to visual angle in
 %   degrees from the visual axis. It is based on Appendix 6 of Watson 2014.
 %   The core of the conversion is from Drasdo & Fowler 1974. Drasdo &
 %   Fowler's equation relates position on the retina to position in the
@@ -12,17 +13,18 @@ function supportPosDegVisualFieldRelativeToVisualAxis = convert_mmRetina_to_degV
 %   approximation to the correction; here we implement the full geometric
 %   correction.
 %
-%
-% Input:
+% Inputs:
 %   supportPosMmRetinaRelativeToVisualAxis - retinal postion(s) in
-%       milimeters relative to visual axis of the eye. Either scalar value
-%       or vector input accepted.
-%   polarAngle - the polarAngle of the meridian for which the conversion
-%       should be calculated. An arbitrary value between 0-360 is accepted.
-%       (0=nasal;90=superior;180=temporal;270=inferior)
+%                           milimeters relative to visual axis of the eye.
+%                           Either scalar value or vector input accepted.
+%   polarAngle            - The polar angle of the meridian for which the 
+%                           conversion should be calculated. An arbitrary
+%                           value between 0-360 is accepted. (0=nasal;
+%                           90=superior; 180=temporal; 270=inferior)
 %
-% Output:
-%   supportPosDegVisualFieldRelativeToVisualAxis
+% Outputs:
+%   supportPosDegVisualFieldRelativeToVisualAxis - A vector of locations in
+%                           the visual field
 %
 
 

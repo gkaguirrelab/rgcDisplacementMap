@@ -33,7 +33,7 @@ function [ angleVisualToOpticalAxis, distanceDegVisualFieldVisualToOpticalAxis ]
 %                           vector that connects the visual to the optical
 %                           axis of the eye
 %   distanceDegVisualFieldVisualToOpticalAxis - Distance (in degrees of
-%                           visual angle of this vector).
+%                           visual angle) of this vector
 %
 
 
