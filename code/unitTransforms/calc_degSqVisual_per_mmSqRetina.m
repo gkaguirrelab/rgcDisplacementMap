@@ -1,6 +1,7 @@
 function degSqVisualPerMmSqRetinaRelativeToVisualAxis = calc_degSqVisual_per_mmSqRetina(supportPosMmRetinaRelativeToVisualAxis, polarAngle)
-% calc_degSqVisual_per_mmSqRetina
+% Factor that expresses the deg^2 in the visual field per mm^2 retina
 %
+% Description:
 %   Returns the square degree of visual angle per mm^2 on the retina as a
 %   function of position in mm on the retina relative to the visual axis of
 %   the eye. It is based on Appendix 6 of Watson 2014, which in turn is
@@ -9,20 +10,24 @@ function degSqVisualPerMmSqRetinaRelativeToVisualAxis = calc_degSqVisual_per_mmS
 %   optic axis of the eye. Watson 2014 observed that a correction
 %   (dependent on polar angle) is necessary to correct the conversion to be
 %   relative to the visual axis (which is otherwise assumed throughout this
-%   toolbox).  We implement the full geometric correction here.
+%   toolbox).  Watson implemented an approximation to this correction; we
+%   implement the full geometric correction here.
 %
 % Inputs:
 %   supportPosMmRetinaRelativeToVisualAxis - retinal postion(s) in
-%       milimeters relative to visual axis of the eye. Either scalar value
-%       or vector input accepted.
-%   polarAngle - the polarAngle of the meridian for which the conversion
-%       should be calculated. An arbitrary value between 0-360 is accepted.
-%       (0=nasal;90=superior;180=temporal;270=inferior)
+%                           milimeters relative to visual axis of the eye.
+%                           Either scalar value or vector input accepted.
+%   polarAngle            - The polar angle of the meridian for which the
+%                           conversion should be calculated. An arbitrary
+%                           value between 0-360 is accepted. (0=nasal;
+%                           90=superior; 180=temporal; 270=inferior)
 %
-% OutPuts:
+% Outputs:
 %   degSqVisualPerMmSqRetinaRelativeToVisualAxis - the area in square
-%       degrees in the visual field corresponding to a square mm of retina
-%       at the locations corresponding to supportPosMmRetinaRelativeToVisualAxis
+%                           degrees in the visual field corresponding to a
+%                           square mm of retina at the locations
+%                           corresponding to
+%                           supportPosMmRetinaRelativeToVisualAxis
 %
 
 

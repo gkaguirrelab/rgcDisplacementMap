@@ -1,21 +1,24 @@
 function supportPosDegRetina = convert_mmRetina_to_degRetina(supportPosMmRetina, varargin)
-% convert_mmRetina_to_degRetina
+% Converts mm on the retina to degrees on the retina
 %
-%   Converts mm on the retina to degrees on the retina, assuming a
-%   spherical eye.
+% Description:
+%   Unit conversion from mm on the retina to degrees across the retina.
+%   The transformation assumes a spherical eye. The value used here is
+%   taken from Drasdo & Fowler 1974.
 %
-% Input: 
-%   supportPosMmRetina - Retinal postion(s) in milimeters. Either scalar value or
-%                     vector input accepted.
+% Inputs: 
+%   supportPosMmRetina    - Retinal postion(s) in milimeters. Either scalar
+%                           value or vector input accepted.
+% Optional key/value pairs:
+%  'radiusCurvatureRetinaMm'  - The value for the radius of curvature for 
+%                           the retina. The Table in Drasdo & Fowler 1974
+%                           offers a value of 11.95 for the "Centre of
+%                           curvature of the retina". It appears that the
+%                           Curcio 1990 papers use a value close to 11.5566
 %
-% Output: 
-%   supportPosDegRetina - Retinal postion(s) in degrees
+% Outputs: 
+%   supportPosDegRetina   - Retinal postion(s) in degrees
 %
-% Optional:
-%   radiusCurvatureRetinaMm - The value for the radius of curvature for the
-%       retina. The Table in Drasdo & Fowler 1974 offers a value of 11.95
-%       for the "Centre of curvature of the retina". It appears that the
-%       Curcio 1990 papers use a value close to 11.5566
 
 %% Parse input and define variables
 p = inputParser;
