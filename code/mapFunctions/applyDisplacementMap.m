@@ -1,14 +1,25 @@
 function [ outputImage ] = applyDisplacementMap( sourceImage, displacementMap, sampleBaseX, sampleBaseY )
-% applyDisplacementMap
-% Each point in the displacementMap is the magniude of a vector that is
-% directed towards the origin of the image. For each point in the
-% sourceImage, we calculate the distance (radius) of the point from the
-% origin. The new distance (radius) for that point will be the current
-% distance minus the magnitude of displacement. The new distance is then
-% decomposed into the X and Y axis components, using the property that the
-% ratio of the X and Y distances will be the same before and after
-% displacement.
-
+% Warp an input according to a calculated displacement map
+%
+% Description:
+%   Each point in the displacementMap is the magniude of a vector that is
+%   directed towards the origin of the image. For each point in the
+%   sourceImage, we calculate the distance (radius) of the point from the
+%   origin. The new distance (radius) for that point will be the current
+%   distance minus the magnitude of displacement. The new distance is then
+%   decomposed into the X and Y axis components, using the property that the
+%   ratio of the X and Y distances will be the same before and after
+%   displacement.
+%
+% Inputs:
+%   sourceImage             
+%   displacementMap         
+%   sampleBaseX             
+%   sampleBaseY             
+% 
+% Outputs:
+%   outputImage
+%
 
 % Calculate the radius for the displaced point
 radiusImage=sqrt(sampleBaseX.^2 + sampleBaseY.^2);
