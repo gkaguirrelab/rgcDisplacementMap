@@ -1,3 +1,12 @@
+% makeIndividualRGCDensityFiles
+% Produces .mat files that contain RGC density data
+%
+% Description:
+%   This routine operated upon an Excel spreadsheet of RGC density data
+%   and saves a set of labeled and organized .mat files that contain these
+%   data. It should not need to be run in the future, as its only purpose
+%   was to create the files that are now stored within this directory.
+%
 
 tableFileNames = {'DENSITY5_gc_resorted_computedAverage.xls','curcioReportedGCAverage.xls'};
 outputFileNameStem = 'curcioRawRGCDensity_';

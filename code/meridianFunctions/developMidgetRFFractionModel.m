@@ -1,79 +1,94 @@
 function [ fitParams, figHandle ] = developMidgetRFFractionModel( varargin )
-% developMidgetRFFractionModel( varargin )
+% Find parameters that transform cone density to midget RF density
 %
-% Examine the relationship between cone density and midget receptive field
-% density. Note that the mRF density reflects both the ratio of convergence
-% of cones onto retinal ganglion cells, as well as the fraction of retinal
-% ganglion cells at any one point that are midgets.
+% Description:
+%   Examine the relationship between cone density and midget receptive
+%   field density. Note that the mRF density reflects both the ratio of
+%   convergence of cones onto retinal ganglion cells, as well as the
+%   fraction of retinal ganglion cells at any one point that are midgets.
 %
-% This function and its companion (developMidgetRGCFractionModel) both
-% incorporate the effect of only a fraction of all RGCs being midget RGCs.
-% However, this function considers that fraction in relation to receptive
-% fields at cone locations, while the companion function expresses the
-% midget fraction in relation to the RGC cell bodies at their displaced
-% positions.
+%   This function and its companion (developMidgetRGCFractionModel) both
+%   incorporate the effect of only a fraction of all RGCs being midget
+%   RGCs. However, this function considers that fraction in relation to
+%   receptive fields at cone locations, while the companion function
+%   expresses the midget fraction in relation to the RGC cell bodies at
+%   their displaced positions.
 %
-% Watson (2014), citing Kolb & Dekorver (1991), asserts that the ratio of
-% mRFs cones at the fovea is 2:1. That is, each foveal cone provides input
-% to two mRGCs (an "on" and "off" cell). We adopt this constraint as well,
-% although we note that Watson's functions for mRF density have a
-% discontinuity at the fovea, in that his formula has the mRF:cone ratio
-% asymptote at ~1.9, and then jump to a value of 2 at the fovea.
+%   Watson (2014), citing Kolb & Dekorver (1991), asserts that the ratio of
+%   mRFs cones at the fovea is 2:1. That is, each foveal cone provides
+%   input to two mRGCs (an "on" and "off" cell). We adopt this constraint
+%   as well, although we note that Watson's functions for mRF density have
+%   a discontinuity at the fovea, in that his formula has the mRF:cone
+%   ratio asymptote at ~1.9, and then jump to a value of 2 at the fovea.
 %
-% For each meridian, We first load the Curcio cone density measurements.
-% These measurements are expressed at positions in retinal degrees. At each
-% of these retinal eccentricityt values, we also obtain the midgetRF
-% density. This is derived from Eq 8 of Watson 2014. However, Watson
-% expressed mRF density in terms of visual angle degrees. Therefore, we
-% must convert Watson's value to be the density of mRF in square retinal
-% degrees and at retinal eccentricities.
+%   For each meridian, We first load the Curcio cone density measurements.
+%   These measurements are expressed at positions in retinal degrees. At
+%   each of these retinal eccentricityt values, we also obtain the midgetRF
+%   density. This is derived from Eq 8 of Watson 2014. However, Watson
+%   expressed mRF density in terms of visual angle degrees. Therefore, we
+%   must convert Watson's value to be the density of mRF in square retinal
+%   degrees and at retinal eccentricities.
 %
-% We observe that the ratio of midgetRF density to cone density as a
-% function of log10 cone density is sigmoidal. To support generalization
-% across datasets, we express the x-axis as log10 of the proportion of
-% maximum cone density observed in the fovea. We then fit this relationship
-% with the function:
+%   We observe that the ratio of midgetRF density to cone density as a
+%   function of log10 cone density is sigmoidal. To support generalization
+%   across datasets, we express the x-axis as log10 of the proportion of
+%   maximum cone density observed in the fovea. We then fit this
+%   relationship with the function:
 %
-%	mRFtoConeDensityRatio = minMidgetRGCToConeRatio+(maxMidgetRGCToConeRatio-minMidgetRGCToConeRatio)./(1+(x./inflect).^slope)
+%	mRFtoConeDensityRatio = 
+%       minMidgetRGCToConeRatio + 
+%       (maxMidgetRGCToConeRatio - minMidgetRGCToConeRatio) ./ 
+%       (1+(x./inflect).^slope)
 %
-% where maxMidgetRGCToConeRatio and minMidgetRGCToConeRatio are locked parameters.
+%   where maxMidgetRGCToConeRatio and minMidgetRGCToConeRatio are locked
+%   parameters.
 %
-% We adopt a slightly negative minMidgetRGCToConeRatio to provide a better
-% fit of the sigmoid at the far periphery, although we observe that this
-% value is not physiologically meaningful. Effectively, our model returns
-% impossible values when the cone density reaches less than 1% of its peak
-% value at the fovea.
+%   We adopt a slightly negative minMidgetRGCToConeRatio to provide a
+%   better fit of the sigmoid at the far periphery, although we observe
+%   that this value is not physiologically meaningful. Effectively, our
+%   model returns impossible values when the cone density reaches less than
+%   1% of its peak value at the fovea.
 %
-% We calculate the fit of this function across each of the four meridians.
-% We observe that our functional form fits the data from the nasal,
-% temporal, and inferior meridians very well. The form for the superior
-% meridian is poorly fit by this model. Therefore, we take the median of
-% the two free fit parameters (slope and inflect) from just the three
-% well-modeled meridians and return these values.
+%   We calculate the fit of this function across each of the four
+%   meridians. We observe that our functional form fits the data from the
+%   nasal, temporal, and inferior meridians very well. The form for the
+%   superior meridian is poorly fit by this model. Therefore, we take the
+%   median of the two free fit parameters (slope and inflect) from just the
+%   three well-modeled meridians and return these values.
 %
+% Inputs:
+%   none
 %
-% OUTPUT
-%   fitParams - The median values of [slope inflect] across the four merdians
-%   figHandle - Handle to a figure showing the fits. Empty if no plotting
-%      requested.
+% Optional key/value pairs:
+%  'supportEccenMaxDegreesRetina' - The maximum eccentricity used for
+%                           modeling. This value should be sufficiently
+%                           high so that we are in the asymptote range of
+%                           cone density
+%  'meridianNames'        - Cell array of the text string names of the
+%                           meridians
+%  'meridianAngles'       - Polar angle values assigned to the meridians
+%  'meridiansIdxToUseForFitParams' - Index of the meridians from which we 
+%                           will calculate the median fit param values.
+%  'maxConeDensity'       - The maximum cone density at the fovea (counts / 
+%                           deg^2). The default value is derived from
+%                           Curcio 1990. If set to empty, the maximum value
+%                           from coneDensitySqDeg is used.
+%  'minMidgetRGCToConeRatio' - The minimum value of the mRF:cone density
+%                           ratio.
+%  'maxMidgetRGCToConeRatio' - The maximuim value of the mRF:cone density
+%                           ratio.
+%  'logitFitStartPoint'   - Initial values used for the slope and 
+%                           inflection point parameters of the logisic fit.
+%                           Hand-crafted after examination of typical data.
+%  'makePlots'            - Do we make a figure?
 %
-% OPTIONS
-%   supportEccenMaxDegreesRetina - the maximum eccentricity used for modeling.
-%       This value should be sufficiently high so that we are in the
-%       asymptote range of cone density
-%   meridianNames - Cell array of the text string names of the meridia
-%   meridianAngles - Polar angle values assigned to the meridians
-%   meridiansIdxToUseForFitParams - Index of the meridians from which we 
-%       will calculate the median fit param values.
-%   maxConeDensity - The maximum cone density at the fovea (couts / deg^2).
-%       The default value is from Curcio 1990. If set to empty, the maximum
-%       value from coneDensitySqDeg is used.
-%   minMidgetRGCToConeRatio - The minimum value of the mRF:cone density ratio.
-%   maxMidgetRGCToConeRatio - The maximuim value of the mRF:cone density ratio.
-%   logitFitStartPoint - initial values used for the slope and inflection
-%       point parameters of the logisic fit. Informed by examination of
-%       typical data.
-%   makePlots - Do we make a figure?
+% Outputs:
+%   fitParams             - The median values of [slope inflect] across the
+%                           merdians that were selected to be used
+%   figHandle             - Handle to a figure showing the fits. Empty if
+%                           no plotting requested.
+%
+
 
 %% Parse input and define variables
 p = inputParser;

@@ -10,21 +10,20 @@
     createDisplacementModel('verbose',true);
 
 
-%% Display the displacement image
-
-% Define the image sample base for transform from polar coords
-displacementMapPixelsPerRetinalDeg = 10;	% resolution of the image map;
+%% Convert from polar to image coordinates
+% Define the image sample base for transform from polar coords. We reduce
+% the resolution a bit to speed things up.
+displacementMapPixelsPerRetinalDeg = 10;
 maxModeledEccentricity = max(regularSupportPosDegRetina);
 imRdim = (maxModeledEccentricity * displacementMapPixelsPerRetinalDeg * 2) -1;
-
-% Convert from polar to image coordinates
 rgcDisplacementMap = ...
-    convertPolarMapToImageMap(rgcDisplacementByMeridian, imRdim);
+    convertPolarMapToImageMap(rgcDisplacementByMeridian,'imRdim',imRdim);
 
-% Display the map
+
+%% Display the map
 displayRetinalImage(...
     rgcDisplacementMap, ...                     % the image to be displayed
-    [0,4], ...                                  % color bar range
+    [0 4], ...                                  % min max of the color bar range
     displacementMapPixelsPerRetinalDeg, ...     % resolution of the image map
     maxModeledEccentricity, ...                 % the maximum eccentricity of the model
     'Displacement in retinal degrees');         % label for the color bar

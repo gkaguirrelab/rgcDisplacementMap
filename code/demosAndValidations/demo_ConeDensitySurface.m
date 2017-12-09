@@ -1,6 +1,9 @@
 function demo_ConeDensitySurface( varargin )
-%UNTITLED Summary of this function goes here
-%   Detailed explanation goes here
+% Create a curved, surface map of cone density
+%
+% Description:
+%   We do this.
+%
 
 
 

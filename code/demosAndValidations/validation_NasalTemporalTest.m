@@ -1,7 +1,12 @@
 function validation_NasalTemporalTest(varargin)
-
-% Steps through each routine and checks the returned values for the nasal
-% and temporal meridians against published values
+% Test if we have the correct assignment to the nasal and temporal retina
+%
+% Description:
+%   One can easily fall prey to mirror reversal confusion. Here, we check
+%   to make sure that our routines are returning values that reflect our
+%   representation of data as being on the nasal or temporal field of the
+%   retina.
+%
 
 
 %% Parse input and define variables

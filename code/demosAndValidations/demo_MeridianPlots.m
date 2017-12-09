@@ -1,17 +1,21 @@
 function demo_MeridianPlots(varargin)
-% demo_MeridianPlots - Model performance on the cardinal meridians
+% Demonstrate model performance on the cardinal meridians
 %
-% This validation function runs the displacement model for each of the
-% cardinal meridians and then saves a set of plots that illustrate the
-% results. The analysis parameters are explicitly defined here and then
-% passed to the main, createDisplacementModel routine.
+% Description:
+%   This validation function runs the displacement model for each of the
+%   cardinal meridians and then saves a set of plots that illustrate the
+%   results. The analysis parameters are explicitly defined here and then
+%   passed to the main, createDisplacementModel routine.
 %
-% The "subjectName" corresponds to one of the Curcio 1990 datasets present
-% within the data directory of this toolbox. Typical options include:
-%   reportedAverage - the values reported in the Curcio 1990 papers
-%   computedAverage - our derivation of average values from the Curcio data
-%   29986A - data from subject 29986, averaged over both eyes.
-%   9387L - data from the left eye of subject 9387
+%   The "subjectName" corresponds to one of the Curcio 1990 datasets
+%   present within the data directory of this toolbox. Typical options
+%   include:
+%       reportedAverage   - The values reported in the Curcio 1990 papers
+%       computedAverage   - Our derivation of average values from the 
+%                           Curcio data
+%       29986A            - Data from subject 29986, averaged over both
+%                           eyes
+%
 
 
 %% Parse input and define variables
@@ -52,7 +56,7 @@ coneDensityDataFileName = fullfile([getpref('rgcDisplacementMap','LocalDataPath'
 rgcDensityDataFileName = fullfile([getpref('rgcDisplacementMap','LocalDataPath') , '/Curcio_1990_JCompNeurol_GanglionCellTopography/curcioRawRGCDensity_',p.Results.subjectName,'.mat']);
 
 % Create the displacement model
-[ rgcDisplacementByMeridian, meridianAngleSupport, regularSupportPosDegRetina, ~, mRGC_cumulativeByMeridian, mRF_cumulativeByMeridian, fitParamsByMeridian, ~, ~ ] = ...
+[ rgcDisplacementByMeridian, meridianAngleSupport, regularSupportPosDegRetina, ~, mRF_RingCumulativeByMeridian, mRGC_RingCumulativeByMeridian, fitParamsByMeridian, ~, ~ ] = ...
     createDisplacementModel(...
     'sampleResolutionDegreesRetina', p.Results.sampleResolutionDegreesRetina, ...
     'maxModeledEccentricityDegreesRetina', p.Results.maxModeledEccentricityDegreesRetina, ...
@@ -80,7 +84,7 @@ for mm = 1:length(p.Results.cardinalMeridianAngles)
     
     % Plot the cumulative functions
     subplot(length(p.Results.cardinalMeridianAngles),2,mm*2-1);
-    plot(regularSupportPosDegRetina,mRGC_cumulativeByMeridian(mm,:),'-k')
+    plot(regularSupportPosDegRetina,mRGC_RingCumulativeByMeridian(mm,:),'-k')
     axis off;
     title(p.Results.cardinalMeridianNames{mm});
     if mm == length(p.Results.cardinalMeridianAngles)
@@ -89,7 +93,7 @@ for mm = 1:length(p.Results.cardinalMeridianAngles)
         ylabel('cells per sector');
     end
     hold on
-    plot(regularSupportPosDegRetina,mRF_cumulativeByMeridian(mm,:),'-b')
+    plot(regularSupportPosDegRetina,mRF_RingCumulativeByMeridian(mm,:),'-b')
     ylim([0 8e5]);
     hold off
     drawnow
@@ -193,7 +197,7 @@ for mm = 1:length(p.Results.cardinalMeridianAngles)
         zeroOpticDiscPoints(RGCDensitySqDegRetinaFit(regularSupportPosDegRetina),regularSupportPosDegRetina, meridianAngleSupport(mm));
 
     % Obtain the cumulative RGC function
-    RGC_ringcount = calcCumulative(regularSupportPosDegRetina,RGCDensityOverRegularSupport');
+    RGC_ringcount = calcRingCumulative(regularSupportPosDegRetina,RGCDensityOverRegularSupport');
     
     % Find the index position in the regularSupportPosDegRetina that is as close
     % as possible to the referenceEccenDegRetinaDegRetina

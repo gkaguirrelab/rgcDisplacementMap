@@ -1,24 +1,39 @@
 function [fitRGCDensitySqDegRetina] = getSplineFitToRGCDensitySqDegRetina(polarAngle, varargin)
-% getSplineFitToRGCDensity(angle)
+% Returns a fit to RGC density data
 %
-% This routine returns a fit to RGC density data. Raw RGC density data are
-% taken from Curcio et al (1990) unless otherwise specified. Fits to the
-% cardinal meridians are obtained. Interpolation over the parameters of the
-% fit are used to produce a function that returns RGC density for an
-% arbitrary meridian angle.
+% Description:
+%   This routine returns a fit to RGC density data. Raw RGC density data
+%   are taken from Curcio et al (1990) unless otherwise specified. Fits to
+%   the cardinal meridians are obtained. Interpolation over the parameters
+%   of the fit are used to produce a function that returns RGC density for
+%   an arbitrary meridian angle.
 %
 % Inputs:
-%   polarAngle - The desired angle of the density function on the retinal field.
-%                (0=nasal;90=superior;180=temporal;270=inferior)
-% Outputs:
-%   fitRGCDensitySqDegRetina - handle of a fitting function that returns
-%       rgc density values for the specified meridian angle across retinal
-%       eccentricity in polarAngle
+%   polarAngle            - The desired angle of the density function on 
+%                           the retinal field. (0=nasal;90=superior;
+%                           180=temporal;270=inferior)
 %
-% Options:
-%   meridiansForKnotDefinition - We find that the knots must be defined
-%       using only the 180 and 270 degree meridians to produce knots that
-%       work for all meridians. This is a hack.
+% Optional key/value pairs:
+%  'cardinalMeridianAngles' - The polar angles corresponding to the
+%                           cardinal medians
+%  'splineKnots'          - The number of spline knots to use in the fit
+%  'splineOrder'          - The polynomial order of the spline
+%  'rgcDensityDataFileName' - The filename of the RGC density file to be
+%                           passed to loadRawRGCDensityByEccen. If set to
+%                           empty, then the default setting in the load
+%                           routine will be used.
+%  'meridiansForKnotDefinition' - We find that the knots must be defined
+%                           using only the 180 and 270 degree meridians to
+%                           produce knots that work for all meridians. This
+%                           is a hack. The indices set here point to these
+%                           poar angles in the cardinalMeridianAngles
+%                           vector.
+%
+% Outputs:
+%	fitRGCDensitySqDegRetina - handle of a fitting function that returns
+%                           rgc density values for the specified meridian
+%                           angle across retinal eccentricity in polarAngle
+%
 
 %% Parse input and define variables
 p = inputParser;
@@ -27,19 +42,18 @@ p = inputParser;
 p.addRequired('polarAngle',@isnumeric);
 
 % Optional analysis params
-p.addParameter('meridianNames',{'nasal' 'superior' 'temporal' 'inferior'},@iscell);
-p.addParameter('meridianAngles',[0, 90, 180, 270],@isnumeric);
-p.addParameter('meridiansForKnotDefinition',[3,4],@isnumeric);
+p.addParameter('cardinalMeridianAngles',[0, 90, 180, 270],@isnumeric);
 p.addParameter('splineKnots',18,@isnumeric);
 p.addParameter('splineOrder',4,@isnumeric);
 p.addParameter('rgcDensityDataFileName', [], @(x)(isempty(x) | ischar(x)));
+p.addParameter('meridiansForKnotDefinition',[3,4],@isnumeric);
 
 % parse
 p.parse(polarAngle,varargin{:})
 
 
 %% sanity check the input
-if p.Results.meridianAngles ~= 0
+if p.Results.cardinalMeridianAngles ~= 0
     error('This routine assumes that the first meridian is polar angle = 0');
 end
 
@@ -52,11 +66,11 @@ for mm=p.Results.meridiansForKnotDefinition(1):p.Results.meridiansForKnotDefinit
     if isempty(p.Results.rgcDensityDataFileName)
         % load the empirical RGC density measured by Curcio
         [rgcDensitySqDegRetina, rgcNativeSupportPosDegRetina] = ...
-            loadRawRGCDensityByEccen(p.Results.meridianAngles(mm));
+            loadRawRGCDensityByEccen(p.Results.cardinalMeridianAngles(mm));
     else
         % or the passed RGC density measurement
         [rgcDensitySqDegRetina, rgcNativeSupportPosDegRetina] = ...
-            loadRawRGCDensityByEccen(p.Results.meridianAngles(mm), ...
+            loadRawRGCDensityByEccen(p.Results.cardinalMeridianAngles(mm), ...
             'rgcDensityDataFileName', p.Results.rgcDensityDataFileName);
     end
     % remove nan values
@@ -73,10 +87,10 @@ knots = BformSplineFit.knots;
 
 % Loop across the cardinal meridians again, and now perform the spline fit
 % with the specified knots
-for mm=1:length(p.Results.meridianAngles)
+for mm=1:length(p.Results.cardinalMeridianAngles)
     % load the empirical rgc density measured by Curcio
     [rgcDensitySqDegRetina, rgcNativeSupportPosDegRetina] = ...
-        loadRawRGCDensityByEccen(p.Results.meridianAngles(mm));
+        loadRawRGCDensityByEccen(p.Results.cardinalMeridianAngles(mm));
     % remove nan values
     isvalididx=find(~isnan(rgcDensitySqDegRetina));
     rgcNativeSupportPosDegRetina = rgcNativeSupportPosDegRetina(isvalididx);
@@ -102,7 +116,7 @@ interpCoefs = zeros(size(ppFormSplineFits{1}.coefs));
 
 % replicate the values for polar angle zero at polar angle 360 to allow a
 % wrap-around fit
-angleBase=[p.Results.meridianAngles 360];
+angleBase=[p.Results.cardinalMeridianAngles 360];
 
 % loop over each element of the coefficient matrix
 for cc=1:numel(interpCoefs)

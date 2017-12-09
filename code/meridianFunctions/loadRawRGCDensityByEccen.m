@@ -1,37 +1,41 @@
 function [rgcDensitySqDegRetina, supportPosDegRetina] = loadRawRGCDensityByEccen(polarAngle, varargin)
-% loadRawRGCDensityByEccen(polarAngle)
+% Load RGC density data from a file in standardized format
 %
-% This routine loads RGC density data from a file in standardized format.
-% The file must be a .mat file that contains a single variable that it
-% itself a structure, containing the fields:
+% Description:
+%   This routine loads RGC density data from a file in standardized format.
+%   The file must be a .mat file that contains a single variable that it
+%   itself a structure, containing the fields:
 %
-%   support
-%   inferior
-%   superior
-%   nasal
-%   temporal
-%   meta
+%       support
+%       inferior
+%       superior
+%       nasal
+%       temporal
+%       meta
 %
-% All fields except for meta contain a [1 x n] row-array of values. All
-% these array fields must be of the same size.
+%   All fields except for meta contain a [1 x n] row-array of values. All
+%   these array fields must be of the same size.
 %
-% The meta field must contain entries for densityUnits and supportUnits,
-% and these entries must be one of the approved types.
-%
+%   The meta field must contain entries for densityUnits and supportUnits,
+%   and these entries must be one of the approved types.
 %
 % Inputs:
-%   polarAngle - The desired angle of the density function on the retinal field.
-%                (0=nasal;90=superior;180=temporal;270=inferior)
+%   polarAngle            - The desired angle of the density function on
+%                           the retinal field. (0=nasal; 90=superior;
+%                           180=temporal; 270=inferior)
+%
+% Optional key/value pairs:
+%  rgcDensityDataFileName - The full path to the data file. The default
+%                           value assigned here is the average RGC density
+%                           reported in Curcio 1990.
 %
 % Outputs:
-%   rgcDensitySqDegRetina - the density (counts per square degree) of RGCs at
-%       each of the positions
-%   supportPosDegRetina - the positions (in degrees of retinal angle) from the
-%       fovea at which the RGC density is defined
+%   rgcDensitySqDegRetina - The density (counts per square degree) of RGCs
+%                           at each of the positions
+%   supportPosDegRetina   - The positions (in degrees of retinal angle)
+%                           from the fovea at which the RGC density is
+%                           defined
 %
-% Options:
-%  rgcDensityDataFileName - The full path to the data file. The default value
-%       assigned here is the average RGC density reported in Curcio 1990.
 
 
 %% Parse input and define variables

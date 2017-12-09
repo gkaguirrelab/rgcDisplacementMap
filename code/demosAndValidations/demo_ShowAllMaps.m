@@ -1,18 +1,23 @@
 function demo_ShowAllMaps(varargin)
-% demo_ShowAllMaps - Model output in image maps
+% Displays and saves maps of retinal cell density and RGC displacement
 %
-% This validation function runs the displacement model for each of many
-% meridian values and then converts the model output to images which are
-% displayed and optionally saved to disk. The analysis parameters are
-% explicitly defined here and then passed to the main,
-% createDisplacementModel routine.
+% Description:
+%	This validation function runs the displacement model for each of many
+%	meridian values and then converts the model output to images which are
+%	displayed and optionally saved to disk. The analysis parameters are
+%   explicitly defined here and then passed to the main,
+%   createDisplacementModel routine.
 %
-% The "subjectName" corresponds to one of the Curcio 1990 datasets present
-% within the data directory of this toolbox. Typical options include:
-%   reportedAverage - the values reported in the Curcio 1990 papers
-%   computedAverage - our derivation of average values from the Curcio data
-%   29986A - data from subject 29986, averaged over both eyes.
-%   
+%   The "subjectName" corresponds to one of the Curcio 1990 datasets
+%   present within the data directory of this toolbox. Typical options
+%   include:
+%       reportedAverage   - The values reported in the Curcio 1990 papers
+%       computedAverage   - Our derivation of average values from the 
+%                           Curcio data
+%       29986A            - Data from subject 29986, averaged over both
+%                           eyes
+%
+
 
 %% Parse input and define variables
 p = inputParser; p.KeepUnmatched = true;
@@ -50,7 +55,7 @@ coneDensityDataFileName = fullfile([getpref('rgcDisplacementMap','LocalDataPath'
 rgcDensityDataFileName = fullfile([getpref('rgcDisplacementMap','LocalDataPath') , '/Curcio_1990_JCompNeurol_GanglionCellTopography/curcioRawRGCDensity_',p.Results.subjectName,'.mat']);
 
 % Create the displacement model
-[ rgcDisplacementByMeridian, meridianAngleSupport, regularSupportPosDegRetina, opticDiscLocationByMeridian, mRGC_cumulativeByMeridian, mRF_cumulativeByMeridian, fitParamsByMeridian, ~, ~ ] = ...
+[ rgcDisplacementByMeridian, meridianAngleSupport, regularSupportPosDegRetina, opticDiscLocationByMeridian, mRF_RingCumulativeByMeridian, mRGC_RingCumulativeByMeridian, fitParamsByMeridian, ~, ~ ] = ...
     createDisplacementModel(...
     'sampleResolutionDegreesRetina', p.Results.sampleResolutionDegreesRetina, ...
     'maxModeledEccentricityDegreesRetina', p.Results.maxModeledEccentricityDegreesRetina, ...
@@ -105,7 +110,7 @@ polarMapNameList = {...
 
 % Obtain the boundary of the optic disc in image space. We have to reverse
 % the boundary array for the y-axis to match our image convention
-opticDiscLocationsImage = convertPolarMapToImageMap(opticDiscLocationByMeridian, imRdim);
+opticDiscLocationsImage = convertPolarMapToImageMap(opticDiscLocationByMeridian, 'imRdim', imRdim);
 opticDiscBoundary = bwboundaries(imbinarize(opticDiscLocationsImage),'noholes');
 opticDiscBoundaryArray = opticDiscBoundary{1};
 opticDiscBoundaryArray(:,1)=imRdim(1)-opticDiscBoundaryArray(:,1);
@@ -113,7 +118,7 @@ dashIndices=1:10:size(opticDiscBoundaryArray,1);
 
 % loop over the maps
 for vv = 1:length(polarMapNameList)
-    mapImage = feval('convertPolarMapToImageMap', eval(polarMapNameList{vv}), imRdim);
+    mapImage = feval('convertPolarMapToImageMap', eval(polarMapNameList{vv}), 'imRdim', imRdim);
     figHandle = figure();
     figHandle.Renderer='Painters';
     climVals = [0,ceil(max(max(mapImage)))];
@@ -158,11 +163,11 @@ smps = -eccenExtent+(1/p.Results.displacementMapPixelsPerDegRetina)/2:1/p.Result
 [sampleBaseX,sampleBaseY] = meshgrid(smps,smps);
 
 % obtain the displacement map
-displacementMapDeg = convertPolarMapToImageMap( rgcDisplacementByMeridian, imRdim);
+displacementMapDeg = convertPolarMapToImageMap( rgcDisplacementByMeridian, 'imRdim', imRdim);
 
 % loop over the maps
 for vv = 1:length(warpMapNameList)
-    mapImage = feval('convertPolarMapToImageMap', eval(warpMapNameList{vv}), imRdim);
+    mapImage = feval('convertPolarMapToImageMap', eval(warpMapNameList{vv}), 'imRdim', imRdim);
     warpImage = applyDisplacementMap( mapImage, displacementMapDeg, sampleBaseX, sampleBaseY );
     smoothImage = fillAndSmoothMap(warpImage,sampleBaseX,sampleBaseY);
     figHandle = figure();
@@ -194,9 +199,9 @@ end % loop over maps to warp
 
 % Make an image which is the difference between the warped mRGC_cumulative
 % map and the mRF_cumulative
-mapImageA = convertPolarMapToImageMap(mRF_cumulativeByMeridian, imRdim);
+mapImageA = convertPolarMapToImageMap(mRF_RingCumulativeByMeridian, 'imRdim', imRdim);
 mapImageB = applyDisplacementMap( ...
-    convertPolarMapToImageMap(mRGC_cumulativeByMeridian, imRdim), ...
+    convertPolarMapToImageMap(mRGC_RingCumulativeByMeridian, 'imRdim', imRdim), ...
     displacementMapDeg, sampleBaseX, sampleBaseY);
 mapImageBminusA = mapImageB-mapImageA;
 smoothImage = fillAndSmoothMap(mapImageBminusA,sampleBaseX,sampleBaseY);

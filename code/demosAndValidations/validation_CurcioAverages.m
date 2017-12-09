@@ -1,14 +1,16 @@
 function validation_CurcioAverages(varargin)
-% validation_CurcioAverages
+% Validate our recreation of Curcio's reported cell densities
 %
-% This routine compares the average cone and RGC densities reported in
-% Christine Curcio's two 1990 J Comp Neurology papers to the averages that
-% we compute from the raw individual data that she has provided.
+% Description:
+%   This routine compares the average cone and RGC densities reported in
+%   Christine Curcio's two 1990 J Comp Neurology papers to the averages
+%   that we compute from the raw individual data that she has provided.
 %
-% We find that the reported RGC averages in the Curcio paper have slight
-% differences at some points to the computed average. It seems likely that
-% the average values reported in the paper were derived from an
-% intermediate modeling step that we cannot currently reconstruct.
+%   We find that the reported RGC averages in the Curcio paper have slight
+%   differences at some points to the computed average. It seems likely
+%   that the average values reported in the paper were derived from an
+%   intermediate modeling step that we cannot currently reconstruct.
+%
 
 %% Parse input and define variables
 p = inputParser;

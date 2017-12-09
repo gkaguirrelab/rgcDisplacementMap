@@ -1,6 +1,7 @@
 function mmSqRetinaPerDegSqVisualRelativeToVisualAxis = calc_mmSqRetina_per_degSqVisual(supportPosDegVisualRelativeToVisualAxis, polarAngle)
-% calc_mmSqRetina_per_degSqVisual
+% Factor that expresses the mm^2 retina per deg^2 in the visual field
 %
+% Description:
 %   Returns the mm^2 on the retina per square degree of visual angle as a
 %   function of position in degrees visual angle relative to the visual
 %   axis of the eye. It is based on Appendix 6 of Watson 2014, which in
@@ -9,20 +10,23 @@ function mmSqRetinaPerDegSqVisualRelativeToVisualAxis = calc_mmSqRetina_per_degS
 %   to the optic axis of the eye. Watson 2014 observed that a correction
 %   (dependent on polar angle) is necessary to correct the conversion to be
 %   relative to the visual axis (which is otherwise assumed throughout this
-%   toolbox). We implement the full geometric correction here.
+%   toolbox). Watson implemented an approximation to this correction; we
+%   implement the full geometric correction here.
 %
 % Inputs:
-%   supportPosDegVisualRelativeToVisualAxis - retinal postion(s) in
-%       milimeters relative to visual axis of the eye. Either scalar value
-%       or vector input accepted.
-%   polarAngle - the polarAngle of the meridian for which the conversion
-%       should be calculated. An arbitrary value between 0-360 is accepted.
-%       (0=nasal;90=superior;180=temporal;270=inferior)
+%   supportPosDegVisualRelativeToVisualAxis - Retinal postion(s) in
+%                           milimeters relative to visual axis of the eye.
+%                           Either scalar value or vector input accepted.
+%   polarAngle            - The polar angle of the meridian for which the
+%                           conversion should be calculated. An arbitrary
+%                           value between 0-360 is accepted. (0=nasal;
+%                           90=superior; 180=temporal; 270=inferior)
 %
-% OutPuts:
+% Outputs:
 %   mmSqRetinaPerDegSqVisualRelativeToVisualAxis - the area in mm^2 on the
-%       retina for a degree of visual angle at the locations corresponding
-%       to supportPosDegVisualRelativeToVisualAxis
+%                           retina for a degree of visual angle at the
+%                           locations corresponding to
+%                           supportPosDegVisualRelativeToVisualAxis
 %
 
 

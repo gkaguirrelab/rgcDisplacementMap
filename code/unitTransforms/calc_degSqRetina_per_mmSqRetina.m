@@ -1,20 +1,24 @@
 function degSqRetinaPerMmSqRetina = calc_degSqRetina_per_mmSqRetina(varargin)
-% convert_mmRetina_to_degRetina
+% Conversion factor for units of mm^2 to degrees^2 on the retina
 %
-%   Returns the degrees square on the retina per mm square on the retina,
-%   assuming a spherical eye. The value for the radius of curvature for the
-%   retina is taken from the Table in Drasdo & Fowler 1974, for the value
-%   "Centre of curvature of the retina"
+% Description:
+%   Returns the factor that converts degrees square on the retina to mm
+%	square on the retina, assuming a spherical eye. The value for the
+%	radius of curvature for the retina is taken from the Table in Drasdo &
+%	Fowler 1974, for the value "Centre of curvature of the retina"
 %
-% Output: 
+% Inputs:
+%   none
+%
+% Optional key/value pairs:
+%  'radiusCurvatureRetinaMm'  - The value for the radius of curvature for 
+%                           the retina. The Table in Drasdo & Fowler 1974
+%                           offers a value of 11.95 for the "Centre of
+%                           curvature of the retina". It appears that the
+%                           Curcio 1990 papers use a value close to 11.5566
+%
+% Outputs: 
 %   degSqRetinaPerMmSqRetina - The conversion factor
-%
-% Optional
-%
-%   radiusCurvatureRetinaMm - The value for the radius of curvature for the
-%       retina. The Table in Drasdo & Fowler 1974 offers a value of 11.95
-%       for the "Centre of curvature of the retina". It appears that the
-%       Curcio 1990 papers use a value close to 11.5566
 %
 
 %% Parse input and define variables

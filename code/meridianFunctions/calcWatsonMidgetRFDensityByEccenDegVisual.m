@@ -1,25 +1,33 @@
 function [ midgetRFDensitySqDegVisual ] = calcWatsonMidgetRFDensityByEccenDegVisual(supportPosDegVisual, polarAngle)
-% calcWatsonMidgetRFDensityByEccen(supportPosDeg, angle)
+% Implement Equation 8 of Watson 2014.
 %
-% This function implements Equation 8 of Watson 2014.
+% Description:
+%   This function returns the midget receptive field density (in units of
+%   counts per square degree of the visual field), based upon the equation
+%   and parameters provided for Equation 8 of Watson 2014.
 %
-% NOTE 1: Watson's paper has the labels for the nasal and temporal retina
-% switched. In this routine we return the values that Watson labeled
-% "nasal" as the temporal retina, and vice-a-versa.
+%   NOTE 1: Watson's paper has the labels for the nasal and temporal retina
+%   switched. In this routine we return the values that Watson labeled
+%   "nasal" as the temporal retina, and vice-a-versa.
 %
-% NOTE 2: Watson's formula is in terms of visual angle degrees (and visual
-% angle degrees squared). Therefore, the output of this routine must be
-% converted to be related to retinal measurements.
+%   NOTE 2: Watson's formula is in terms of visual angle degrees (and
+%   visual angle degrees squared). Therefore, the output of this routine
+%   must be converted to be related to retinal measurements in subsequent
+%   routines.
 %
-% Inputs
-%   supportPosDegVisual - the positions (in degrees of visual angle) from the
-%       fovea at which to calculate the midget receptive field density
-%   angle - the meridian to evaluate. Acceptable values are: 
-%       (0=nasal;90=superior;180=temporal;270=inferior)
+% Inputs:
+%   supportPosDegVisual   - The positions (in degrees of visual angle) from
+%                           the fovea at which to calculate the midget
+%                           receptive field density
+%   polarAngle            - The desired angle of the density function on
+%                           the retinal field. (0=nasal; 90=superior;
+%                           180=temporal; 270=inferior)
 %
-% Outputs
-%   midgetRFDensitySqDegVisual - the density (receptive fields per visual
-%       square degree) of midget receptive fields at each of the positions
+% Outputs:
+%   midgetRFDensitySqDegVisual - The density (receptive fields per visual
+%                           square degree) of midget receptive fields at
+%                           each of the positions
+%
 
 %% Check the input
 

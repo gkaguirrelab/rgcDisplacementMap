@@ -1,6 +1,7 @@
 function supportPosMmRetinaRelativeToVisualAxis = convert_degVisual_to_mmRetina(supportPosDegVisualRelativeToVisualAxis, polarAngle)
-% convert_degVisual_to_mmRetina
+% Convert visual angle in degrees to mm on the retina
 %
+% Description:
 %   Converts visual angle in degrees from the visual axis to mm on the
 %   retina from the visual axis. It is based on Appendix 6 of Watson 2014.
 %   The core of the conversion is from Drasdo & Fowler 1974. Drasdo &
@@ -12,17 +13,31 @@ function supportPosMmRetinaRelativeToVisualAxis = convert_degVisual_to_mmRetina(
 %   approximation to the correction; here we implement the full geometric
 %   correction.
 %
+%	In Appendix 6, Watson (2014) provides polynomial approximations to the
+%   plots created by Drasdo & Fowler for the forward and inverse
+%   transformation of mm on the retina to position in the visual field. We
+%   find that these approximations result in discrepancies on the order of
+%   a tenth of a millimeter when we attempt to recover mm after passing
+%   through the forward and inverse transform. Consequently, we take the
+%   Watson 2014 approximation for the forward transform (mm retina --> deg
+%   visual field), but for the inverse transform (deg visual field --> mm
+%   retina) we perform a spline fit to the inverted output of the forward
+%   transform. This provides a result that is closer to fully invertible.
+%   This spline fit operation is performed in the local function.
 %
-% Input:
-%   supportPosDegVisualRelativeToVisualAxis - visual field position in
-%       degrees relative to visual axis of the eye. Either scalar value
-%       or vector input accepted.
-%   polarAngle - the polarAngle of the meridian for which the conversion
-%       should be calculated. An arbitrary value between 0-360 is accepted.
-%       (0=nasal;90=superior;180=temporal;270=inferior)
+%
+% Inputs:
+%   supportPosDegVisualRelativeToVisualAxis - Visual field position in
+%                           degrees relative to visual axis of the eye.
+%                           Either scalar value or vector input accepted.
+%   polarAngle            - The polar angle of the meridian for which the 
+%                           conversion should be calculated. An arbitrary
+%                           value between 0-360 is accepted. (0=nasal;
+%                           90=superior; 180=temporal; 270=inferior)
 %
 % Output:
-%   supportPosDegVisualFieldRelativeToVisualAxis
+%   supportPosMmRetinaRelativeToVisualAxis - A vector of locations on the
+%                           retinal surface
 %
 
 
@@ -66,24 +81,13 @@ end % main function
 % Local Drasdo & Fowler equations
 
 function mmRetinaRelativeToOpticAxis = drasdoAndFowlerConversionFieldToRetina(degreesVisualRelativeToOpticAxis)
-%
-% In Appendix 6, Watson (2014) provides polynomial approximations to the
-% plots created by Drasdo & Fowler for the forward and inverse
-% transformation of mm on the retina to position in the visual field. We
-% find that these approximations result in discrepancies on the order of a
-% tenth of a millimeter when we attempt to recover mm after passing through
-% the forward and inverse transform. Consequently, we take the Watson 2014
-% approximation for the forward transform (mm retina --> deg visual field),
-% but for the inverse transform (deg visual field --> mm retina) we perform
-% a spline fit to the inverted output of the forward transform. This
-% provides a result that is closer to fully invertible.
-%
 supportPosMmRetinaRelativeToOpticalAxis=0:0.01:25;
 calculatedPosDegFieldRelativeToOpticalAxis = ...
     drasdoAndFowlerConversionRetinaToField(supportPosMmRetinaRelativeToOpticalAxis);
 mmRetinaRelativeToOpticAxis = ...
     spline(calculatedPosDegFieldRelativeToOpticalAxis,supportPosMmRetinaRelativeToOpticalAxis,degreesVisualRelativeToOpticAxis);
 end
+
 
 function degreesVisualRelativeToOpticAxis = drasdoAndFowlerConversionRetinaToField(mmRetinaRelativeToOpticAxis)
 degreesVisualRelativeToOpticAxis = 3.556.*mmRetinaRelativeToOpticAxis + 0.05593.*(mmRetinaRelativeToOpticAxis.^2) - 0.007358.*(mmRetinaRelativeToOpticAxis.^3) +0.0003027.*(mmRetinaRelativeToOpticAxis.^4);

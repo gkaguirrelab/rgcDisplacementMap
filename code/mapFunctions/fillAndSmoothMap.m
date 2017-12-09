@@ -1,36 +1,53 @@
 function [smoothMap] = fillAndSmoothMap(Map,sampleBaseX,sampleBaseY,varargin)
-%fillAndSmoothMap - This function takes in a map and interpolates the
-% values and smooths
+% Interpolate and smooth the values in a map
 %
-% INPUTS:
-% Map - a 2D matrix that the interp and smoothing are applied to.
-% sampleBaseX - 2D support fot the X dim.
-% sampleBaseY - 2D support fot the Y dim.
-% varargin:
-%     interpMethod: Type of interpolation to remove holes in mesh 
-%                   Types of interpolation methods for meshdata
-%                       'linear'	Triangulation-based linear interpolation (default) supporting 2-D and 3-D interpolation.	
-%                       'nearest'	Triangulation-based nearest neighbor interpolation supporting 2-D and 3-D interpolation.	Discontinuous
-%                       'natural'	Triangulation-based natural neighbor interpolation supporting 2-D and 3-D interpolation. This method is an efficient tradeoff between linear and cubic.
-%                       'cubic'	    Triangulation-based cubic interpolation supporting 2-D interpolation only.
-%                       'v4'	    Biharmonic spline interpolation. Unlike the other methods, this interpolation is not based on a triangulation.
-%     kernelType: Kernel to be used fot smoothing.
-%                   Types of kernels
-%                       'gaussian' 
-%                       'disk'
-%                       'average'
-%     sigma: Standard deviation of smoothing kernel
-%     hsize: Size of the smoothing kernel.
-%     verbose: say stuff
+% Description:
+%   Needed.
 %
-% OUTPUT: Interpolated and smoothed map.
+% Inputs:
+%   Map                   - 2D matrix that the interp and smoothing are
+%                           applied to.
+%   sampleBaseX           - 2D support fot the X dim.
+%   sampleBaseY           - 2D support fot the Y dim.
 %
-% Sample Call:
+% Optional key/value pairs:
+%  'interpMethod'         - Type of interpolation to remove holes in mesh.
+%                           Legal values options:
+%                              'linear'	- Triangulation-based linear 
+%                                       interpolation (default) supporting
+%                                       2-D and 3-D interpolation.
+%                               'nearest' - Triangulation-based nearest 
+%                                       neighbor interpolation supporting
+%                                       2-D and 3-D interpolation.
+%                                       Discontinuous
+%                               'natural' - Triangulation-based natural 
+%                                       neighbor interpolation supporting
+%                                       2-D and 3-D interpolation. This
+%                                       method is an efficient tradeoff
+%                                       between linear and cubic.
+%                               'cubic' - Triangulation-based cubic 
+%                                       interpolation supporting 2-D
+%                                       interpolation only.
+%                               'v4'  - Biharmonic spline interpolation. 
+%                                       Unlike the other methods, this
+%                                       interpolation is not based on a
+%                                       triangulation.
+%  'kernelType'           - Kernel to be used for smoothing. Options:
+%                               'gaussian' 
+%                               'disk'
+%                               'average'
+%  'sigma'                - Standard deviation of smoothing kernel
+%  'hsize'                - Size of the smoothing kernel.
+%  'verbose'              - say stuff
+%
+% Outputs:
+%   smoothMap             - The smoothed map
+%
+% Example call:
 %   function [smoothMap] = fillAndSmoothMap(Map,sampleBaseX,sampleBaseY,varargin)
 %
-%mab 2017
-
-
+% mab 2017
+%
 
 
 p = inputParser;
