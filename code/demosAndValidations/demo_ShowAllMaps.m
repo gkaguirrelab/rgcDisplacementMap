@@ -105,7 +105,7 @@ polarMapNameList = {...
 
 % Obtain the boundary of the optic disc in image space. We have to reverse
 % the boundary array for the y-axis to match our image convention
-opticDiscLocationsImage = convertPolarMapToImageMap(opticDiscLocationByMeridian, imRdim);
+opticDiscLocationsImage = convertPolarMapToImageMap(opticDiscLocationByMeridian, 'imRdim', imRdim);
 opticDiscBoundary = bwboundaries(imbinarize(opticDiscLocationsImage),'noholes');
 opticDiscBoundaryArray = opticDiscBoundary{1};
 opticDiscBoundaryArray(:,1)=imRdim(1)-opticDiscBoundaryArray(:,1);
@@ -113,7 +113,7 @@ dashIndices=1:10:size(opticDiscBoundaryArray,1);
 
 % loop over the maps
 for vv = 1:length(polarMapNameList)
-    mapImage = feval('convertPolarMapToImageMap', eval(polarMapNameList{vv}), imRdim);
+    mapImage = feval('convertPolarMapToImageMap', eval(polarMapNameList{vv}), 'imRdim', imRdim);
     figHandle = figure();
     figHandle.Renderer='Painters';
     climVals = [0,ceil(max(max(mapImage)))];
@@ -158,11 +158,11 @@ smps = -eccenExtent+(1/p.Results.displacementMapPixelsPerDegRetina)/2:1/p.Result
 [sampleBaseX,sampleBaseY] = meshgrid(smps,smps);
 
 % obtain the displacement map
-displacementMapDeg = convertPolarMapToImageMap( rgcDisplacementByMeridian, imRdim);
+displacementMapDeg = convertPolarMapToImageMap( rgcDisplacementByMeridian, 'imRdim', imRdim);
 
 % loop over the maps
 for vv = 1:length(warpMapNameList)
-    mapImage = feval('convertPolarMapToImageMap', eval(warpMapNameList{vv}), imRdim);
+    mapImage = feval('convertPolarMapToImageMap', eval(warpMapNameList{vv}), 'imRdim', imRdim);
     warpImage = applyDisplacementMap( mapImage, displacementMapDeg, sampleBaseX, sampleBaseY );
     smoothImage = fillAndSmoothMap(warpImage,sampleBaseX,sampleBaseY);
     figHandle = figure();
@@ -194,9 +194,9 @@ end % loop over maps to warp
 
 % Make an image which is the difference between the warped mRGC_cumulative
 % map and the mRF_cumulative
-mapImageA = convertPolarMapToImageMap(mRF_RingCumulativeByMeridian, imRdim);
+mapImageA = convertPolarMapToImageMap(mRF_RingCumulativeByMeridian, 'imRdim', imRdim);
 mapImageB = applyDisplacementMap( ...
-    convertPolarMapToImageMap(mRGC_RingCumulativeByMeridian, imRdim), ...
+    convertPolarMapToImageMap(mRGC_RingCumulativeByMeridian, 'imRdim', imRdim), ...
     displacementMapDeg, sampleBaseX, sampleBaseY);
 mapImageBminusA = mapImageB-mapImageA;
 smoothImage = fillAndSmoothMap(mapImageBminusA,sampleBaseX,sampleBaseY);
