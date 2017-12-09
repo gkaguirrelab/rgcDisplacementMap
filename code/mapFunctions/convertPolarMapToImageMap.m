@@ -34,7 +34,7 @@ p.addRequired('polarMap',@isnumeric);
 p.addParameter('imRdim',size(polarMap,2)*2-1,@isnumeric);
 
 % parse
-p.parse(varargin{:})
+p.parse(polarMap,varargin{:})
 
 % Pull out the result from the param parser
 imRdim = p.Results.imRdim;
