@@ -1,8 +1,13 @@
 function validation_WatsonFigs1and2(varargin)
-% validation_WatsonFigs1and2
+% Attempt to re-create Figures 1 and 2 from Watson 2014 JoV
 %
-% This routine attempts to re-create Watson's Figures 1 and 2 starting
-% From Curcio's raw data.
+% Description:
+%   Figures 1 and 2 of Watson 2014 JoV present cone and RGC densities as a
+%   function of eccentricity and cardinal meridian, with the values derived
+%   from the data for the Curcio 1990 papers. Here, we attempt to re-create
+%   Watson's figures starting from the raw data from Curcio. This tests if
+%   we are implementing unit conversions in a manner that matches Watson.
+%
 
 %% Parse input and define variables
 p = inputParser;

@@ -1,7 +1,9 @@
 function validation_UnitConversion(varargin)
-% validation_UnitConversion
+% Validate unit conversions
 %
-% Tests if the unit conversion routines are close to invertible
+% Description:
+%   We test here if the various unit conversions used in the model are
+%   invertible to within the specified error tolerance.
 %
 
 %% Parse input and define variables

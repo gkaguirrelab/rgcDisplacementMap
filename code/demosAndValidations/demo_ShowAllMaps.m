@@ -1,18 +1,23 @@
 function demo_ShowAllMaps(varargin)
-% demo_ShowAllMaps - Model output in image maps
+% Displays and saves maps of retinal cell density and RGC displacement
 %
-% This validation function runs the displacement model for each of many
-% meridian values and then converts the model output to images which are
-% displayed and optionally saved to disk. The analysis parameters are
-% explicitly defined here and then passed to the main,
-% createDisplacementModel routine.
+% Description:
+%	This validation function runs the displacement model for each of many
+%	meridian values and then converts the model output to images which are
+%	displayed and optionally saved to disk. The analysis parameters are
+%   explicitly defined here and then passed to the main,
+%   createDisplacementModel routine.
 %
-% The "subjectName" corresponds to one of the Curcio 1990 datasets present
-% within the data directory of this toolbox. Typical options include:
-%   reportedAverage - the values reported in the Curcio 1990 papers
-%   computedAverage - our derivation of average values from the Curcio data
-%   29986A - data from subject 29986, averaged over both eyes.
-%   
+%   The "subjectName" corresponds to one of the Curcio 1990 datasets
+%   present within the data directory of this toolbox. Typical options
+%   include:
+%       reportedAverage   - The values reported in the Curcio 1990 papers
+%       computedAverage   - Our derivation of average values from the 
+%                           Curcio data
+%       29986A            - Data from subject 29986, averaged over both
+%                           eyes
+%
+
 
 %% Parse input and define variables
 p = inputParser; p.KeepUnmatched = true;

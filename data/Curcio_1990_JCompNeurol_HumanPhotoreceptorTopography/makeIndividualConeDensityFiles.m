@@ -1,3 +1,12 @@
+% makeIndividualConeDensityFiles
+% Produces .mat files that contain cone density data
+%
+% Description:
+%   This routine operated upon an Excel spreadsheet of cone density data
+%   and saves a set of labeled and organized .mat files that contain these
+%   data. It should not need to be run in the future, as its only purpose
+%   was to create the files that are now stored within this directory.
+%
 
 tableFileNames = {'DENSITY8_cones_resorted_computedAverage.xlsx','curcioReportedConeAverage.xlsx'};
 outputFileNameStem = 'curcioRawConeDensity_';
