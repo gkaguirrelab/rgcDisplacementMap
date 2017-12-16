@@ -2,8 +2,8 @@
 
 %% Create the default displacement model.
 % The variable rgcDisplacementByMeridian contains an m x p matrix, where m
-% is number of meridians and p is the number of eccentricity positions
-% (starting from zero) modeled. The values are the displacement in retinal
+% is number of meridians and p is the number of modeled eccentricity
+% positions. The values are the displacement in retinal
 % degrees of the RGC soma away from the fovea. The next two variables are
 % the support for the m and p dimensions, respectively.
 [rgcDisplacementByMeridian, meridianAngleSupport, regularSupportPosDegRetina] = ...
