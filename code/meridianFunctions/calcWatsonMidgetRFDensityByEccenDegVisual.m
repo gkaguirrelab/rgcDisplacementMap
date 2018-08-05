@@ -10,11 +10,6 @@ function [ midgetRFDensitySqDegVisual ] = calcWatsonMidgetRFDensityByEccenDegVis
 %   switched. In this routine we return the values that Watson labeled
 %   "nasal" as the temporal retina, and vice-a-versa.
 %
-%   NOTE 2: Watson's formula is in terms of visual angle degrees (and
-%   visual angle degrees squared). Therefore, the output of this routine
-%   must be converted to be related to retinal measurements in subsequent
-%   routines.
-%
 % Inputs:
 %   supportPosDegVisual   - The positions (in degrees of visual angle) from
 %                           the fovea at which to calculate the midget

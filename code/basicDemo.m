@@ -7,7 +7,7 @@
 % positions. The values specify the displacement of the RGC soma away from
 % the fovea in units of retinal degrees. The next two variables are the
 % support for the m and p dimensions, respectively.
-[rgcDisplacementByMeridian, meridianAngleSupport, regularSupportPosDegRetina] = ...
+[rgcDisplacementByMeridian, meridianAngleSupport, regularSupportPosDegVisual] = ...
     createDisplacementModel('verbose',true);
 
 
@@ -16,10 +16,10 @@
 % Define the image sample base for transform from polar coords. We reduce
 % the resolution from the default of 0.01 retinal degrees per pixel to 10
 % per pixel to speed things up.
-displacementMapPixelsPerRetinalDeg = 10;
-maxModeledEccentricity = max(regularSupportPosDegRetina);
+displacementMapPixelsPerDegVisual = 10;
+maxModeledEccentricity = max(regularSupportPosDegVisual);
 imRdim = ...
-    (maxModeledEccentricity * displacementMapPixelsPerRetinalDeg * 2) -1;
+    (maxModeledEccentricity * displacementMapPixelsPerDegVisual * 2) -1;
 
 % This step actually makes the image map. If the 'imRdim' key/value pair is
 % omitted, the map is returned with the same spatial resolution as the
@@ -32,7 +32,7 @@ rgcDisplacementMap = ...
 displayRetinalImage(...
     rgcDisplacementMap, ...                     % the image to be displayed
     [0 ceil(max(max(rgcDisplacementMap)))], ... % min max of the color bar range
-    displacementMapPixelsPerRetinalDeg, ...     % resolution of the image map
+    displacementMapPixelsPerDegVisual, ...      % resolution of the image map
     maxModeledEccentricity, ...                 % the maximum eccentricity of the model
     'Displacement in retinal degrees');         % label for the color bar
 

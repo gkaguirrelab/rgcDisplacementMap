@@ -1,5 +1,8 @@
-function [ rgcDisplacementByMeridian, meridianAngleSupport, regularSupportPosDegRetina, opticDiscLocationByMeridian, mRF_RingCumulativeByMeridian, mRGC_RingCumulativeByMeridian, fitParamsByMeridian, fValsByMeridian, convergenceEccenDegRetinaByMeridian ] = createDisplacementModel( varargin )
+function [ rgcDisplacementByMeridian, meridianAngleSupport, regularSupportPosDegVisual, opticDiscLocationByMeridian, mRF_RingCumulativeByMeridian, mRGC_RingCumulativeByMeridian, fitParamsByMeridian, fValsByMeridian, convergenceEccenDegVisualByMeridian ] = createDisplacementModel( varargin )
 % Creates a model of retinal ganglion cell displacement
+%
+% Syntax:
+%  [ rgcDisplacementByMeridian, meridianAngleSupport, regularSupportPosDegVisual, opticDiscLocationByMeridian, mRF_RingCumulativeByMeridian, mRGC_RingCumulativeByMeridian, fitParamsByMeridian, fValsByMeridian, convergenceEccenDegVisualByMeridian ] = createDisplacementModel()
 %
 % Description:
 %   We begin with empirical measurements of cone and retinal ganglion cell
@@ -52,12 +55,12 @@ function [ rgcDisplacementByMeridian, meridianAngleSupport, regularSupportPosDeg
 %   None
 %
 % Optional key/value pairs:
-%  'sampleResolutionDegreesRetina' - The calculations are performed across
+%  'sampleResolutionDegVisual' - The calculations are performed across
 %                           a regular sampling of eccentricity. This param
 %                           defines sample resolution The sample resolution
 %                           must be sufficient fine so that the cumulative
 %                           is an accurate estimate of the integral.
-%  'maxModeledEccentricityDegreesRetina' - The eccentricity extent of the
+%  'maxModeledEccentricityDegVisual' - The eccentricity extent of the
 %                           model. This value must be sufficiently beyond
 %                           the convergence zone so that there is a portion
 %                           of the cumulative to match between the mRF and
@@ -66,7 +69,7 @@ function [ rgcDisplacementByMeridian, meridianAngleSupport, regularSupportPosDeg
 %                           are less accurate. We find that our results
 %                           depend in unpredictable ways on the particular
 %                           value selected, which is unfortunate.
-%  'targetConvergenceOnCardinalMeridiansDegRetina' - The point in degrees
+%  'targetConvergenceOnCardinalMeridiansDegVisual' - The point in degrees
 %                           at which displacement should become zero for
 %                           each cadinal meridian. The default values were
 %                           set by taking the apparent convergence points
@@ -76,13 +79,13 @@ function [ rgcDisplacementByMeridian, meridianAngleSupport, regularSupportPosDeg
 %                           meridians, and the inferior and superior
 %                           meridian target values are simply the
 %                           midpoints.
-%  'targetMaxDisplacementDegRetina' - The desired maximum displacement
+%  'targetMaxDisplacementDegVisual' - The desired maximum displacement
 %                           value in retinal degrees. Taken from the maxium
 %                           y-axis value from Figure 2 of Drasdo 2007,
 %                           converted from mm retina to deg retina.
 %  'meridianAngleResolutionDeg' - The resolution across polar angle for
 %                           which displacements are calculated.
-%  'displacementMapPixelsPerDegRetina' - The resolution in pixels per degree
+%  'displacementMapPixelsPerDegVisual' - The resolution in pixels per degree
 %                           in which the displacement map is rendered.
 %  'cone_to_mRF_linkTolerance' - We derive initial parameters for the
 %                           linking function that converts cone density to
@@ -131,7 +134,7 @@ function [ rgcDisplacementByMeridian, meridianAngleSupport, regularSupportPosDeg
 %   meridianAngleSupport  - An m x 1 vector of polar angle values (in
 %                           degrees) that are the support for the meridian
 %                           positions modeled.
-%   regularSupportPosDegRetina - A 1 x p vector that contains the
+%   regularSupportPosDegVisual - A 1 x p vector that contains the
 %                           eccentricity in retinal degrees at which the
 %                           model was evaluated along each meridian
 %   mRF_cumulativeByMeridian - An m x p matrix. The cumulative RF counts
@@ -149,25 +152,29 @@ function [ rgcDisplacementByMeridian, meridianAngleSupport, regularSupportPosDeg
 %                           error in minimizing the difference between mRF
 %                           and mRGC cumulatives beyond the convergence
 %                           point.
-%   convergenceEccenDegRetinaByMeridian - An m x 1 vector with the values
+%   convergenceEccenDegVisualByMeridian - An m x 1 vector with the values
 %                           providing the location (in retinal degrees) at
 %                           whicih the mRGC and mRF cumulative functions
 %                           were found to converge.
 %
+% Examples:
+%{
+    rgcDisplacementByMeridian = createDisplacementModel( 'verbose', true )
+%}
 
 %% Parse input and define variables
 p = inputParser; p.KeepUnmatched = true;
 
 % Optional anaysis params
-p.addParameter('sampleResolutionDegreesRetina',0.01,@isnumeric);
-p.addParameter('maxModeledEccentricityDegreesRetina',30,@isnumeric);
-p.addParameter('targetConvergenceOnCardinalMeridiansDegRetina',[17 19.5 22 19.5],@isnumeric);
-p.addParameter('targetMaxDisplacementDegRetina',3.2,@isnumeric);
+p.addParameter('sampleResolutionDegVisual',0.01,@isnumeric);
+p.addParameter('maxModeledEccentricityDegVisual',30,@isnumeric);
+p.addParameter('targetConvergenceOnCardinalMeridiansDegVisual',[17 19.5 22 19.5],@isnumeric);
+p.addParameter('targetMaxDisplacementDegVisual',3.2,@isnumeric);
 p.addParameter('cardinalMeridianAngles',[0 90 180 270],@isnumeric);
 p.addParameter('meridianAngleResolutionDeg',45,@isnumeric);
-p.addParameter('displacementMapPixelsPerDegRetina',10,@isnumeric);
-p.addParameter('cone_to_mRF_linkTolerance',1.1,@isnumeric);
-p.addParameter('rgc_to_mRGC_linkTolerance',1.01,@isnumeric);
+p.addParameter('displacementMapPixelsPerDegVisual',10,@isnumeric);
+p.addParameter('cone_to_mRF_linkTolerance',2,@isnumeric);
+p.addParameter('rgc_to_mRGC_linkTolerance',2,@isnumeric);
 p.addParameter('rgcLinkingFunctionFlavor','Dacey',@(x)(stcmp(x,'Drasdo') | stcmp(x,'Dacey')));
 p.addParameter('rfInitialTransformParams',[],@(x)(isempty(x) | isnumeric(x)));
 p.addParameter('rgcDrasdoInitialTransformParams',[],@(x)(isempty(x) | isnumeric(x)));
@@ -184,33 +191,33 @@ p.parse(varargin{:})
 
 %% Setup
 % Prepare the regular eccentricity support base
-regularSupportPosDegRetina = ...
-    0:p.Results.sampleResolutionDegreesRetina:p.Results.maxModeledEccentricityDegreesRetina;
+regularSupportPosDegVisual = ...
+    0:p.Results.sampleResolutionDegVisual:p.Results.maxModeledEccentricityDegVisual;
 
 % Prepare the set of meridian angles for which we will calculate
 % displacement. This is a column vector.
 meridianAngleSupport = (0:p.Results.meridianAngleResolutionDeg:(360-p.Results.meridianAngleResolutionDeg))';
 
-% Prepare the vector targetConvergenceDegRetinaByMeridian. We interpolate
+% Prepare the vector targetConvergenceDegVisualByMeridian. We interpolate
 % from the values given for the cardinal merdians to the other meridians.
 % We wrap the value at zero degrees around to 360 degrees to provide a
 % circular interpolation.
 % This is a column vector.
 targetConvergenceByMeridianFit = fit(...
     [p.Results.cardinalMeridianAngles 360]',... % 
-    [p.Results.targetConvergenceOnCardinalMeridiansDegRetina p.Results.targetConvergenceOnCardinalMeridiansDegRetina(1)]',...
+    [p.Results.targetConvergenceOnCardinalMeridiansDegVisual p.Results.targetConvergenceOnCardinalMeridiansDegVisual(1)]',...
     'pchipinterp');
-targetConvergenceDegRetinaByMeridian = targetConvergenceByMeridianFit(meridianAngleSupport);
+targetConvergenceDegVisualByMeridian = targetConvergenceByMeridianFit(meridianAngleSupport);
 
 % Pre-allocated loop variables. We do not pre-allocate fitParamsByMeridian
 % as the number of returned params could differ depending upon whether we
 % go with Dacey or Drasdo model flavor
 fValsByMeridian = zeros(length(meridianAngleSupport),1);
-convergenceEccenDegRetinaByMeridian = zeros(length(meridianAngleSupport),1);
-mRGC_RingCumulativeByMeridian = zeros(length(meridianAngleSupport),length(regularSupportPosDegRetina));
-mRF_RingCumulativeByMeridian = zeros(length(meridianAngleSupport),length(regularSupportPosDegRetina));
-rgcDisplacementByMeridian = zeros(length(meridianAngleSupport),length(regularSupportPosDegRetina));
-opticDiscLocationByMeridian = zeros(length(meridianAngleSupport),length(regularSupportPosDegRetina));
+convergenceEccenDegVisualByMeridian = zeros(length(meridianAngleSupport),1);
+mRGC_RingCumulativeByMeridian = zeros(length(meridianAngleSupport),length(regularSupportPosDegVisual));
+mRF_RingCumulativeByMeridian = zeros(length(meridianAngleSupport),length(regularSupportPosDegVisual));
+rgcDisplacementByMeridian = zeros(length(meridianAngleSupport),length(regularSupportPosDegVisual));
+opticDiscLocationByMeridian = zeros(length(meridianAngleSupport),length(regularSupportPosDegVisual));
 
 %% Setup the initial values for the linking function parameters
 
@@ -252,20 +259,20 @@ for mm = 1:length(meridianAngleSupport)
     % density.
     
     % Obtain a spline fit to the specified empirical density file
-    [fitConeDensitySqDegRetina] = ...
-        getSplineFitToConeDensitySqDegRetina(meridianAngleSupport(mm), ...
+    [fitConeDensitySqDegVisual] = ...
+        getSplineFitToConeDensitySqDegVisual(meridianAngleSupport(mm), ...
         'coneDensityDataFileName',p.Results.coneDensityDataFileName);
     % Define a variable with cone density over regular support and zero
     % values at the optic disc positions
     coneDensityOverRegularSupport = ...
-        zeroOpticDiscPoints(fitConeDensitySqDegRetina(regularSupportPosDegRetina),regularSupportPosDegRetina, meridianAngleSupport(mm));
+        zeroOpticDiscPoints(fitConeDensitySqDegVisual(regularSupportPosDegVisual),regularSupportPosDegVisual, meridianAngleSupport(mm));
     % Create an anonymous function that returns mRF density as a function
     % of cone density, with the transform defined by the first two fitParams
     mRFDensityOverRegularSupport = ...
         @(fitParams) transformConeToMidgetRFDensity(coneDensityOverRegularSupport, ...
         'linkingFuncParams',fitParams(1:2));
     % Define anonymous function for the cumulative sum of mRF density
-    mRF_RingCumulative = @(fitParams) calcRingCumulative(regularSupportPosDegRetina, mRFDensityOverRegularSupport(fitParams));
+    mRF_RingCumulative = @(fitParams) calcRingCumulative(regularSupportPosDegVisual, mRFDensityOverRegularSupport(fitParams));
     
     
     %% mRGC_cumulative function
@@ -274,13 +281,13 @@ for mm = 1:length(meridianAngleSupport)
     % density.
     
     % Obtain a spline fit to the empirical RGC density data of Curcio 1990
-    fitRGCDensitySqDegRetina = ...
-        getSplineFitToRGCDensitySqDegRetina(meridianAngleSupport(mm), ...
+    fitRGCDensitySqDegVisual = ...
+        getSplineFitToRGCDensitySqDegVisual(meridianAngleSupport(mm), ...
         'rgcDensityDataFileName',p.Results.rgcDensityDataFileName);
     % Define a variable with RGC density over regular support and zero
     % values at the optic disc positions
     RGCDensityOverRegularSupport = ...
-        zeroOpticDiscPoints(fitRGCDensitySqDegRetina(regularSupportPosDegRetina),regularSupportPosDegRetina, meridianAngleSupport(mm));
+        zeroOpticDiscPoints(fitRGCDensitySqDegVisual(regularSupportPosDegVisual),regularSupportPosDegVisual, meridianAngleSupport(mm));
 
     % Create an anonymous function that returns mRGC density as a function
     % of RGC density, with the transform defined by the last two or three
@@ -288,29 +295,29 @@ for mm = 1:length(meridianAngleSupport)
     switch p.Results.rgcLinkingFunctionFlavor
         case 'Drasdo'
             mRGCDensityOverRegularSupport = ...
-                @(fitParams) transformRGCToMidgetRGCDensityDrasdo(regularSupportPosDegRetina,RGCDensityOverRegularSupport,...
+                @(fitParams) transformRGCToMidgetRGCDensityDrasdo(regularSupportPosDegVisual,RGCDensityOverRegularSupport,...
                 'linkingFuncParams',fitParams(3:end));
         case 'Dacey'
             mRGCDensityOverRegularSupport = ...
-                @(fitParams) transformRGCToMidgetRGCDensityDacey(regularSupportPosDegRetina,RGCDensityOverRegularSupport,...
+                @(fitParams) transformRGCToMidgetRGCDensityDacey(regularSupportPosDegVisual,RGCDensityOverRegularSupport,...
                 'linkingFuncParams',fitParams(3:end));
         otherwise
             error('This is not an RGC linking function flavor that I know');
     end
 
     % Define anonymous function for the cumulative sum of mRGC density
-    mRGC_RingCumulative = @(fitParams) calcRingCumulative(regularSupportPosDegRetina, mRGCDensityOverRegularSupport(fitParams));
+    mRGC_RingCumulative = @(fitParams) calcRingCumulative(regularSupportPosDegVisual, mRGCDensityOverRegularSupport(fitParams));
     
     
     %% Non-linear constraint and error functions
     % Create a non-linear constraint that tests if the RF cumulative values
     % are greater than the RGC cumulative values at eccentricities less
     % than the displacement point
-    nonlinconst = @(fitParams) constrainCumulativeAndDisplacement(regularSupportPosDegRetina, mRF_RingCumulative(fitParams), mRGC_RingCumulative(fitParams), targetConvergenceDegRetinaByMeridian(mm), p.Results.targetMaxDisplacementDegRetina);
+    nonlinconst = @(fitParams) constrainCumulativeAndDisplacement(regularSupportPosDegVisual, mRF_RingCumulative(fitParams), mRGC_RingCumulative(fitParams), targetConvergenceDegVisualByMeridian(mm), p.Results.targetMaxDisplacementDegVisual);
     
     % The error function acts to minimize the diffrence between the
     % mRF and mRGC cumulative functions past the displacement point
-    errorFunc = @(fitParams) errorMatchingRFandRGC(regularSupportPosDegRetina, mRF_RingCumulative(fitParams), mRGC_RingCumulative(fitParams), targetConvergenceDegRetinaByMeridian(mm));
+    errorFunc = @(fitParams) errorMatchingRFandRGC(regularSupportPosDegVisual, mRF_RingCumulative(fitParams), mRGC_RingCumulative(fitParams), targetConvergenceDegVisualByMeridian(mm));
     
     
     %% Perform the fit
@@ -332,19 +339,19 @@ for mm = 1:length(meridianAngleSupport)
     mRGC_RingCumulativeByMeridian(mm,:) = mRGC_RingCumulative(fitParamsByMeridian(mm,:));
     mRF_RingCumulativeByMeridian(mm,:) = mRF_RingCumulative(fitParamsByMeridian(mm,:));
     rgcDisplacementByMeridian(mm,:) = ...
-        calcDisplacement(regularSupportPosDegRetina, mRF_RingCumulative(fitParamsByMeridian(mm,:)), mRGC_RingCumulative(fitParamsByMeridian(mm,:)));
-    opticDiscLocationByMeridian(mm,findOpticDiscPositions(regularSupportPosDegRetina, meridianAngleSupport(mm)))=1;
+        calcDisplacement(regularSupportPosDegVisual, mRF_RingCumulative(fitParamsByMeridian(mm,:)), mRGC_RingCumulative(fitParamsByMeridian(mm,:)));
+    opticDiscLocationByMeridian(mm,findOpticDiscPositions(regularSupportPosDegVisual, meridianAngleSupport(mm)))=1;
     
     % Report the results for this meridian
     if p.Results.verbose
         zeroPoints = find(rgcDisplacementByMeridian(mm,:)==0);
-        convergenceIdx = find(regularSupportPosDegRetina(zeroPoints) > 2,1);
+        convergenceIdx = find(regularSupportPosDegVisual(zeroPoints) > 2,1);
         if isempty(convergenceIdx)
-            outLine = ['Polar angle: ' num2str(meridianAngleSupport(mm)) ', max RGC displacement: ' num2str(max(rgcDisplacementByMeridian(mm,:))) ', target convergence: ' num2str(targetConvergenceDegRetinaByMeridian(mm)) ', found convergence: FAILED TO CONVERGE' ', error: ' num2str(round(fValsByMeridian(mm))) '\n'];
+            outLine = ['Polar angle: ' num2str(meridianAngleSupport(mm)) ', max RGC displacement: ' num2str(max(rgcDisplacementByMeridian(mm,:))) ', target convergence: ' num2str(targetConvergenceDegVisualByMeridian(mm)) ', found convergence: FAILED TO CONVERGE' ', error: ' num2str(round(fValsByMeridian(mm))) '\n'];
             fprintf(outLine);
         else
-            convergenceEccenDegRetinaByMeridian(mm) = regularSupportPosDegRetina(zeroPoints(convergenceIdx));
-            outLine = ['Polar angle: ' num2str(meridianAngleSupport(mm)) ', max RGC displacement: ' num2str(max(rgcDisplacementByMeridian(mm,:))) ', target convergence: ' num2str(targetConvergenceDegRetinaByMeridian(mm)) ', found convergence: ' num2str(convergenceEccenDegRetinaByMeridian(mm)) ', RMSE: ' num2str(round(fValsByMeridian(mm))) '\n'];
+            convergenceEccenDegVisualByMeridian(mm) = regularSupportPosDegVisual(zeroPoints(convergenceIdx));
+            outLine = ['Polar angle: ' num2str(meridianAngleSupport(mm)) ', max RGC displacement: ' num2str(max(rgcDisplacementByMeridian(mm,:))) ', target convergence: ' num2str(targetConvergenceDegVisualByMeridian(mm)) ', found convergence: ' num2str(convergenceEccenDegVisualByMeridian(mm)) ', RMSE: ' num2str(round(fValsByMeridian(mm))) '\n'];
             fprintf(outLine);
         end
     end
@@ -357,14 +364,14 @@ end % createDisplacementModel
 
 %% LOCAL FUNCTIONS
 
-function vectorOut = zeroOpticDiscPoints(vectorIn, regularSupportPosDegRetina, polarAngle)
-	opticDiscIndices = findOpticDiscPositions(regularSupportPosDegRetina, polarAngle);
+function vectorOut = zeroOpticDiscPoints(vectorIn, regularSupportPosDegVisual, polarAngle)
+	opticDiscIndices = findOpticDiscPositions(regularSupportPosDegVisual, polarAngle);
     vectorOut = vectorIn;
     vectorOut(opticDiscIndices) = 0;
 end
 
 
-function [c,ceq] = constrainCumulativeAndDisplacement(regularSupportPosDegRetina, mRF_RingCumulative, mRGC_RingCumulative, targetConvergencePointDegRetina, targetMaxDisplacementDegRetina)
+function [c,ceq] = constrainCumulativeAndDisplacement(regularSupportPosDegVisual, mRF_RingCumulative, mRGC_RingCumulative, targetConvergencePointDegVisual, targetMaxDisplacementDegVisual)
 % We implement two non-linear constraints. The first is that the mRGC
 % cumulative values should not exceed the mRF cumulative values at any
 % point prior to the convergence point. The second constraint is that the
@@ -375,24 +382,24 @@ function [c,ceq] = constrainCumulativeAndDisplacement(regularSupportPosDegRetina
 % If there are any cumulative RGC values that are greater than the RF
 % values at eccentricities less than the displacementPoint, then this
 % violates the nonlinear fit constraint
-withinRangeIdx = find(regularSupportPosDegRetina < targetConvergencePointDegRetina);
+withinRangeIdx = find(regularSupportPosDegVisual < targetConvergencePointDegVisual);
 c = nansum(mRGC_RingCumulative(withinRangeIdx) > mRF_RingCumulative(withinRangeIdx));
 
 % Second constraint:
 % Calculate how many values in the displacement function exceed the maximum
 % desired displacement.
-displaceInDeg = calcDisplacement(regularSupportPosDegRetina, mRF_RingCumulative, mRGC_RingCumulative);
-ceq = nansum(displaceInDeg > targetMaxDisplacementDegRetina);
+displaceInDeg = calcDisplacement(regularSupportPosDegVisual, mRF_RingCumulative, mRGC_RingCumulative);
+ceq = nansum(displaceInDeg > targetMaxDisplacementDegVisual);
 
 end
 
 
-function error = errorMatchingRFandRGC(regularSupportPosDeg, mRF_RingCumulative, mRGC_RingCumulative, targetConvergencePointDegRetina)
+function error = errorMatchingRFandRGC(regularSupportPosDeg, mRF_RingCumulative, mRGC_RingCumulative, targetConvergencePointDegVisual)
 % The error is calculated as the RMSE of difference between the ring
 % cumulative RF and RGC counts at retinal positions past the point where
 % displacement should have ended
 
-withinRangeIdx = find(regularSupportPosDeg > targetConvergencePointDegRetina);
+withinRangeIdx = find(regularSupportPosDeg > targetConvergencePointDegVisual);
 error = sqrt(nanmean((mRGC_RingCumulative(withinRangeIdx) - mRF_RingCumulative(withinRangeIdx)).^2));
 end
 

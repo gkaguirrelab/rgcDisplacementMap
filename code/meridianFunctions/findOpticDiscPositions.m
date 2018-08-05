@@ -1,4 +1,4 @@
-function opticDiscIndices = findOpticDiscPositions(regularSupportPosDegRetina, polarAngle, varargin)
+function opticDiscIndices = findOpticDiscPositions(regularSupportPosDegVisual, polarAngle, varargin)
 % Model the spatial position of the optic disc on the retinal field
 %
 % Description:
@@ -13,8 +13,7 @@ function opticDiscIndices = findOpticDiscPositions(regularSupportPosDegRetina, p
 %       This paper provides mean (across subject) values for the distance
 %       of the optic disc center from the fovea. From these values I
 %       derived the polar angle (5.6° visual) and the eccentricity
-%       (15.5724° visual). The eccentricity is then converted to retinal
-%       degrees.
+%       (15.5724° visual).
 %
 % 	Drasdo & Fowler 1974
 %
@@ -27,8 +26,8 @@ function opticDiscIndices = findOpticDiscPositions(regularSupportPosDegRetina, p
 %   tilt towards the fovea.
 %
 % Inputs:
-%   regularSupportPosDegRetina - A 1 x p vector that contains the
-%                           eccentricity in retinal degrees at which to
+%   regularSupportPosDegVisual - A 1 x p vector that contains the
+%                           eccentricity in visual degrees at which to
 %                           determine the presence of the optic disc
 %   polarAngle            - A scalar that specifies the polar angle (in
 %                           degrees) for the meridian to be evalauted
@@ -49,7 +48,7 @@ function opticDiscIndices = findOpticDiscPositions(regularSupportPosDegRetina, p
 %
 % Outputs:
 %   opticDiscIndices      - A 1 x p vector (correspoinding to the input
-%                           regularSupportPosDegRetina) that indicates (1
+%                           regularSupportPosDegVisual) that indicates (1
 %                           or 0) if the optic disc is present at this
 %                           location
 %
@@ -66,23 +65,23 @@ p.addRequired('polarAngle',@isnumeric);
 p.addParameter('opticDiscParameters', ...
     struct(...
     'm',5.6, ...
-    'e',convert_mmRetina_to_degRetina(convert_degVisual_to_mmRetina(15.5724, 5.6)),...
-    'major',convert_mmRetina_to_degRetina(1.8),...
-    'minor',convert_mmRetina_to_degRetina(1.6),...
+    'e',15.5724,...
+    'major',convert_mmRetina_to_degVisual(1.8,0),...
+    'minor',convert_mmRetina_to_degVisual(1.6,0),...
     'theta',90),...
     @isstruct);
 
 % parse
-p.parse(regularSupportPosDegRetina, polarAngle, varargin{:})
+p.parse(regularSupportPosDegVisual, polarAngle, varargin{:})
 
 opticDiscParameters = p.Results.opticDiscParameters;
 
 % Determine the distance between the center of the optic disc and
 % each point in regularSupportPosDeg
-distanceToOpticDiscCenterDegRetina = sqrt(...
+distanceToOpticDiscCenterDegVisual = sqrt(...
     opticDiscParameters.e^2 + ...
-    regularSupportPosDegRetina.^2 - ...
-    2.*opticDiscParameters.e.*regularSupportPosDegRetina.*cos(deg2rad(polarAngle-opticDiscParameters.m)));
+    regularSupportPosDegVisual.^2 - ...
+    2.*opticDiscParameters.e.*regularSupportPosDegVisual.*cos(deg2rad(polarAngle-opticDiscParameters.m)));
 
 % Determine the angle (alpha) between the line that connects the optic disc
 % to each point in regularSupportPosDeg and the line that connects the
@@ -93,29 +92,28 @@ distanceToOpticDiscCenterDegRetina = sqrt(...
 
 % This calculation is valid if the position in regularSupportPosDeg is less
 % than opticDiscParameters.e
-alpha_case1 = rad2deg(asin(sin(deg2rad(polarAngle-opticDiscParameters.m)).*regularSupportPosDegRetina./distanceToOpticDiscCenterDegRetina));
+alpha_case1 = rad2deg(asin(sin(deg2rad(polarAngle-opticDiscParameters.m)).*regularSupportPosDegVisual./distanceToOpticDiscCenterDegVisual));
 
 % This calculation is valid if the position in regularSupportPosDeg is
 % greater than opticDiscParameters.e
 alpha_case2 = 180 - (polarAngle-opticDiscParameters.m) - ...
-    rad2deg(asin(sin(deg2rad(polarAngle-opticDiscParameters.m))./distanceToOpticDiscCenterDegRetina.*opticDiscParameters.e));
+    rad2deg(asin(sin(deg2rad(polarAngle-opticDiscParameters.m))./distanceToOpticDiscCenterDegVisual.*opticDiscParameters.e));
 
 % store the correct alpha for each regularSupportPosDeg
 alpha=nan(size(alpha_case1));
-alpha(regularSupportPosDegRetina <= opticDiscParameters.e) = ...
-    alpha_case1(regularSupportPosDegRetina <= opticDiscParameters.e);
-alpha(regularSupportPosDegRetina > opticDiscParameters.e) = ...
-    alpha_case2(regularSupportPosDegRetina > opticDiscParameters.e);
+alpha(regularSupportPosDegVisual <= opticDiscParameters.e) = ...
+    alpha_case1(regularSupportPosDegVisual <= opticDiscParameters.e);
+alpha(regularSupportPosDegVisual > opticDiscParameters.e) = ...
+    alpha_case2(regularSupportPosDegVisual > opticDiscParameters.e);
 
 % Now derive the angle (beta) between the center of the optic disc and
 % each point in regularSupportPosDeg, relative to the major axis of the
 % optic disc.
 beta = opticDiscParameters.theta + opticDiscParameters.m - alpha;
 
-
-% For each support position, determine if distanceToOpticDiscCenterDegRetina
+% For each support position, determine if distanceToOpticDiscCenterDegVisual
 % is less than the radius of the optic disc for that angle.
-opticDiscIndices = distanceToOpticDiscCenterDegRetina < ...
+opticDiscIndices = distanceToOpticDiscCenterDegVisual < ...
                     ( ...
                        ((opticDiscParameters.major/2)*(opticDiscParameters.minor/2)) ./ sqrt( ((opticDiscParameters.minor/2).^2.*cos(deg2rad(beta)).^2 + ...
                        ((opticDiscParameters.major/2).^2.*sin(deg2rad(beta)).^2  ))) ...
@@ -124,7 +122,7 @@ opticDiscIndices = distanceToOpticDiscCenterDegRetina < ...
 % Handle the case in which a regularSupportPosDeg value is exactly on the
 % optic disc center
 if polarAngle == opticDiscParameters.m
-    exactCenterIdx = find(regularSupportPosDegRetina==opticDiscParameters.e);
+    exactCenterIdx = find(regularSupportPosDegVisual==opticDiscParameters.e);
     if ~isempty(exactCenterIdx)
         opticDiscIndices(exactCenterIdx)=1;
     end

@@ -1,6 +1,9 @@
 function [ fitParams, figHandle ] = developMidgetRFFractionModel( varargin )
 % Find parameters that transform cone density to midget RF density
 %
+% Syntax:
+%  [ fitParams, figHandle ] = developMidgetRFFractionModel()
+%
 % Description:
 %   Examine the relationship between cone density and midget receptive
 %   field density. Note that the mRF density reflects both the ratio of
@@ -19,15 +22,12 @@ function [ fitParams, figHandle ] = developMidgetRFFractionModel( varargin )
 %   input to two mRGCs (an "on" and "off" cell). We adopt this constraint
 %   as well, although we note that Watson's functions for mRF density have
 %   a discontinuity at the fovea, in that his formula has the mRF:cone
-%   ratio asymptote at ~1.9, and then jump to a value of 2 at the fovea.
+%   ratio asymptote at ~1.9, and then jumps to a value of 2 at the fovea.
 %
 %   For each meridian, We first load the Curcio cone density measurements.
-%   These measurements are expressed at positions in retinal degrees. At
-%   each of these retinal eccentricityt values, we also obtain the midgetRF
-%   density. This is derived from Eq 8 of Watson 2014. However, Watson
-%   expressed mRF density in terms of visual angle degrees. Therefore, we
-%   must convert Watson's value to be the density of mRF in square retinal
-%   degrees and at retinal eccentricities.
+%   These measurements are expressed at positions in visual degrees. At
+%   each of these retinal eccentricity values, we also obtain the midgetRF
+%   density. This is derived from Eq 8 of Watson 2014.
 %
 %   We observe that the ratio of midgetRF density to cone density as a
 %   function of log10 cone density is sigmoidal. To support generalization
@@ -88,7 +88,10 @@ function [ fitParams, figHandle ] = developMidgetRFFractionModel( varargin )
 %   figHandle             - Handle to a figure showing the fits. Empty if
 %                           no plotting requested.
 %
-
+% Examples:
+%{
+    [ fitParams, figHandle ] = developMidgetRFFractionModel( 'makePlots', true )
+%}
 
 %% Parse input and define variables
 p = inputParser;
@@ -99,7 +102,7 @@ p.addParameter('meridianNames',{'Nasal' 'Superior' 'Temporal' 'Inferior'},@iscel
 p.addParameter('meridianAngles',[0, 90, 180, 270],@isnumeric);
 p.addParameter('meridianSymbols',{'.','x','o','^'},@cell);
 p.addParameter('meridiansIdxToUseForFitParams',[1 3 4],@isnumeric);
-p.addParameter('maxConeDensitySqDegRetina',[],@(x)(isempty(x) | isnumeric(x)));
+p.addParameter('maxConeDensitySqDegVisual',[],@(x)(isempty(x) | isnumeric(x)));
 p.addParameter('minMidgetRGCToConeRatio',-.5,@isnumeric);
 p.addParameter('maxMidgetRGCToConeRatio',2,@isnumeric);
 p.addParameter('logitFitStartPoint',[3,-1],@isnumeric);
@@ -131,53 +134,35 @@ end
 for mm = 1:length(p.Results.meridianAngles)
     
     % Load the Cone density Data from Curcio 1990:
-    [coneDensitySqDegRetina, nativeSupportPosDegRetina] = loadRawConeDensityByEccen(p.Results.meridianAngles(mm));
+    [coneDensitySqDegVisual, nativeSupportPosDegVisual] = loadRawConeDensityByEccen(p.Results.meridianAngles(mm));
     
     % remove nan values
-    isvalididx=find(~isnan(coneDensitySqDegRetina));
-    nativeSupportPosDegRetina = nativeSupportPosDegRetina(isvalididx);
-    coneDensitySqDegRetina = coneDensitySqDegRetina(isvalididx);
+    isvalididx=find(~isnan(coneDensitySqDegVisual));
+    nativeSupportPosDegVisual = nativeSupportPosDegVisual(isvalididx);
+    coneDensitySqDegVisual = coneDensitySqDegVisual(isvalididx);
     
     % Set the maxConeDensity value
-    if isempty(p.Results.maxConeDensitySqDegRetina)
-        maxConeDensitySqDegRetina = max(coneDensitySqDegRetina);
+    if isempty(p.Results.maxConeDensitySqDegVisual)
+        maxConeDensitySqDegVisual = max(coneDensitySqDegVisual);
     else
-        maxConeDensitySqDegRetina = p.Results.maxConeDensitySqDegRetina;
+        maxConeDensitySqDegVisual = p.Results.maxConeDensitySqDegVisual;
     end
-    
-    % Determine the visual field positions corresponding to these retinal
-    % positions. We first convert the retinal eccentricity values from
-    % degrees to mm, then convert from mm to visual angle degrees.
-    nativeSupportPosMmRetina = convert_degRetina_to_mmRetina(nativeSupportPosDegRetina);
-    nativeSupportPosDegVisual = convert_mmRetina_to_degVisual(nativeSupportPosMmRetina, p.Results.meridianAngles(mm));
-    
+        
     % calculate the mRF density at these eccentricity locations using
     % Watson equation 8.
     [ midgetRFDensitySqDegVisual ] = calcWatsonMidgetRFDensityByEccenDegVisual(nativeSupportPosDegVisual, p.Results.meridianAngles(mm));
-    
-    % obtain the conversion from degree square visual to mm square retina
-    mmSqRetinaPerDegSqVisual = calc_mmSqRetina_per_degSqVisual(nativeSupportPosDegVisual, p.Results.meridianAngles(mm));
-    
-    % convert the mRF density from degree square visual to mm square retina
-    midgetRFDensitySqMmRetina = midgetRFDensitySqDegVisual ./ mmSqRetinaPerDegSqVisual;
-
-    % obtain the conversion from mm square retina to degree square retina
-    degSqRetinaPerMmSqRetina = calc_degSqRetina_per_mmSqRetina();
-    
-    % convert the mRF density from mm square retina to degree square retina
-    midgetRFDensitySqDegRetina = midgetRFDensitySqMmRetina ./ degSqRetinaPerMmSqRetina;
-    
+        
     % Remove nans and points beyond the modeled eccentricity bound
-    isvalididx=find(~isnan(midgetRFDensitySqDegRetina).*~isnan(coneDensitySqDegRetina) .* (nativeSupportPosDegRetina < p.Results.supportEccenMaxDegreesRetina) );
-    nativeSupportPosDegRetina = nativeSupportPosDegRetina(isvalididx);
-    coneDensitySqDegRetina = coneDensitySqDegRetina(isvalididx);
-    midgetRFDensitySqDegRetina = midgetRFDensitySqDegRetina(isvalididx);
+    isvalididx=find(~isnan(midgetRFDensitySqDegVisual).*~isnan(coneDensitySqDegVisual) .* (nativeSupportPosDegVisual < p.Results.supportEccenMaxDegreesRetina) );
+    nativeSupportPosDegVisual = nativeSupportPosDegVisual(isvalididx);
+    coneDensitySqDegVisual = coneDensitySqDegVisual(isvalididx);
+    midgetRFDensitySqDegVisual = midgetRFDensitySqDegVisual(isvalididx);
     
     % Define the ratio function.
-    midgetRFtoConeRatio = (midgetRFDensitySqDegRetina ./ coneDensitySqDegRetina)';
+    midgetRFtoConeRatio = (midgetRFDensitySqDegVisual ./ coneDensitySqDegVisual)';
     
     % Define the x-axis as the log10 of the proportion of max cone density
-    x = log10(coneDensitySqDegRetina ./ maxConeDensitySqDegRetina)';
+    x = log10(coneDensitySqDegVisual ./ maxConeDensitySqDegVisual)';
         
     % Perform the logistic fit. Note that the max and min asymptote are
     % pinned by the passed parameters

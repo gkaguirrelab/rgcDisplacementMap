@@ -47,7 +47,7 @@ function [ fitParams, figHandle ] = developDrasdoMidgetRGCFractionModel( varargi
 %   none
 %
 % Optional key/value pairs:
-%  'referenceEccenDegRetina' - The reference eccentricity for the proportion 
+%  'referenceEccenDegVisual' - The reference eccentricity for the proportion 
 %                           of the cumulative RGC density. The proportion
 %                           function will have a value of unity at this
 %                           point. We use 15° here for the practical reason
@@ -55,9 +55,9 @@ function [ fitParams, figHandle ] = developDrasdoMidgetRGCFractionModel( varargi
 %                           have OCT measurements of the RGC layer
 %                           thickness, and we wish in the future to model
 %                           such data using these functions.
-%  'supportResolutionDegreesRetina' - the resolution (in degrees) for which
+%  'supportResolutionDegVisual' - the resolution (in degrees) for which
 %                           the calculations are made.
-%  'supportEccenMaxDegreesRetina' - The maximum eccentricity used for
+%  'supportEccenMaxDegVisual' - The maximum eccentricity used for
 %                           modeling
 %  'meridianNames'        - Cell array of the text string names of the
 %                           meridians
@@ -84,9 +84,9 @@ function [ fitParams, figHandle ] = developDrasdoMidgetRGCFractionModel( varargi
 p = inputParser;
 
 % Optional anaysis params
-p.addParameter('referenceEccenDegRetina',15,@isnumeric);
-p.addParameter('supportResolutionDegreesRetina',0.01,@isnumeric);
-p.addParameter('supportEccenMaxDegreesRetina',30,@isnumeric);
+p.addParameter('referenceEccenDegVisual',15,@isnumeric);
+p.addParameter('supportResolutionDegVisual',0.01,@isnumeric);
+p.addParameter('supportEccenMaxDegVisual',30,@isnumeric);
 p.addParameter('meridianNames',{'Nasal' 'Superior' 'Temporal' 'Inferior'},@iscell);
 p.addParameter('meridianAngles',[0, 90, 180, 270],@isnumeric);
 p.addParameter('meridianSymbols',{'.','x','o','^'},@cell);
@@ -110,8 +110,8 @@ recipFunc = fittype('(1./(a+(b.*x)))+c','independent','x','dependent','y');
 
 % Define the regular-spaced eccentricity support over which we will model
 % the anatomical retinal functions
-regularSupportPosDegRetina = ...
-    0:p.Results.supportResolutionDegreesRetina:p.Results.supportEccenMaxDegreesRetina;
+regularSupportPosDegVisual = ...
+    0:p.Results.supportResolutionDegVisual:p.Results.supportEccenMaxDegVisual;
 
 % Prepare a figure if requested
 if p.Results.makePlots
@@ -125,24 +125,24 @@ end
 for mm = 1:length(p.Results.meridianAngles)
     
     % Load the RGC Density Data from Curcio and Allen 1990
-    [ RGCDensitySqDegRetina, nativeSupportPosDegRetina ] = loadRawRGCDensityByEccen( p.Results.meridianAngles(mm) );
+    [ RGCDensitySqDegVisual, nativeSupportPosDegVisual ] = loadRawRGCDensityByEccen( p.Results.meridianAngles(mm) );
     
     % remove nan values
-    isvalididx=find(~isnan(RGCDensitySqDegRetina)  );
-    nativeSupportPosDegRetina = nativeSupportPosDegRetina(isvalididx);
-    RGCDensitySqDegRetina = RGCDensitySqDegRetina(isvalididx);
+    isvalididx=find(~isnan(RGCDensitySqDegVisual)  );
+    nativeSupportPosDegVisual = nativeSupportPosDegVisual(isvalididx);
+    RGCDensitySqDegVisual = RGCDensitySqDegVisual(isvalididx);
     
     % Fit a spline to the RGC density data
-    RGCDensitySqDegRetinaFit = fit(nativeSupportPosDegRetina',RGCDensitySqDegRetina','smoothingspline', 'Exclude',find(isnan(RGCDensitySqDegRetina)),'SmoothingParam', 1);
+    RGCDensitySqDegVisualFit = fit(nativeSupportPosDegVisual',RGCDensitySqDegVisual','smoothingspline', 'Exclude',find(isnan(RGCDensitySqDegVisual)),'SmoothingParam', 1);
     
     % Obtain the cumulative RGC function
-    RGC_ringcount = calcRingCumulative(regularSupportPosDegRetina,RGCDensitySqDegRetinaFit(regularSupportPosDegRetina)');
+    RGC_ringcount = calcRingCumulative(regularSupportPosDegVisual,RGCDensitySqDegVisualFit(regularSupportPosDegVisual)');
     
-    % Find the index position in the regularSupportPosDegRetina that is as close
-    % as possible to the referenceEccenDegRetina
+    % Find the index position in the regularSupportPosDegVisual that is as close
+    % as possible to the referenceEccenDegVisual
     refPointIdx= ...
-        find((regularSupportPosDegRetina-p.Results.referenceEccenDegRetina)== ...
-        min(abs(regularSupportPosDegRetina-p.Results.referenceEccenDegRetina)));
+        find((regularSupportPosDegVisual-p.Results.referenceEccenDegVisual)== ...
+        min(abs(regularSupportPosDegVisual-p.Results.referenceEccenDegVisual)));
     % Calculate a proportion of the cumulative RGC density counts, relative
     % to the reference point (which is assigned a value of unity)
     propRGC_ringcount=RGC_ringcount./RGC_ringcount(refPointIdx);
@@ -156,8 +156,9 @@ for mm = 1:length(p.Results.meridianAngles)
     
     % Obtain the Watson midget fraction as a function of eccentricity
     % NOTE THE CONCEPTUAL INACCURACY: we are using the Drasdo midget
-    % fraction equation, which is in units of visual degrees
-    midgetFractionByDegRetinaEccen = calcDrasdoMidgetFractionByVisualEccen(regularSupportPosDegRetina,p.Results.watsonEq8_f0,p.Results.watsonEq8_rm);
+    % fraction equation, which expresses the midget fraction at a
+    % photoreceptor location, not at the displaced RGC location.
+    midgetFractionByDegVisualEccen = calcDrasdoMidgetFractionByVisualEccen(regularSupportPosDegVisual,p.Results.watsonEq8_f0,p.Results.watsonEq8_rm);
     
     % Fit the reciprocal model that relates log10(proportionRGC) to midget
     % fraction. First, define a weight function to lock the f0 value
@@ -174,7 +175,7 @@ for mm = 1:length(p.Results.meridianAngles)
     warning('off','MATLAB:plot:IgnoreImaginaryXYPart');
 
     recipFit= ...
-        fit(log10(propRGC_ringcount'),p.Results.watsonEq8_f0-midgetFractionByDegRetinaEccen', ...
+        fit(log10(propRGC_ringcount'),p.Results.watsonEq8_f0-midgetFractionByDegVisualEccen', ...
         recipFunc,'Weights',weights,'StartPoint',p.Results.recipFitStartPoint );
     fitParams(mm,1)=recipFit.a;
     fitParams(mm,2)=recipFit.b;
@@ -182,7 +183,7 @@ for mm = 1:length(p.Results.meridianAngles)
     
     % Add the data to the figure
     if p.Results.makePlots
-        plot(log10(propRGC_ringcount),midgetFractionByDegRetinaEccen,p.Results.meridianSymbols{mm},'color',[.8 .8 .8])
+        plot(log10(propRGC_ringcount),midgetFractionByDegVisualEccen,p.Results.meridianSymbols{mm},'color',[.8 .8 .8])
         hold on
         ylim([0.4 1]);
         xlim([-12 1]);
@@ -196,7 +197,7 @@ for mm = 1:length(p.Results.meridianAngles)
 end % loop over meridians
 
 % Calculate the median param values across meridians, but only for those
-% meridians that we have declared hwe wish to use for this purpose
+% meridians that we have declared we wish to use for this purpose
 fitParams=median(fitParams(p.Results.meridiansIdxToUseForFitParams,:));
 
 % Add a fit line to the plot

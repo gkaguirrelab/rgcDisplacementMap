@@ -1,15 +1,15 @@
-function midgetFraction = calcDaceyMidgetFractionByEccenDegRetina(supportPosDegRetina, varargin)
+function midgetFraction = calcDaceyMidgetFractionByEccenDegVisual(supportPosDegVisual, varargin)
 % Calculate the midget fraction as a function of eccentricity
 %
 % Description:
-%   This routine returns, for each of the locations in supportPosDegRetina,
+%   This routine returns, for each of the locations in supportPosDegVisual,
 %   the fraction of retinal ganglion cells that are midget RGCs. The
 %   calculation is based upon the values provided in Dacey (1993) J
 %   Neurosci. A logisitic function is fit to the data from the Dacey paper
 %   which then allows for interpolation to intermediate values.
 %
 % Inputs:
-%   supportPosDegRetina   - A 1 x p vector that identifies the eccentricity
+%   supportPosDegVisual   - A 1 x p vector that identifies the eccentricity
 %                           positions (in retinal degrees relative to the 
 %                           fovea) at which to perform the calculation.
 %
@@ -31,7 +31,7 @@ function midgetFraction = calcDaceyMidgetFractionByEccenDegRetina(supportPosDegR
 p = inputParser;
 
 % required input
-p.addRequired('supportPosDegRetina',@isnumeric);
+p.addRequired('supportPosDegVisual',@isnumeric);
 
 % Optional anaysis params
 p.addParameter('minRatio',0.45,@isnumeric);
@@ -39,7 +39,7 @@ p.addParameter('maxRatio',0.95,@isnumeric);
 p.addParameter('logitFitStartPoint',[5, 20],@isnumeric);
 
 % parse
-p.parse(supportPosDegRetina, varargin{:})
+p.parse(supportPosDegVisual, varargin{:})
 
 
 % Define a four-parameter logistic function that will be used to fit the
@@ -56,17 +56,17 @@ daceyDataSupportPosMmRetina = [0.98174998	2.02854114	3.015966729	3.978015168	4.9
 daceyMidgetFraction = [91.54203702	97.96884938	95.9768409	94.73766615	82.97154041	68.49580038	58.38473457	52.33172959	48.381962	48.34575552	49.36116774	47.82027236	44.92408057	44.88689554	47.55638914];
 
 % Convert the Dacey support vector from mm to degrees
-daceyDataSupportPosDegRetina = convert_mmRetina_to_degRetina(daceyDataSupportPosMmRetina);
+daceyDataSupportPosDegVisual = convert_mmRetina_to_degVisual(daceyDataSupportPosMmRetina,0);
 
 % Convert the Dacey percent values to proportion
 daceyMidgetFraction = daceyMidgetFraction / 100;
 
 % Fit a logistic function
-logisticFit = fit(daceyDataSupportPosDegRetina',daceyMidgetFraction',logisticFunc, ...
+logisticFit = fit(daceyDataSupportPosDegVisual',daceyMidgetFraction',logisticFunc, ...
     'problem',{p.Results.minRatio, p.Results.maxRatio}, ...
     'StartPoint',p.Results.logitFitStartPoint, ...
     'Lower',[0,0],'Upper',[100,100] );
 
-midgetFraction = logisticFit(supportPosDegRetina);
+midgetFraction = logisticFit(supportPosDegVisual);
 
 end

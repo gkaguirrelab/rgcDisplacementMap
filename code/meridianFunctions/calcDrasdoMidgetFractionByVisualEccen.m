@@ -3,7 +3,8 @@ function midgetFraction = calcDrasdoMidgetFractionByVisualEccen(supportPosDegVis
 %
 % Description:
 %   Returns the fraction of the total receptive fields at given visual
-%   field position that are midget receptive fields. The equation is taken from Drasdo et al 2007.
+%   field position that are midget receptive fields. The equation is taken
+%   from Drasdo et al 2007.
 %
 % Inputs:
 %   supportPosDegVisual   - A 1 x p vector that identifies the eccentricity
