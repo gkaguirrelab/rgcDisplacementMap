@@ -378,18 +378,33 @@ function [c,ceq] = constrainCumulativeAndDisplacement(regularSupportPosDegVisual
 % degree of displacement at any point should not exceed the maximum allowed
 % displacement.
 
+% We inflate the constraint values so that they have more influence when
+% weighed against the error function.
+constraintMultiplier = 1e6;
+
+% Calculate the displacement
+displaceInDeg = calcDisplacement(regularSupportPosDegVisual, mRF_RingCumulative, mRGC_RingCumulative);
+
 % First constraint:
-% If there are any cumulative RGC values that are greater than the RF
-% values at eccentricities less than the displacementPoint, then this
-% violates the nonlinear fit constraint
-withinRangeIdx = find(regularSupportPosDegVisual < targetConvergencePointDegVisual);
-c = nansum(mRGC_RingCumulative(withinRangeIdx) > mRF_RingCumulative(withinRangeIdx));
+% If the point of concergence is greater than the targetConvergence, this
+% is a constraint violation
+zeroPoints = find(displaceInDeg==0);
+convergenceIdx = find(regularSupportPosDegVisual(zeroPoints) > 2,1);
+if isempty(convergenceIdx)
+    c = realmax;
+else
+    convergencePoint = regularSupportPosDegVisual(zeroPoints(convergenceIdx));
+    if convergencePoint < targetConvergencePointDegVisual
+        c = 0;
+    else
+        c = (convergencePoint-targetConvergencePointDegVisual)*constraintMultiplier;
+    end
+end
 
 % Second constraint:
 % Calculate how many values in the displacement function exceed the maximum
 % desired displacement.
-displaceInDeg = calcDisplacement(regularSupportPosDegVisual, mRF_RingCumulative, mRGC_RingCumulative);
-ceq = nansum(displaceInDeg > targetMaxDisplacementDegVisual);
+ceq = nansum(displaceInDeg > targetMaxDisplacementDegVisual)*constraintMultiplier;
 
 end
 
