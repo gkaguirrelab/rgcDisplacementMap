@@ -159,7 +159,7 @@ function [ rgcDisplacementByMeridian, meridianAngleSupport, regularSupportPosDeg
 %
 % Examples:
 %{
-    rgcDisplacementByMeridian = createDisplacementModel( 'verbose', true )
+    rgcDisplacementByMeridian = createDisplacementModel( 'verbose', true );
 %}
 
 %% Parse input and define variables
@@ -174,7 +174,7 @@ p.addParameter('cardinalMeridianAngles',[0 90 180 270],@isnumeric);
 p.addParameter('meridianAngleResolutionDeg',90,@isnumeric);
 p.addParameter('displacementMapPixelsPerDegVisual',10,@isnumeric);
 p.addParameter('cone_to_mRF_linkTolerance',1.1,@isnumeric);
-p.addParameter('rgc_to_mRGC_linkTolerance',1.01,@isnumeric);
+p.addParameter('rgc_to_mRGC_linkTolerance',1.05,@isnumeric);
 p.addParameter('rgcLinkingFunctionFlavor','Dacey',@(x)(stcmp(x,'Drasdo') | stcmp(x,'Dacey')));
 p.addParameter('rfInitialTransformParams',[3.7, -1.2],@(x)(isempty(x) | isnumeric(x)));
 p.addParameter('rgcDrasdoInitialTransformParams',[],@(x)(isempty(x) | isnumeric(x)));
