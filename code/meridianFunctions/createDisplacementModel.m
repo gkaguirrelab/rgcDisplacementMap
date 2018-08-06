@@ -174,7 +174,7 @@ p.addParameter('cardinalMeridianAngles',[0 90 180 270],@isnumeric);
 p.addParameter('meridianAngleResolutionDeg',90,@isnumeric);
 p.addParameter('displacementMapPixelsPerDegVisual',10,@isnumeric);
 p.addParameter('cone_to_mRF_linkTolerance',1.1,@isnumeric);
-p.addParameter('rgc_to_mRGC_linkTolerance',1.01,@isnumeric);
+p.addParameter('rgc_to_mRGC_linkTolerance',1.05,@isnumeric);
 p.addParameter('rgcLinkingFunctionFlavor','Dacey',@(x)(stcmp(x,'Drasdo') | stcmp(x,'Dacey')));
 p.addParameter('rfInitialTransformParams',[3.25, -1.17],@(x)(isempty(x) | isnumeric(x)));
 p.addParameter('rgcDrasdoInitialTransformParams',[],@(x)(isempty(x) | isnumeric(x)));
@@ -333,6 +333,7 @@ for mm = 1:length(meridianAngleSupport)
     options = optimoptions('fmincon', 'Algorithm','sqp','Display', 'none', 'ConstraintTolerance', 0.1);
     
     % Fit that sucker
+    
     [fitParamsByMeridian(mm,:), fValsByMeridian(mm)]  = fmincon(errorFunc,x0,[],[],[],[],lb,ub,nonlinconst,options);
     
     % Calculate and store the cumulative, displacement, and optic disc fxns
@@ -361,8 +362,9 @@ end % loop over meridians
 
 % Report the fitParams
 if p.Results.verbose
-    fprintf('FitParams by meridian:\n');
+    lb
     fitParamsByMeridian
+    ub
 end
 
 end % createDisplacementModel
@@ -386,7 +388,7 @@ function [c,ceq] = constrainCumulativeAndDisplacement(regularSupportPosDegVisual
 
 % We inflate the constraint values so that they have more influence when
 % weighed against the error function.
-constraintMultiplier = 1e6;
+constraintMultiplier = 1e12;
 
 % Calculate the displacement
 displaceInDeg = calcDisplacement(regularSupportPosDegVisual, mRF_RingCumulative, mRGC_RingCumulative);

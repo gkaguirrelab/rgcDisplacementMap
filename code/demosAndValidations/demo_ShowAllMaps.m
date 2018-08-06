@@ -25,7 +25,7 @@ p = inputParser; p.KeepUnmatched = true;
 % Optional anaysis params
 p.addParameter('sampleResolutionDegVisual',0.01,@isnumeric);
 p.addParameter('maxModeledEccentricityDegVisual',30,@isnumeric);
-p.addParameter('meridianAngleResolutionDeg',45,@isnumeric);
+p.addParameter('meridianAngleResolutionDeg',1,@isnumeric);
 p.addParameter('displacementMapPixelsPerDegVisual',10,@isnumeric);
 p.addParameter('subjectName', 'computedAverage', @ischar);
 
