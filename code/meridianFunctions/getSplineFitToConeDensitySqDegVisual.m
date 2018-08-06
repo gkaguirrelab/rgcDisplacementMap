@@ -36,7 +36,7 @@ function [fitConeDensitySqDegVisual, figHandle] = getSplineFitToConeDensitySqDeg
 %
 % Examples:
 %{
-    fitConeDensitySqDegVisual = getSplineFitToConeDensitySqDegVisual(45, 'makePlots', true);
+    fitConeDensitySqDegVisual = getSplineFitToConeDensitySqDegVisual(180, 'makePlots', true);
 %}
 
 %% Parse input and define variables
@@ -67,6 +67,7 @@ end
 % Prepare a figure if requested
 if p.Results.makePlots
     figHandle=figure;
+        subplot(1,2,1);
 else
     figHandle=[];
 end
@@ -171,9 +172,21 @@ if p.Results.makePlots
     xlabel('log10 Eccentricity [deg visual]');
     ylabel('log10 Cone density [counts / deg visual^2]');
     legend({p.Results.cardinalMeridianNames{:} 'fit'},'Location','southwest');
+    ylim([1e1 1e5]);
+    xlim([1e-1 1e2]);
     drawnow
 end
 
+% Show the interpolated meridian
+if p.Results.makePlots
+    subplot(1,2,2)
+    fitSupport=0:0.1:max(coneNativeSupportPosDegVisual);
+    loglog(fitSupport,fitConeDensitySqDegVisual(fitSupport),'-.k');
+    xlabel('log10 Eccentricity [deg visual]');
+    ylabel('log10 cone density [counts / deg visual^2]');
+    ylim([1e1 1e5]);
+    xlim([1e-1 1e2]);
+end
 
 end % function
 
