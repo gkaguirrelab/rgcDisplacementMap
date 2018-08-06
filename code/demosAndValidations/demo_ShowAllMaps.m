@@ -23,10 +23,10 @@ function demo_ShowAllMaps(varargin)
 p = inputParser; p.KeepUnmatched = true;
 
 % Optional anaysis params
-p.addParameter('sampleResolutionDegreesRetina',0.01,@isnumeric);
-p.addParameter('maxModeledEccentricityDegreesRetina',30,@isnumeric);
-p.addParameter('meridianAngleResolutionDeg',1,@isnumeric);
-p.addParameter('displacementMapPixelsPerDegRetina',10,@isnumeric);
+p.addParameter('sampleResolutionDegVisual',0.01,@isnumeric);
+p.addParameter('maxModeledEccentricityDegVisual',30,@isnumeric);
+p.addParameter('meridianAngleResolutionDeg',45,@isnumeric);
+p.addParameter('displacementMapPixelsPerDegVisual',10,@isnumeric);
 p.addParameter('subjectName', 'computedAverage', @ischar);
 
 % Optional display and ouput params
@@ -55,12 +55,12 @@ coneDensityDataFileName = fullfile([getpref('rgcDisplacementMap','LocalDataPath'
 rgcDensityDataFileName = fullfile([getpref('rgcDisplacementMap','LocalDataPath') , '/Curcio_1990_JCompNeurol_GanglionCellTopography/curcioRawRGCDensity_',p.Results.subjectName,'.mat']);
 
 % Create the displacement model
-[ rgcDisplacementByMeridian, meridianAngleSupport, regularSupportPosDegRetina, opticDiscLocationByMeridian, mRF_RingCumulativeByMeridian, mRGC_RingCumulativeByMeridian, fitParamsByMeridian, ~, ~ ] = ...
+[ rgcDisplacementByMeridian, meridianAngleSupport, regularSupportPosDegVisual, opticDiscLocationByMeridian, mRF_RingCumulativeByMeridian, mRGC_RingCumulativeByMeridian, fitParamsByMeridian, ~, ~ ] = ...
     createDisplacementModel(...
-    'sampleResolutionDegreesRetina', p.Results.sampleResolutionDegreesRetina, ...
-    'maxModeledEccentricityDegreesRetina', p.Results.maxModeledEccentricityDegreesRetina, ...
+    'sampleResolutionDegVisual', p.Results.sampleResolutionDegVisual, ...
+    'maxModeledEccentricityDegVisual', p.Results.maxModeledEccentricityDegVisual, ...
     'meridianAngleResolutionDeg', p.Results.meridianAngleResolutionDeg, ...
-    'displacementMapPixelsPerDegRetina', p.Results.displacementMapPixelsPerDegRetina, ...
+    'displacementMapPixelsPerDegVisual', p.Results.displacementMapPixelsPerDegVisual, ...
     'coneDensityDataFileName', coneDensityDataFileName, ...
     'rgcDensityDataFileName', rgcDensityDataFileName, ...
     'verbose', p.Results.verbose);
@@ -71,8 +71,8 @@ rgcDensityDataFileName = fullfile([getpref('rgcDisplacementMap','LocalDataPath')
 for mm = 1:length(meridianAngleSupport)
     
     % obtain cone density
-    fitConeDensitySqDegRetina = getSplineFitToConeDensitySqDegRetina(meridianAngleSupport(mm));
-    coneDensitySqDeg = zeroOpticDiscPoints(fitConeDensitySqDegRetina(regularSupportPosDegRetina),regularSupportPosDegRetina, meridianAngleSupport(mm));
+    fitConeDensitySqDegVisual = getSplineFitToConeDensitySqDegVisual(meridianAngleSupport(mm));
+    coneDensitySqDeg = zeroOpticDiscPoints(fitConeDensitySqDegVisual(regularSupportPosDegVisual),regularSupportPosDegVisual, meridianAngleSupport(mm));
     coneDensityByMeridian(mm,:) = coneDensitySqDeg;
     
     % obtain the mRF density
@@ -81,19 +81,19 @@ for mm = 1:length(meridianAngleSupport)
     mRFtoConeDensityByMeridian(mm,:) = mRFtoConeDensityRatio;
     
     % obtain the RGC density
-    fitRGCDensitySqDegRetina = getSplineFitToRGCDensitySqDegRetina(meridianAngleSupport(mm));
-    rgcDensitySqDeg = zeroOpticDiscPoints(fitRGCDensitySqDegRetina(regularSupportPosDegRetina),regularSupportPosDegRetina, meridianAngleSupport(mm));
+    fitRGCDensitySqDegVisual = getSplineFitToRGCDensitySqDegVisual(meridianAngleSupport(mm));
+    rgcDensitySqDeg = zeroOpticDiscPoints(fitRGCDensitySqDegVisual(regularSupportPosDegVisual),regularSupportPosDegVisual, meridianAngleSupport(mm));
     rgcDensityByMeridian(mm,:) = rgcDensitySqDeg;
     
     % obtain the mRGC density
-    [ mRGCDensitySqDeg, midgetFraction ] = transformRGCToMidgetRGCDensityDacey( regularSupportPosDegRetina, rgcDensitySqDeg, 'linkingFuncParams', fitParamsByMeridian(mm,3:end) );
+    [ mRGCDensitySqDeg, midgetFraction ] = transformRGCToMidgetRGCDensityDacey( regularSupportPosDegVisual, rgcDensitySqDeg, 'linkingFuncParams', fitParamsByMeridian(mm,3:end) );
     mRGCDensityByMeridian(mm,:) = mRGCDensitySqDeg;
     midgetFractionByMeridian(mm,:) = midgetFraction;
     
 end
 
 % Define the image sample base for transform from polar coords
-imRdim = (p.Results.maxModeledEccentricityDegreesRetina * p.Results.displacementMapPixelsPerDegRetina * 2) -1;
+imRdim = (p.Results.maxModeledEccentricityDegVisual * p.Results.displacementMapPixelsPerDegVisual * 2) -1;
 
 % Show and save the maps
 polarMapNameList = {...
@@ -128,7 +128,7 @@ for vv = 1:length(polarMapNameList)
     if strcmp(titleString,'mRFtoConeDensity')
         climVals(2)=2;
     end
-    displayRetinalImage(mapImage, climVals, p.Results.displacementMapPixelsPerDegRetina, p.Results.maxModeledEccentricityDegreesRetina, titleString);
+    displayRetinalImage(mapImage, climVals, p.Results.displacementMapPixelsPerDegVisual, p.Results.maxModeledEccentricityDegVisual, titleString);
     hold on
     if median(arrayfun(@(x) mapImage(opticDiscBoundaryArray(x,1),opticDiscBoundaryArray(x,2)),1:1:size(opticDiscBoundaryArray,1))) > max(climVals)/2
         opticDiscBorderColor = [0.25 0.25 0.25];
@@ -158,8 +158,8 @@ warpMapNameList = {...
     };
 
 % create a sample space for the warped map
-eccenExtent = p.Results.maxModeledEccentricityDegreesRetina - (1/p.Results.displacementMapPixelsPerDegRetina)/2;
-smps = -eccenExtent+(1/p.Results.displacementMapPixelsPerDegRetina)/2:1/p.Results.displacementMapPixelsPerDegRetina:eccenExtent-(1/p.Results.displacementMapPixelsPerDegRetina)/2;
+eccenExtent = p.Results.maxModeledEccentricityDegVisual - (1/p.Results.displacementMapPixelsPerDegVisual)/2;
+smps = -eccenExtent+(1/p.Results.displacementMapPixelsPerDegVisual)/2:1/p.Results.displacementMapPixelsPerDegVisual:eccenExtent-(1/p.Results.displacementMapPixelsPerDegVisual)/2;
 [sampleBaseX,sampleBaseY] = meshgrid(smps,smps);
 
 % obtain the displacement map
@@ -175,7 +175,7 @@ for vv = 1:length(warpMapNameList)
     climVals = [0,ceil(max(max(smoothImage)))];
     tmp = strsplit(warpMapNameList{vv},'ByMeridian');
     titleString=tmp{1};
-    displayRetinalImage(smoothImage, climVals, p.Results.displacementMapPixelsPerDegRetina, p.Results.maxModeledEccentricityDegreesRetina, ['warped ' tmp{1} ]);
+    displayRetinalImage(smoothImage, climVals, p.Results.displacementMapPixelsPerDegVisual, p.Results.maxModeledEccentricityDegVisual, ['warped ' tmp{1} ]);
     hold on
     if median(arrayfun(@(x) smoothImage(opticDiscBoundaryArray(x,1),opticDiscBoundaryArray(x,2)),1:1:size(opticDiscBoundaryArray,1))) > max(climVals)/2
         opticDiscBorderColor = [0.25 0.25 0.25];
@@ -209,7 +209,7 @@ figHandle = figure();
 figHandle.Renderer='Painters';
 climVals = [0, 1e4];
 titleString='mRGC_cumulative_warped_minus_mRF_cumulative';
-displayRetinalImage(smoothImage, climVals, p.Results.displacementMapPixelsPerDegRetina, p.Results.maxModeledEccentricityDegreesRetina, titleString);
+displayRetinalImage(smoothImage, climVals, p.Results.displacementMapPixelsPerDegVisual, p.Results.maxModeledEccentricityDegVisual, titleString);
 hold on
 if median(arrayfun(@(x) smoothImage(opticDiscBoundaryArray(x,1),opticDiscBoundaryArray(x,2)),1:1:size(opticDiscBoundaryArray,1))) > max(climVals)/2
     opticDiscBorderColor = [0.25 0.25 0.25];
@@ -236,7 +236,7 @@ figHandle = figure();
 figHandle.Renderer='Painters';
 climVals = [0, 1e4];
 titleString='mRF_cumulative_minus_mRGC_cumulative_warped';
-displayRetinalImage(smoothImage, climVals, p.Results.displacementMapPixelsPerDegRetina, p.Results.maxModeledEccentricityDegreesRetina, titleString);
+displayRetinalImage(smoothImage, climVals, p.Results.displacementMapPixelsPerDegVisual, p.Results.maxModeledEccentricityDegVisual, titleString);
 hold on
 if median(arrayfun(@(x) smoothImage(opticDiscBoundaryArray(x,1),opticDiscBoundaryArray(x,2)),1:1:size(opticDiscBoundaryArray,1))) > max(climVals)/2
     opticDiscBorderColor = [0.25 0.25 0.25];
@@ -263,8 +263,8 @@ end % function
 
 %% LOCAL FUNCTIONS
 
-function vectorOut = zeroOpticDiscPoints(vectorIn, regularSupportPosDegRetina, polarAngle)
-opticDiscIndices = findOpticDiscPositions(regularSupportPosDegRetina, polarAngle);
+function vectorOut = zeroOpticDiscPoints(vectorIn, regularSupportPosDegVisual, polarAngle)
+opticDiscIndices = findOpticDiscPositions(regularSupportPosDegVisual, polarAngle);
 vectorOut = vectorIn;
 vectorOut(opticDiscIndices) = 0;
 end
