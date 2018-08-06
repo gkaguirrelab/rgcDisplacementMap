@@ -51,9 +51,7 @@ p = inputParser;
 p.addRequired('polarAngle',@isnumeric);
 
 % Optional anaysis params
-p.addParameter('rgcDensityDataFileName', ...
-    fullfile([getpref('rgcDisplacementMap','LocalDataPath') , '/Curcio_1990_JCompNeurol_GanglionCellTopography/curcioRawRGCDensity_reportedAverage.mat']), ...
-    @ischar);
+p.addParameter('rgcDensityDataFileName', [],@(x)(isempty(x) | ischar(x)));
 p.addParameter('cardinalMeridianAngles',[0 90 180 270],@isnumeric);
 p.addParameter('cardinalMeridianNames',{'nasal' 'superior' 'temporal' 'inferior'},@iscell);
 
@@ -65,8 +63,16 @@ if sum(p.Results.cardinalMeridianAngles==polarAngle) ~= 1
     error('Please identify the polar angle for a cardinal meridian');
 end
 
+%% Set the default for the rgcDensityFileName if not defined
+if isempty(p.Results.rgcDensityDataFileName)
+    rgcDensityDataFileName = ...
+        fullfile([getpref('rgcDisplacementMap','LocalDataPath') , '/Curcio_1990_JCompNeurol_GanglionCellTopography/curcioRawRGCDensity_computedAverage.mat']);
+else
+	rgcDensityDataFileName = p.Results.rgcDensityDataFileName;
+end
+
 %% Load and check the density data
-tmpLoader = load(p.Results.rgcDensityDataFileName);
+tmpLoader = load(rgcDensityDataFileName);
 fieldNames = fields(tmpLoader);
 if length(fieldNames) ~= 1
     error('Please specify a raw datafile that contains a single structure variable');
@@ -108,24 +114,6 @@ switch rawRGCDensity.meta.densityUnits
         error('The densityUnits of this raw file are not recognized');
 end
 
-%% Special case Curcio data
-if contains(p.Results.rgcDensityDataFileName,'curcioRawRGCDensity_reportedAverage.mat')
-    % The nasal and temporal meridians have no RGCs reported in the Curcio
-    % data at the earliest positions. I kludge a non-zero value here to
-    % allow the spline fits to be well behaved
-    if strcmp(requestedMeridianName,'nasal')
-        rgcDensitySqDegVisual(2) = 10;
-    end
-    if strcmp(requestedMeridianName,'superior')
-        rgcDensitySqDegVisual(3) = 10;
-        rgcDensitySqDegVisual(2) = 1;
-    end
-    % The temporal meridian has no reported values in the far periphery. I
-    % set these to have one cell so that the spline fits behave.
-    if strcmp(requestedMeridianName,'temporal')
-        rgcDensitySqDegVisual(29:32) = 1;
-    end
-end
 
 end % function
 
