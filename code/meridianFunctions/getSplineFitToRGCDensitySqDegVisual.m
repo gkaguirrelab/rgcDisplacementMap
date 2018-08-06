@@ -36,7 +36,7 @@ function [fitRGCDensitySqDegVisual, figHandle] = getSplineFitToRGCDensitySqDegVi
 %
 % Examples:
 %{
-    fitRGCDensitySqDegVisual = getSplineFitToRGCDensitySqDegVisual(45, 'makePlots', true);
+    fitRGCDensitySqDegVisual = getSplineFitToRGCDensitySqDegVisual(180, 'makePlots', true);
 %}
 
 %% Parse input and define variables
@@ -49,8 +49,8 @@ p.addRequired('polarAngle',@isnumeric);
 p.addParameter('cardinalMeridianAngles',[0, 90, 180, 270],@isnumeric);
 p.addParameter('cardinalMeridianNames',{'nasal','superior','temporal','inferior'},@iscell);
 p.addParameter('cardinalMeridianPlotColors',{'r','b','g','k'},@iscell);
-p.addParameter('splineKnots',14,@isnumeric);
-p.addParameter('splineOrder',3,@isnumeric);
+p.addParameter('splineKnots',20,@isnumeric);
+p.addParameter('splineOrder',5,@isnumeric);
 p.addParameter('rgcDensityDataFileName', [], @(x)(isempty(x) | ischar(x)));
 
 % Optional display params
@@ -96,7 +96,7 @@ for mm=1:length(p.Results.cardinalMeridianAngles)
     end
     % make a plot if requested
     if p.Results.makePlots
-        loglog(rgcNativeSupportPosDegVisual.(mName),rgcDensitySqDegVisual.(mName),'x','Color',p.Results.cardinalMeridianPlotColors{mm});
+        plot(rgcNativeSupportPosDegVisual.(mName),rgcDensitySqDegVisual.(mName),'x','Color',p.Results.cardinalMeridianPlotColors{mm});
         hold on
     end
     % aggregate the values across meridians
@@ -120,7 +120,7 @@ for mm=1:length(p.Results.cardinalMeridianAngles)
     % Add a fit line to the plot
     if p.Results.makePlots
         fitSupport=0:0.1:max(rgcNativeSupportPosDegVisual.(mName));
-        loglog(fitSupport,10.^fnval(ppFormSplineFits{mm},log10(fitSupport)),'-','Color',p.Results.cardinalMeridianPlotColors{mm});
+        plot(fitSupport,10.^fnval(ppFormSplineFits{mm},log10(fitSupport)),'-','Color',p.Results.cardinalMeridianPlotColors{mm});
     end
 end
 
@@ -128,8 +128,8 @@ end
 if p.Results.makePlots    
     xlabel('log10 Eccentricity [deg visual]');
     ylabel('log10 RGC density [counts / deg visual^2]');
-    ylim([1 1e4]);
-    xlim([1e-1 1e2]);
+    ylim([1 3000]);
+    xlim([0 30]);
     legend({p.Results.cardinalMeridianNames{:} 'fit'},'Location','southwest');
     drawnow
 end
@@ -172,18 +172,19 @@ ppFormSplineInterp.coefs = interpCoefs;
 % will return rgc density as a function of eccentricity in degrees. The
 % transpose operations are needed so that that the function returns a row
 % vector of density in response to a row vector of eccentricity support.
-filterZeros = @(x) (x.*(x>1e-3))+(1e-2.*(x<1e-3));
-fitRGCDensitySqDegVisual = @(supportPosDeg) 10.^fnval(ppFormSplineInterp,log10(filterZeros(supportPosDeg))')';
+filterZeros = @(x) (x.*(x>1e-3))+(1e-3.*(x<=1e-3));
+fitRGCDensitySqDegVisual = @(supportPosDeg) 10.^fnval(ppFormSplineInterp,log10(filterZeros(supportPosDeg))')' .* ...
+    (supportPosDeg>0.15);
 
 % Show the interpolated meridian
 if p.Results.makePlots
     subplot(1,2,2)
     fitSupport=0:0.1:max(rgcNativeSupportPosDegVisual.(mName));
-    loglog(fitSupport,fitRGCDensitySqDegVisual(fitSupport),'-.k');
+    plot(fitSupport,fitRGCDensitySqDegVisual(fitSupport),'-.k');
     xlabel('log10 Eccentricity [deg visual]');
     ylabel('log10 RGC density [counts / deg visual^2]');
-    ylim([1 1e4]);
-    xlim([1e-1 1e2]);
+    ylim([1 3000]);
+    xlim([0 30]);
 end
 
     
@@ -195,12 +196,9 @@ end % function
 function rgcDensityVector = handleZerosAndNans(rgcDensityVector)
     zeroIdx = find(rgcDensityVector(1:10)==0);
     if ~isempty(zeroIdx)
-        replacementVals = 1./(10.^(max(zeroIdx)-zeroIdx+1));
-        if rgcDensityVector(zeroIdx(end)+1) > 20
-            replacementVals = replacementVals.*10;
-        end
-        if rgcDensityVector(zeroIdx(end)+1) > 200
-            replacementVals = replacementVals.*100;
+        replacementVals = rgcDensityVector(zeroIdx(end)+1) ./ ((max(zeroIdx)-zeroIdx+1).^10.*10);
+        if length(replacementVals)==1
+            replacementVals = replacementVals./1e12;
         end
         rgcDensityVector(zeroIdx)=replacementVals;
     end
