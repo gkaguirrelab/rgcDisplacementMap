@@ -25,12 +25,6 @@ function [fitRGCDensitySqDegVisual, figHandle] = getSplineFitToRGCDensitySqDegVi
 %                           passed to loadRawRGCDensityByEccen. If set to
 %                           empty, then the default setting in the load
 %                           routine will be used.
-%  'meridiansForKnotDefinition' - We find that the knots must be defined
-%                           using only the 180 and 270 degree meridians to
-%                           produce knots that work for all meridians. This
-%                           is a hack. The indices set here point to these
-%                           poar angles in the cardinalMeridianAngles
-%                           vector.
 %  'makePlots'            - Do we make a figure?
 %
 % Outputs:
@@ -55,10 +49,9 @@ p.addRequired('polarAngle',@isnumeric);
 p.addParameter('cardinalMeridianAngles',[0, 90, 180, 270],@isnumeric);
 p.addParameter('cardinalMeridianNames',{'nasal','superior','temporal','inferior'},@iscell);
 p.addParameter('cardinalMeridianPlotColors',{'r','b','g','k'},@iscell);
-p.addParameter('splineKnots',18,@isnumeric);
-p.addParameter('splineOrder',4,@isnumeric);
+p.addParameter('splineKnots',14,@isnumeric);
+p.addParameter('splineOrder',3,@isnumeric);
 p.addParameter('rgcDensityDataFileName', [], @(x)(isempty(x) | ischar(x)));
-p.addParameter('meridiansForKnotDefinition',[1,2,3,4],@isnumeric);
 
 % Optional display params
 p.addParameter('makePlots',false,@islogical);
@@ -85,34 +78,30 @@ end
 aggregatePosition=[];
 aggregateDensity=[];
 for mm=1:length(p.Results.cardinalMeridianAngles)
+    mName = p.Results.cardinalMeridianNames{mm};
     % get the raw density measurements
-    if isempty(p.Results.rgcDensityDataFileName)
-        % load the empirical RGC density measured by Curcio
-        [rgcDensitySqDegVisual, rgcNativeSupportPosDegVisual] = ...
-            loadRawRGCDensityByEccen(p.Results.cardinalMeridianAngles(mm));
-    else
-        % or the passed RGC density measurement
-        [rgcDensitySqDegVisual, rgcNativeSupportPosDegVisual] = ...
+        [rgcDensitySqDegVisual.(mName), rgcNativeSupportPosDegVisual.(mName)] = ...
             loadRawRGCDensityByEccen(p.Results.cardinalMeridianAngles(mm), ...
             'rgcDensityDataFileName', p.Results.rgcDensityDataFileName);
+    % handle leading zeros and trailing nans in the density vector
+    rgcDensitySqDegVisual.(mName)=handleZerosAndNans(rgcDensitySqDegVisual.(mName));
+    % handle nans around the optic disc in the density vector
+    isvalididx=find(~isnan(rgcDensitySqDegVisual.(mName)));
+    rgcNativeSupportPosDegVisual.(mName) = rgcNativeSupportPosDegVisual.(mName)(isvalididx);
+    rgcDensitySqDegVisual.(mName) = rgcDensitySqDegVisual.(mName)(isvalididx);
+    % make the initial support position slightly non-zero
+    zeroIdx = find(rgcNativeSupportPosDegVisual.(mName)==0);
+    if ~isempty(zeroIdx)
+        rgcNativeSupportPosDegVisual.(mName)(zeroIdx) = 1e-6;
     end
-    % remove nan values
-    isvalididx=find(~isnan(rgcDensitySqDegVisual));
-    rgcNativeSupportPosDegVisual = rgcNativeSupportPosDegVisual(isvalididx);
-    rgcDensitySqDegVisual = rgcDensitySqDegVisual(isvalididx);
     % make a plot if requested
     if p.Results.makePlots
-        loglog(rgcNativeSupportPosDegVisual,rgcDensitySqDegVisual,'x','Color',p.Results.cardinalMeridianPlotColors{mm});
+        loglog(rgcNativeSupportPosDegVisual.(mName),rgcDensitySqDegVisual.(mName),'x','Color',p.Results.cardinalMeridianPlotColors{mm});
         hold on
     end
-    % If this meridian is one of the ones to be used, aggregate the values
-    if sum(p.Results.meridiansForKnotDefinition==mm)
-        % Replace zeros with values close to zero
-        rgcNativeSupportPosDegVisual(rgcNativeSupportPosDegVisual==0)=1e-10;
-        rgcDensitySqDegVisual(rgcDensitySqDegVisual==0)=1e-10;
-        aggregatePosition = [aggregatePosition rgcNativeSupportPosDegVisual];
-        aggregateDensity = [aggregateDensity rgcDensitySqDegVisual];
-    end
+    % aggregate the values across meridians
+    aggregatePosition = [aggregatePosition rgcNativeSupportPosDegVisual.(mName)];
+    aggregateDensity = [aggregateDensity rgcDensitySqDegVisual.(mName)];
 end
 
 % perform a least-squares spline fit with the specified knots and order
@@ -122,24 +111,15 @@ knots = BformSplineFit.knots;
 % Loop across the cardinal meridians again, and now perform the spline fit
 % with the specified knots
 for mm=1:length(p.Results.cardinalMeridianAngles)
-    % load the empirical rgc density measured by Curcio
-    [rgcDensitySqDegVisual, rgcNativeSupportPosDegVisual] = ...
-        loadRawRGCDensityByEccen(p.Results.cardinalMeridianAngles(mm));
-    % remove nan values
-    isvalididx=find(~isnan(rgcDensitySqDegVisual));
-    rgcNativeSupportPosDegVisual = rgcNativeSupportPosDegVisual(isvalididx);
-    rgcDensitySqDegVisual = rgcDensitySqDegVisual(isvalididx);
-    % Replace zeros with values close to zero
-    rgcNativeSupportPosDegVisual(rgcNativeSupportPosDegVisual==0)=1e-10;
-    rgcDensitySqDegVisual(rgcDensitySqDegVisual==0)=1e-10;
+    mName = p.Results.cardinalMeridianNames{mm};
     % Perform the spline fit
     BformSplineFit = ...
-        spap2(knots, p.Results.splineOrder, log10(rgcNativeSupportPosDegVisual)', log10(rgcDensitySqDegVisual)');
+        spap2(knots, p.Results.splineOrder, log10(rgcNativeSupportPosDegVisual.(mName))', log10(rgcDensitySqDegVisual.(mName))');
     % convert from B-form to piecewise polynomial form
     ppFormSplineFits{mm} = fn2fm(BformSplineFit,'pp');
     % Add a fit line to the plot
     if p.Results.makePlots
-        fitSupport=0:0.1:max(rgcNativeSupportPosDegVisual);
+        fitSupport=0:0.1:max(rgcNativeSupportPosDegVisual.(mName));
         loglog(fitSupport,10.^fnval(ppFormSplineFits{mm},log10(fitSupport)),'-','Color',p.Results.cardinalMeridianPlotColors{mm});
     end
 end
@@ -198,7 +178,7 @@ fitRGCDensitySqDegVisual = @(supportPosDeg) 10.^fnval(ppFormSplineInterp,log10(f
 % Show the interpolated meridian
 if p.Results.makePlots
     subplot(1,2,2)
-    fitSupport=0:0.1:max(rgcNativeSupportPosDegVisual);
+    fitSupport=0:0.1:max(rgcNativeSupportPosDegVisual.(mName));
     loglog(fitSupport,fitRGCDensitySqDegVisual(fitSupport),'-.k');
     xlabel('log10 Eccentricity [deg visual]');
     ylabel('log10 RGC density [counts / deg visual^2]');
@@ -209,4 +189,24 @@ end
     
 
 end % function
+
+%%%% LOCAL FUNCTIONS
+
+function rgcDensityVector = handleZerosAndNans(rgcDensityVector)
+    zeroIdx = find(rgcDensityVector(1:10)==0);
+    if ~isempty(zeroIdx)
+        replacementVals = 1./(10.^(max(zeroIdx)-zeroIdx+1));
+        if rgcDensityVector(zeroIdx(end)+1) > 20
+            replacementVals = replacementVals.*10;
+        end
+        if rgcDensityVector(zeroIdx(end)+1) > 200
+            replacementVals = replacementVals.*100;
+        end
+        rgcDensityVector(zeroIdx)=replacementVals;
+    end
+    nanIdx = find(isnan(rgcDensityVector(end-10:end)));
+    if ~isempty(nanIdx)        
+        rgcDensityVector(nanIdx+end-11)=1./(10.^(nanIdx-min(nanIdx)));
+    end
+end
 
