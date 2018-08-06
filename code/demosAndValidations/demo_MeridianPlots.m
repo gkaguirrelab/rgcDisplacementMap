@@ -30,7 +30,7 @@ p.addParameter('cardinalMeridianNames',{'nasal','superior','temporal','inferior'
 p.addParameter('cardinalMeridianPlotColors',{'r','b','g','k'},@iscell);
 p.addParameter('displacementMapPixelsPerDegVisual',10,@isnumeric);
 p.addParameter('referenceEccenDegVisual',10,@isnumeric);
-p.addParameter('subjectName', 'reportedAverage', @ischar);
+p.addParameter('subjectName', 'computedAverage', @ischar);
 
 % Optional display and ouput params
 p.addParameter('verbose',true,@islogical);
