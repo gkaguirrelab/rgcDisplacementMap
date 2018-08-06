@@ -173,12 +173,12 @@ p.addParameter('targetMaxDisplacementDegVisual',3.2,@isnumeric);
 p.addParameter('cardinalMeridianAngles',[0 90 180 270],@isnumeric);
 p.addParameter('meridianAngleResolutionDeg',45,@isnumeric);
 p.addParameter('displacementMapPixelsPerDegVisual',10,@isnumeric);
-p.addParameter('cone_to_mRF_linkTolerance',2,@isnumeric);
-p.addParameter('rgc_to_mRGC_linkTolerance',2,@isnumeric);
+p.addParameter('cone_to_mRF_linkTolerance',5,@isnumeric);
+p.addParameter('rgc_to_mRGC_linkTolerance',5,@isnumeric);
 p.addParameter('rgcLinkingFunctionFlavor','Dacey',@(x)(stcmp(x,'Drasdo') | stcmp(x,'Dacey')));
 p.addParameter('rfInitialTransformParams',[],@(x)(isempty(x) | isnumeric(x)));
 p.addParameter('rgcDrasdoInitialTransformParams',[],@(x)(isempty(x) | isnumeric(x)));
-p.addParameter('rgcDaceyInitialTransformParams',[4.2857 1.6],@(x)(isempty(x) | isnumeric(x)));
+p.addParameter('rgcDaceyInitialTransformParams',[5 2],@(x)(isempty(x) | isnumeric(x)));
 p.addParameter('coneDensityDataFileName', [], @(x)(isempty(x) | ischar(x)));
 p.addParameter('rgcDensityDataFileName', [], @(x)(isempty(x) | ischar(x)));
 

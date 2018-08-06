@@ -4,7 +4,7 @@ function cumulativeCountsPerRing = calcRingCumulative(regularSupportPosDegVisual
 % Description:
 %   For each of the positions defined in regularSupportPosDegVisual, we
 %   calculate the area of a ring that is centered on the fovea (0 degrees
-%   retinal eccentricity) and has a width equal to the distance between
+%   visual eccentricity) and has a width equal to the distance between
 %   the support positions. Across these rings of expanding area, we
 %   calculate the cumulative number of cells at each position. This vector
 %   is used subsequently to identify points on the retina that have matched

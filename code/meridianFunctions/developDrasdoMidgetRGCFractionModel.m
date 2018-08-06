@@ -84,7 +84,7 @@ function [ fitParams, figHandle ] = developDrasdoMidgetRGCFractionModel( varargi
 p = inputParser;
 
 % Optional anaysis params
-p.addParameter('referenceEccenDegVisual',15,@isnumeric);
+p.addParameter('referenceEccenDegVisual',10,@isnumeric);
 p.addParameter('supportResolutionDegVisual',0.01,@isnumeric);
 p.addParameter('supportEccenMaxDegVisual',30,@isnumeric);
 p.addParameter('meridianNames',{'Nasal' 'Superior' 'Temporal' 'Inferior'},@iscell);

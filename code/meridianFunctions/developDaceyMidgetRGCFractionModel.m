@@ -53,8 +53,8 @@ function [ fitParams, figHandle ] = developDaceyMidgetRGCFractionModel( varargin
 %  'referenceEccenDegVisual' - The reference eccentricity for the proportion 
 %                           of the cumulative RGC density. The proportion
 %                           function will have a value of unity at this
-%                           point. We use 15° here for the practical reason
-%                           that this is the maximum extent for which we
+%                           point. We use 10° here for the practical reason
+%                           that this is within the range for which we
 %                           have OCT measurements of the RGC layer
 %                           thickness, and we wish in the future to model
 %                           such data using these functions.
@@ -89,7 +89,7 @@ function [ fitParams, figHandle ] = developDaceyMidgetRGCFractionModel( varargin
 p = inputParser;
 
 % Optional anaysis params
-p.addParameter('referenceEccenDegVisual',15,@isnumeric);
+p.addParameter('referenceEccenDegVisual',10,@isnumeric);
 p.addParameter('supportResolutionDegVisual',0.01,@isnumeric);
 p.addParameter('supportEccenMaxDegVisual',60,@isnumeric);
 p.addParameter('meridianNames',{'Nasal' 'Superior' 'Temporal' 'Inferior'},@iscell);
@@ -98,7 +98,7 @@ p.addParameter('meridianSymbols',{'.','x','o','^'},@cell);
 p.addParameter('meridiansIdxToUseForFitParams',[1 2 3 4],@isnumeric);
 p.addParameter('minMidgetFractionRatio',0.41,@isnumeric);
 p.addParameter('maxMidgetFractionRatio',0.85,@isnumeric);
-p.addParameter('logitFitStartPoint',[5 1],@isnumeric);
+p.addParameter('logitFitStartPoint',[12 1],@isnumeric);
 
 % Optional display params
 p.addParameter('makePlots',false,@islogical);
@@ -131,19 +131,11 @@ end
 
 for mm = 1:length(p.Results.meridianAngles)
     
-    % Load the RGC Density Data from Curcio and Allen 1990
-    [ RGCDensitySqDegVisual, nativeSupportPosDegVisual ] = loadRawRGCDensityByEccen( p.Results.meridianAngles(mm) );
-    
-    % remove nan values
-    isvalididx=find(~isnan(RGCDensitySqDegVisual)  );
-    nativeSupportPosDegVisual = nativeSupportPosDegVisual(isvalididx);
-    RGCDensitySqDegVisual = RGCDensitySqDegVisual(isvalididx);
-    
-    % Fit a spline to the RGC density data
-    RGCDensitySqDegVisualFit = fit(nativeSupportPosDegVisual',RGCDensitySqDegVisual','smoothingspline', 'Exclude',find(isnan(RGCDensitySqDegVisual)),'SmoothingParam', 1);
-    
+	% Get a spline to the Curcio RGC density data for this meridian 
+    fitRGCDensitySqDegVisual = getSplineFitToRGCDensitySqDegVisual(p.Results.meridianAngles(mm));
+
     % Obtain the ring cumulative RGC function
-    RGC_ringcount = calcRingCumulative(regularSupportPosDegVisual,RGCDensitySqDegVisualFit(regularSupportPosDegVisual)');
+    RGC_ringcount = calcRingCumulative(regularSupportPosDegVisual,fitRGCDensitySqDegVisual(regularSupportPosDegVisual));
     
     % Find the index position in the regularSupportPosDegVisual that is as close
     % as possible to the referenceEccenDegVisual

@@ -53,7 +53,7 @@ p.addRequired('regularSupportPosDegVisual',@isnumeric);
 p.addRequired('rgcDensitySqDegVisual',@isnumeric);
 
 % Optional anaysis params
-p.addParameter('referenceEccenDegVisual',15,@isnumeric);
+p.addParameter('referenceEccenDegVisual',10,@isnumeric);
 p.addParameter('watsonEq8_f0',0.8928,@isnumeric);
 p.addParameter('linkingFuncParams',[2.4026 -8.0877 -0.0139],@isnumeric);
 
