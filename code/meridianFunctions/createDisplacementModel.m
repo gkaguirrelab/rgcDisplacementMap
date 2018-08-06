@@ -168,20 +168,20 @@ p = inputParser; p.KeepUnmatched = true;
 % Optional anaysis params
 p.addParameter('sampleResolutionDegVisual',0.01,@isnumeric);
 p.addParameter('maxModeledEccentricityDegVisual',30,@isnumeric);
-p.addParameter('targetConvergenceOnCardinalMeridiansDegVisual',[17 19.5 22 19.5],@isnumeric);
+p.addParameter('targetConvergenceOnCardinalMeridiansDegVisual',[14 15 17 15],@isnumeric);
 p.addParameter('targetMaxDisplacementDegVisual',3.2,@isnumeric);
 p.addParameter('cardinalMeridianAngles',[0 90 180 270],@isnumeric);
-p.addParameter('meridianAngleResolutionDeg',45,@isnumeric);
+p.addParameter('meridianAngleResolutionDeg',90,@isnumeric);
 p.addParameter('displacementMapPixelsPerDegVisual',10,@isnumeric);
-p.addParameter('cone_to_mRF_linkTolerance',5,@isnumeric);
-p.addParameter('rgc_to_mRGC_linkTolerance',5,@isnumeric);
+p.addParameter('cone_to_mRF_linkTolerance',1.1,@isnumeric);
+p.addParameter('rgc_to_mRGC_linkTolerance',1.01,@isnumeric);
 p.addParameter('rgcLinkingFunctionFlavor','Dacey',@(x)(stcmp(x,'Drasdo') | stcmp(x,'Dacey')));
-p.addParameter('rfInitialTransformParams',[],@(x)(isempty(x) | isnumeric(x)));
+p.addParameter('rfInitialTransformParams',[3.7, -1.2],@(x)(isempty(x) | isnumeric(x)));
 p.addParameter('rgcDrasdoInitialTransformParams',[],@(x)(isempty(x) | isnumeric(x)));
-p.addParameter('rgcDaceyInitialTransformParams',[5 2],@(x)(isempty(x) | isnumeric(x)));
+p.addParameter('rgcDaceyInitialTransformParams',[4.5, 1.5],@(x)(isempty(x) | isnumeric(x)));
 p.addParameter('coneDensityDataFileName', [], @(x)(isempty(x) | ischar(x)));
 p.addParameter('rgcDensityDataFileName', [], @(x)(isempty(x) | ischar(x)));
-
+         
 % Optional display params
 p.addParameter('verbose',false,@islogical);
 
@@ -310,9 +310,9 @@ for mm = 1:length(meridianAngleSupport)
     
     
     %% Non-linear constraint and error functions
-    % Create a non-linear constraint that tests if the RF cumulative values
-    % are greater than the RGC cumulative values at eccentricities less
-    % than the displacement point
+    % Create a non-linear constraint that tries to enforces RF counts
+    % greater than RGC counts prior to displacement, and tries to enforce a
+    % max displacement value of less than the targeted max.
     nonlinconst = @(fitParams) constrainCumulativeAndDisplacement(regularSupportPosDegVisual, mRF_RingCumulative(fitParams), mRGC_RingCumulative(fitParams), targetConvergenceDegVisualByMeridian(mm), p.Results.targetMaxDisplacementDegVisual);
     
     % The error function acts to minimize the diffrence between the
