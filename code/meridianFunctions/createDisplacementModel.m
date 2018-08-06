@@ -69,7 +69,7 @@ function [ rgcDisplacementByMeridian, meridianAngleSupport, regularSupportPosDeg
 %                           are less accurate. We find that our results
 %                           depend in unpredictable ways on the particular
 %                           value selected, which is unfortunate.
-%  'targetConvergenceOnCardinalMeridiansDegVisual' - The point in degrees
+%  'maxConvergenceOnCardinalMeridiansDegVisual' - The point in degrees
 %                           at which displacement should become zero for
 %                           each cadinal meridian. The default values were
 %                           set by taking the apparent convergence points
@@ -79,7 +79,7 @@ function [ rgcDisplacementByMeridian, meridianAngleSupport, regularSupportPosDeg
 %                           meridians, and the inferior and superior
 %                           meridian target values are simply the
 %                           midpoints.
-%  'targetMaxDisplacementDegVisual' - The desired maximum displacement
+%  'maxDisplacementDegVisual' - The desired maximum displacement
 %                           value in retinal degrees. Taken from the maxium
 %                           y-axis value from Figure 2 of Drasdo 2007,
 %                           converted from mm retina to deg retina.
@@ -168,17 +168,17 @@ p = inputParser; p.KeepUnmatched = true;
 % Optional anaysis params
 p.addParameter('sampleResolutionDegVisual',0.01,@isnumeric);
 p.addParameter('maxModeledEccentricityDegVisual',30,@isnumeric);
-p.addParameter('targetConvergenceOnCardinalMeridiansDegVisual',[14 15 17 15],@isnumeric);
-p.addParameter('targetMaxDisplacementDegVisual',3.2,@isnumeric);
+p.addParameter('maxConvergenceOnCardinalMeridiansDegVisual',[12.3 17 17 17],@isnumeric);
+p.addParameter('maxDisplacementDegVisual',3,@isnumeric);
 p.addParameter('cardinalMeridianAngles',[0 90 180 270],@isnumeric);
 p.addParameter('meridianAngleResolutionDeg',90,@isnumeric);
 p.addParameter('displacementMapPixelsPerDegVisual',10,@isnumeric);
 p.addParameter('cone_to_mRF_linkTolerance',1.1,@isnumeric);
-p.addParameter('rgc_to_mRGC_linkTolerance',1.05,@isnumeric);
+p.addParameter('rgc_to_mRGC_linkTolerance',1.01,@isnumeric);
 p.addParameter('rgcLinkingFunctionFlavor','Dacey',@(x)(stcmp(x,'Drasdo') | stcmp(x,'Dacey')));
-p.addParameter('rfInitialTransformParams',[3.7, -1.2],@(x)(isempty(x) | isnumeric(x)));
+p.addParameter('rfInitialTransformParams',[3.25, -1.17],@(x)(isempty(x) | isnumeric(x)));
 p.addParameter('rgcDrasdoInitialTransformParams',[],@(x)(isempty(x) | isnumeric(x)));
-p.addParameter('rgcDaceyInitialTransformParams',[4.5, 1.5],@(x)(isempty(x) | isnumeric(x)));
+p.addParameter('rgcDaceyInitialTransformParams',[4.3, 1.5],@(x)(isempty(x) | isnumeric(x)));
 p.addParameter('coneDensityDataFileName', [], @(x)(isempty(x) | ischar(x)));
 p.addParameter('rgcDensityDataFileName', [], @(x)(isempty(x) | ischar(x)));
          
@@ -198,16 +198,16 @@ regularSupportPosDegVisual = ...
 % displacement. This is a column vector.
 meridianAngleSupport = (0:p.Results.meridianAngleResolutionDeg:(360-p.Results.meridianAngleResolutionDeg))';
 
-% Prepare the vector targetConvergenceDegVisualByMeridian. We interpolate
+% Prepare the vector maxConvergenceDegVisualByMeridian. We interpolate
 % from the values given for the cardinal merdians to the other meridians.
 % We wrap the value at zero degrees around to 360 degrees to provide a
 % circular interpolation.
 % This is a column vector.
-targetConvergenceByMeridianFit = fit(...
+maxConvergenceByMeridianFit = fit(...
     [p.Results.cardinalMeridianAngles 360]',... % 
-    [p.Results.targetConvergenceOnCardinalMeridiansDegVisual p.Results.targetConvergenceOnCardinalMeridiansDegVisual(1)]',...
+    [p.Results.maxConvergenceOnCardinalMeridiansDegVisual p.Results.maxConvergenceOnCardinalMeridiansDegVisual(1)]',...
     'pchipinterp');
-targetConvergenceDegVisualByMeridian = targetConvergenceByMeridianFit(meridianAngleSupport);
+maxConvergenceDegVisualByMeridian = maxConvergenceByMeridianFit(meridianAngleSupport);
 
 % Pre-allocated loop variables. We do not pre-allocate fitParamsByMeridian
 % as the number of returned params could differ depending upon whether we
@@ -313,11 +313,11 @@ for mm = 1:length(meridianAngleSupport)
     % Create a non-linear constraint that tries to enforces RF counts
     % greater than RGC counts prior to displacement, and tries to enforce a
     % max displacement value of less than the targeted max.
-    nonlinconst = @(fitParams) constrainCumulativeAndDisplacement(regularSupportPosDegVisual, mRF_RingCumulative(fitParams), mRGC_RingCumulative(fitParams), targetConvergenceDegVisualByMeridian(mm), p.Results.targetMaxDisplacementDegVisual);
+    nonlinconst = @(fitParams) constrainCumulativeAndDisplacement(regularSupportPosDegVisual, mRF_RingCumulative(fitParams), mRGC_RingCumulative(fitParams), maxConvergenceDegVisualByMeridian(mm), p.Results.maxDisplacementDegVisual);
     
     % The error function acts to minimize the diffrence between the
     % mRF and mRGC cumulative functions past the displacement point
-    errorFunc = @(fitParams) errorMatchingRFandRGC(regularSupportPosDegVisual, mRF_RingCumulative(fitParams), mRGC_RingCumulative(fitParams), targetConvergenceDegVisualByMeridian(mm));
+    errorFunc = @(fitParams) errorMatchingRFandRGC(regularSupportPosDegVisual, mRF_RingCumulative(fitParams), mRGC_RingCumulative(fitParams), maxConvergenceDegVisualByMeridian(mm));
     
     
     %% Perform the fit
@@ -347,17 +347,23 @@ for mm = 1:length(meridianAngleSupport)
         zeroPoints = find(rgcDisplacementByMeridian(mm,:)==0);
         convergenceIdx = find(regularSupportPosDegVisual(zeroPoints) > 2,1);
         if isempty(convergenceIdx)
-            outLine = ['Polar angle: ' num2str(meridianAngleSupport(mm)) ', max RGC displacement: ' num2str(max(rgcDisplacementByMeridian(mm,:))) ', target convergence: ' num2str(targetConvergenceDegVisualByMeridian(mm)) ', found convergence: FAILED TO CONVERGE' ', error: ' num2str(round(fValsByMeridian(mm))) '\n'];
+            outLine = ['Polar angle: ' num2str(meridianAngleSupport(mm)) ', max RGC displacement: ' num2str(max(rgcDisplacementByMeridian(mm,:))) ', target convergence: ' num2str(maxConvergenceDegVisualByMeridian(mm)) ', found convergence: FAILED TO CONVERGE' ', error: ' num2str(round(fValsByMeridian(mm))) '\n'];
             fprintf(outLine);
         else
             convergenceEccenDegVisualByMeridian(mm) = regularSupportPosDegVisual(zeroPoints(convergenceIdx));
-            outLine = ['Polar angle: ' num2str(meridianAngleSupport(mm)) ', max RGC displacement: ' num2str(max(rgcDisplacementByMeridian(mm,:))) ', target convergence: ' num2str(targetConvergenceDegVisualByMeridian(mm)) ', found convergence: ' num2str(convergenceEccenDegVisualByMeridian(mm)) ', RMSE: ' num2str(round(fValsByMeridian(mm))) '\n'];
+            outLine = ['Polar angle: ' num2str(meridianAngleSupport(mm)) ', max RGC displacement: ' num2str(max(rgcDisplacementByMeridian(mm,:))) ', target convergence: ' num2str(maxConvergenceDegVisualByMeridian(mm)) ', found convergence: ' num2str(convergenceEccenDegVisualByMeridian(mm)) ', RMSE: ' num2str(round(fValsByMeridian(mm))) '\n'];
             fprintf(outLine);
         end
     end
     
 end % loop over meridians
 
+
+% Report the fitParams
+if p.Results.verbose
+    fprintf('FitParams by meridian:\n');
+    fitParamsByMeridian
+end
 
 end % createDisplacementModel
 
@@ -371,7 +377,7 @@ function vectorOut = zeroOpticDiscPoints(vectorIn, regularSupportPosDegVisual, p
 end
 
 
-function [c,ceq] = constrainCumulativeAndDisplacement(regularSupportPosDegVisual, mRF_RingCumulative, mRGC_RingCumulative, targetConvergencePointDegVisual, targetMaxDisplacementDegVisual)
+function [c,ceq] = constrainCumulativeAndDisplacement(regularSupportPosDegVisual, mRF_RingCumulative, mRGC_RingCumulative, targetConvergencePointDegVisual, maxDisplacementDegVisual)
 % We implement two non-linear constraints. The first is that the mRGC
 % cumulative values should not exceed the mRF cumulative values at any
 % point prior to the convergence point. The second constraint is that the
@@ -404,7 +410,7 @@ end
 % Second constraint:
 % Calculate how many values in the displacement function exceed the maximum
 % desired displacement.
-ceq = nansum(displaceInDeg > targetMaxDisplacementDegVisual)*constraintMultiplier;
+ceq = nansum(displaceInDeg > maxDisplacementDegVisual)*constraintMultiplier;
 
 end
 
