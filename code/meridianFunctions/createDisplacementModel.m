@@ -372,12 +372,6 @@ end % createDisplacementModel
 
 %% LOCAL FUNCTIONS
 
-function vectorOut = zeroOpticDiscPoints(vectorIn, regularSupportPosDegVisual, polarAngle)
-	opticDiscIndices = findOpticDiscPositions(regularSupportPosDegVisual, polarAngle);
-    vectorOut = vectorIn;
-    vectorOut(opticDiscIndices) = 0;
-end
-
 
 function [c,ceq] = constrainCumulativeAndDisplacement(regularSupportPosDegVisual, mRF_RingCumulative, mRGC_RingCumulative, targetConvergencePointDegVisual, maxDisplacementDegVisual)
 % We implement two non-linear constraints. The first is that the mRGC
