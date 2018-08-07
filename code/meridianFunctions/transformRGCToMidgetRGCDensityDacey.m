@@ -62,7 +62,7 @@ p.addRequired('rgcDensitySqDegVisual',@isnumeric);
 % Optional anaysis params
 p.addParameter('referenceEccenDegVisual',10,@isnumeric);
 p.addParameter('minMidgetFractionRatio',0.41,@isnumeric);
-p.addParameter('maxMidgetFractionRatio',0.85,@isnumeric);
+p.addParameter('maxMidgetFractionRatio',0.95,@isnumeric);
 p.addParameter('linkingFuncParams',[12 1.25],@isnumeric);
 
 % parse

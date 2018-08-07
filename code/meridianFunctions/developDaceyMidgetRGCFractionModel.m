@@ -41,10 +41,10 @@ function [ fitParams, figHandle ] = developDaceyMidgetRGCFractionModel( varargin
 %   midget fraction at the fovea and periphery, respectivey.
 %
 %   We have adopted a value of maxMidgetFractionRatio based upon the
-%   measurements reported by Don Miller's group (Liu et al 2017 PNAS)
-%   that show a peak midget fraction of ~0.85 close to the fovea.
-%   The minimum midget fraction is taken from the asymptotic value of a
-%   fit to Dacey's measurements.
+%   measurements reported by Don Miller's group (Liu et al 2017 PNAS) that
+%   show a peak midget fraction of ~0.95 close to the fovea. The minimum
+%   midget fraction is taken from the asymptotic value of a fit to Dacey's
+%   measurements.
 %
 % Inputs:
 %   none
@@ -97,7 +97,7 @@ p.addParameter('meridianAngles',[0, 90, 180, 270],@isnumeric);
 p.addParameter('meridianSymbols',{'.','x','o','^'},@cell);
 p.addParameter('meridiansIdxToUseForFitParams',[1 2 3 4],@isnumeric);
 p.addParameter('minMidgetFractionRatio',0.41,@isnumeric);
-p.addParameter('maxMidgetFractionRatio',0.85,@isnumeric);
+p.addParameter('maxMidgetFractionRatio',0.95,@isnumeric);
 p.addParameter('logitFitStartPoint',[12 1],@isnumeric);
 
 % Optional display params
