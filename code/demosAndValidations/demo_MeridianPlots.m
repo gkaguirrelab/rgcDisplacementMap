@@ -23,7 +23,7 @@ p = inputParser; p.KeepUnmatched = true;
 
 % Optional anaysis params
 p.addParameter('sampleResolutionDegVisual',0.01,@isnumeric);
-p.addParameter('maxModeledEccentricityDegVisual',30,@isnumeric);
+p.addParameter('maxModeledEccentricityDegVisual',40,@isnumeric);
 p.addParameter('meridianAngleResolutionDeg',90,@isnumeric);
 p.addParameter('cardinalMeridianAngles',[0 90 180 270],@isnumeric);
 p.addParameter('cardinalMeridianNames',{'nasal','superior','temporal','inferior'},@iscell);
