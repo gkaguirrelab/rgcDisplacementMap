@@ -168,18 +168,18 @@ p = inputParser; p.KeepUnmatched = true;
 % Optional anaysis params
 p.addParameter('sampleResolutionDegVisual',0.01,@isnumeric);
 p.addParameter('maxModeledEccentricityDegVisual',40,@isnumeric);
-p.addParameter('minConvergenceOnCardinalMeridiansDegVisual',[11 10 15 10],@isnumeric);
+p.addParameter('minConvergenceOnCardinalMeridiansDegVisual',[12 10 15 10],@isnumeric);
 p.addParameter('maxConvergenceOnCardinalMeridiansDegVisual',[12.5 17 20 17],@isnumeric);
-p.addParameter('maxDisplacementDegVisual',2.5,@isnumeric);
+p.addParameter('maxDisplacementDegVisual',2.25,@isnumeric);
 p.addParameter('cardinalMeridianAngles',[0 90 180 270],@isnumeric);
-p.addParameter('meridianAngleResolutionDeg',180,@isnumeric);
+p.addParameter('meridianAngleResolutionDeg',90,@isnumeric);
 p.addParameter('displacementMapPixelsPerDegVisual',10,@isnumeric);
-p.addParameter('cone_to_mRF_linkTolerance',1.25,@isnumeric);
-p.addParameter('rgc_to_mRGC_linkTolerance',1.25,@isnumeric);
+p.addParameter('cone_to_mRF_linkTolerance',1.5,@isnumeric); %1.1
+p.addParameter('rgc_to_mRGC_linkTolerance',1.5,@isnumeric); %1.025
 p.addParameter('rgcLinkingFunctionFlavor','Dacey',@(x)(stcmp(x,'Drasdo') | stcmp(x,'Dacey')));
-p.addParameter('rfInitialTransformParams',[3.0262, -1.1847],@(x)(isempty(x) | isnumeric(x)));
+p.addParameter('rfInitialTransformParams',[3.25, -1.17],@(x)(isempty(x) | isnumeric(x)));
 p.addParameter('rgcDrasdoInitialTransformParams',[],@(x)(isempty(x) | isnumeric(x)));
-p.addParameter('rgcDaceyInitialTransformParams',[0.9067, 2.2145],@(x)(isempty(x) | isnumeric(x)));
+p.addParameter('rgcDaceyInitialTransformParams',[2.2, 1.25],@(x)(isempty(x) | isnumeric(x)));
 p.addParameter('coneDensityDataFileName', [], @(x)(isempty(x) | ischar(x)));
 p.addParameter('rgcDensityDataFileName', [], @(x)(isempty(x) | ischar(x)));
 
@@ -218,7 +218,6 @@ minConvergenceByMeridianFit = minConvergenceByMeridianFit(meridianAngleSupport);
 % Pre-allocated loop variables. We do not pre-allocate fitParamsByMeridian
 % as the number of returned params could differ depending upon whether we
 % go with Dacey or Drasdo model flavor
-fitParamsByMeridian = zeros(length(meridianAngleSupport),length(p.Results.rfInitialTransformParams)+length(p.Results.rgcDaceyInitialTransformParams));
 fValsByMeridian = zeros(length(meridianAngleSupport),1);
 convergenceEccenDegVisualByMeridian = zeros(length(meridianAngleSupport),1);
 mRGC_RingCumulativeByMeridian = zeros(length(meridianAngleSupport),length(regularSupportPosDegVisual));
@@ -336,15 +335,20 @@ for mm = 1:length(meridianAngleSupport)
     x0 = [rfInitialTransformParams rgcInitialTransformParams];
     
     % Set up the options
-    options = optimoptions('fmincon', 'Algorithm','interior-point','Display', 'iter' );
+    options = optimoptions('fmincon', 'Algorithm','interior-point','Display', 'off' );
     
     % Fit that sucker
+    %    [fitParamsByMeridian(mm,:), fValsByMeridian(mm)]  = fmincon(errorFunc,x0,[],[],[],[],lb,ub,nonlinconst,options);
     
-    % [fitParamsByMeridian(mm,:), fValsByMeridian(mm)]  = fmincon(errorFunc,x0,[],[],[],[],lb,ub,nonlinconst,options);    
     problem = createOptimProblem('fmincon','objective',...
         errorFunc,'x0',x0,'lb',lb,'ub',ub,'nonlcon',nonlinconst,'options',options);
     gs = GlobalSearch;
-    [fitParamsByMeridian(mm,:), fValsByMeridian(mm)] = run(gs,problem);
+    [a,b]=run(gs,problem);
+    
+    if ~isempty(a)
+        fitParamsByMeridian(mm,:) = a;
+        fValsByMeridian(mm) = b;
+    end
     
     % Calculate and store the cumulative, displacement, and optic disc fxns
     mRGC_RingCumulativeByMeridian(mm,:) = mRGC_RingCumulative(fitParamsByMeridian(mm,:));
@@ -387,15 +391,14 @@ function [c,ceq] = constrainConvergenceAndDisplacement(regularSupportPosDegVisua
 
 % We inflate the constraint values so that they have more influence when
 % weighed against the error function.
-constraintMultiplier = 1e3;
+constraintMultiplier = 1e2;
 
 % Calculate the displacement
 displaceInDeg = calcDisplacement(regularSupportPosDegVisual, mRF_RingCumulative, mRGC_RingCumulative);
 
 % First constraint:
-% Calculate how many values in the displacement function exceed the maximum
-% desired displacement.
-c = nansum(displaceInDeg > maxDisplacementDegVisual)*constraintMultiplier;
+% The max observed displacement must be below threshold
+c = (max(displaceInDeg) - maxDisplacementDegVisual)*constraintMultiplier*constraintMultiplier;
 
 % Second constraint:
 % The point of convergence must be within the max and min values
