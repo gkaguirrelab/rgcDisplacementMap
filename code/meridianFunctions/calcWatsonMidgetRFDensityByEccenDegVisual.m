@@ -6,14 +6,9 @@ function [ midgetRFDensitySqDegVisual ] = calcWatsonMidgetRFDensityByEccenDegVis
 %   counts per square degree of the visual field), based upon the equation
 %   and parameters provided for Equation 8 of Watson 2014.
 %
-%   NOTE 1: Watson's paper has the labels for the nasal and temporal retina
+%   NOTE: Watson's paper has the labels for the nasal and temporal retina
 %   switched. In this routine we return the values that Watson labeled
 %   "nasal" as the temporal retina, and vice-a-versa.
-%
-%   NOTE 2: Watson's formula is in terms of visual angle degrees (and
-%   visual angle degrees squared). Therefore, the output of this routine
-%   must be converted to be related to retinal measurements in subsequent
-%   routines.
 %
 % Inputs:
 %   supportPosDegVisual   - The positions (in degrees of visual angle) from
