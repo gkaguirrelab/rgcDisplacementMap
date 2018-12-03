@@ -338,17 +338,17 @@ for mm = 1:length(meridianAngleSupport)
     options = optimoptions('fmincon', 'Algorithm','interior-point','Display', 'off' );
     
     % Fit that sucker
-    %    [fitParamsByMeridian(mm,:), fValsByMeridian(mm)]  = fmincon(errorFunc,x0,[],[],[],[],lb,ub,nonlinconst,options);
+    [fitParamsByMeridian(mm,:), fValsByMeridian(mm)]  = fmincon(errorFunc,x0,[],[],[],[],lb,ub,nonlinconst,options);
     
-    problem = createOptimProblem('fmincon','objective',...
-        errorFunc,'x0',x0,'lb',lb,'ub',ub,'nonlcon',nonlinconst,'options',options);
-    gs = GlobalSearch;
-    [a,b]=run(gs,problem);
-    
-    if ~isempty(a)
-        fitParamsByMeridian(mm,:) = a;
-        fValsByMeridian(mm) = b;
-    end
+%     problem = createOptimProblem('fmincon','objective',...
+%         errorFunc,'x0',x0,'lb',lb,'ub',ub,'nonlcon',nonlinconst,'options',options);
+%     gs = GlobalSearch;
+%     [a,b]=run(gs,problem);
+%     
+%     if ~isempty(a)
+%         fitParamsByMeridian(mm,:) = a;
+%         fValsByMeridian(mm) = b;
+%     end
     
     % Calculate and store the cumulative, displacement, and optic disc fxns
     mRGC_RingCumulativeByMeridian(mm,:) = mRGC_RingCumulative(fitParamsByMeridian(mm,:));
