@@ -82,7 +82,12 @@ function [ fitParams, figHandle ] = developDaceyMidgetRGCFractionModel( varargin
 %
 % Examples:
 %{
-    [ fitParams, figHandle ] = developDaceyMidgetRGCFractionModel('makePlots', true);
+    fitParams = developDaceyMidgetRGCFractionModel();
+    fitRGCDensitySqDegVisual = getSplineFitToRGCDensitySqDegVisual(180);
+    regularSupportPosDegVisual = 0:0.1:30;
+    [ ~, midgetFraction ] = transformRGCToMidgetRGCDensityDacey( regularSupportPosDegVisual, fitRGCDensitySqDegVisual(regularSupportPosDegVisual), 'linkingFuncParams', fitParams );
+    figure
+    plot(regularSupportPosDegVisual,midgetFraction)
 %}
 
 %% Parse input and define variables
