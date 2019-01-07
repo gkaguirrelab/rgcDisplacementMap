@@ -63,7 +63,7 @@ p.addRequired('rgcDensitySqDegVisual',@isnumeric);
 p.addParameter('referenceEccenDegVisual',10,@isnumeric);
 p.addParameter('minMidgetFractionRatio',0.41,@isnumeric);
 p.addParameter('maxMidgetFractionRatio',0.95,@isnumeric);
-p.addParameter('linkingFuncParams',[12 1.25],@isnumeric);
+p.addParameter('linkingFuncParams',[12 1.785],@isnumeric);
 
 % parse
 p.parse(regularSupportPosDegVisual, rgcDensitySqDegVisual, varargin{:})
