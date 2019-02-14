@@ -1,4 +1,4 @@
-function [ mRGCDensitySqDegRetina, midgetFraction ] = transformRGCToMidgetRGCDensityDrasdo( regularSupportPosDegRetina, rgcDensitySqDegRetina, varargin )
+function [ mRGCDensitySqDegVisual, midgetFraction ] = transformRGCToMidgetRGCDensityDrasdo( regularSupportPosDegVisual, rgcDensitySqDegVisual, varargin )
 % Transform a vector of RGC densities to midget RGC densities (Drasdo)
 %
 % Description:
@@ -21,15 +21,15 @@ function [ mRGCDensitySqDegRetina, midgetFraction ] = transformRGCToMidgetRGCDen
 %   Watson / Drasdo as 0.8928.
 %
 % Inputs:
-%   regularSupportPosDegRetina - A 1 x p vector that contains the
-%                           eccentricity in retinal degrees at which the
+%   regularSupportPosDegVisual - A 1 x p vector that contains the
+%                           eccentricity in visual degrees at which the
 %                           model was evaluated along each meridian
-%   rgcDensitySqDegRetina - A 1 x p vector of RGC density at each
+%   rgcDensitySqDegVisual - A 1 x p vector of RGC density at each
 %                           eccentricity location in units of cells /
 %                           degree^2
 %
 % Optional key/value pairs:
-%  'referenceEccenDegRetina' - The reference eccentricity for the
+%  'referenceEccenDegVisual' - The reference eccentricity for the
 %                           proportion of the cumulative RGC density. The
 %                           proportion function will have a value of unity
 %                           at this point.
@@ -38,7 +38,7 @@ function [ mRGCDensitySqDegRetina, midgetFraction ] = transformRGCToMidgetRGCDen
 %                           the transformation.
 %
 % Outputs:
-%   mRGCDensitySqDegRetina - Midget RGC density at each eccentricity
+%   mRGCDensitySqDegVisual - Midget RGC density at each eccentricity
 %                           location
 %   midgetFraction        - The midget fraction at each eccentricity
 %                           location
@@ -49,16 +49,16 @@ function [ mRGCDensitySqDegRetina, midgetFraction ] = transformRGCToMidgetRGCDen
 p = inputParser;
 
 % required input
-p.addRequired('regularSupportPosDegRetina',@isnumeric);
-p.addRequired('rgcDensitySqDegRetina',@isnumeric);
+p.addRequired('regularSupportPosDegVisual',@isnumeric);
+p.addRequired('rgcDensitySqDegVisual',@isnumeric);
 
 % Optional anaysis params
-p.addParameter('referenceEccenDegRetina',15,@isnumeric);
+p.addParameter('referenceEccenDegVisual',10,@isnumeric);
 p.addParameter('watsonEq8_f0',0.8928,@isnumeric);
 p.addParameter('linkingFuncParams',[2.4026 -8.0877 -0.0139],@isnumeric);
 
 % parse
-p.parse(regularSupportPosDegRetina, rgcDensitySqDegRetina, varargin{:})
+p.parse(regularSupportPosDegVisual, rgcDensitySqDegVisual, varargin{:})
 
 
 %% House keeping and setup
@@ -68,11 +68,11 @@ p.parse(regularSupportPosDegRetina, rgcDensitySqDegRetina, varargin{:})
 recipFunc = fittype('(1./(a+(b.*x)))+c','independent','x','dependent','y');
 
 % Obtain the cumulative RGC function
-RGC_ringcount = calcCumulative(regularSupportPosDegRetina,rgcDensitySqDegRetina);
+RGC_ringcount = calcCumulative(regularSupportPosDegVisual,rgcDensitySqDegVisual);
 
 % Find the index position in the regularSupportPosDeg that is as close
 % as possible to the referenceEccen
-[ ~, refPointIdx ] = min(abs(regularSupportPosDegRetina-p.Results.referenceEccenDegRetina));
+[ ~, refPointIdx ] = min(abs(regularSupportPosDegVisual-p.Results.referenceEccenDegVisual));
 % Calculate a proportion of the cumulative RGC density counts, relative
 % to the reference point (which is assigned a value of unity)
 propRGC_ringcount=RGC_ringcount./RGC_ringcount(refPointIdx);
@@ -88,12 +88,12 @@ end
 midgetFraction = p.Results.watsonEq8_f0-recipFunc(p.Results.linkingFuncParams(1),p.Results.linkingFuncParams(2),p.Results.linkingFuncParams(3),log10(propRGC_ringcount));
 
 % Scale the rgcDensity by the midget fraction
-mRGCDensitySqDegRetina = rgcDensitySqDegRetina .* midgetFraction;
+mRGCDensitySqDegVisual = rgcDensitySqDegVisual .* midgetFraction;
 
 % NaNs can happen; set them to zero
-badIdx = find(isnan(mRGCDensitySqDegRetina));
+badIdx = find(isnan(mRGCDensitySqDegVisual));
 if ~isempty(badIdx)
-    mRGCDensitySqDegRetina(badIdx)=0;
+    mRGCDensitySqDegVisual(badIdx)=0;
 end
 
 end % function

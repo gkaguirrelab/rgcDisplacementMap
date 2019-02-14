@@ -1,5 +1,8 @@
-function [fitConeDensitySqDegRetina] = getSplineFitToConeDensitySqDegRetina(polarAngle, varargin)
+function [fitConeDensitySqDegVisual, figHandle] = getSplineFitToConeDensitySqDegVisual(polarAngle, varargin)
 % Returns a fit to cone density data
+%
+% Syntax:
+%  [fitConeDensitySqDegVisual] = getSplineFitToConeDensitySqDegVisual(polarAngle)
 %
 % Description:
 %   This routine returns a fit to cone density data. Raw cone density data
@@ -22,13 +25,19 @@ function [fitConeDensitySqDegRetina] = getSplineFitToConeDensitySqDegRetina(pola
 %                           passed to loadRawConeDensityByEccen. If set to
 %                           empty, then the default setting in the load
 %                           routine will be used.
+%  'makePlots'            - Do we make a figure?
 %
 % Outputs:
-%	fitConeDensitySqDegRetina - handle of a fitting function that returns
+%	fitConeDensitySqDegVisual - handle of a fitting function that returns
 %                           rgc density values for the specified meridian
 %                           angle across retinal eccentricity in polarAngle
+%   figHandle             - Handle to a figure showing the fits. Empty if 
+%                           no plotting requested.
 %
-
+% Examples:
+%{
+    fitConeDensitySqDegVisual = getSplineFitToConeDensitySqDegVisual(180, 'makePlots', true);
+%}
 
 %% Parse input and define variables
 p = inputParser;
@@ -38,9 +47,14 @@ p.addRequired('polarAngle',@isnumeric);
 
 % Optional analysis params
 p.addParameter('cardinalMeridianAngles',[0, 90, 180, 270],@isnumeric);
+p.addParameter('cardinalMeridianNames',{'nasal','superior','temporal','inferior'},@iscell);
+p.addParameter('cardinalMeridianPlotColors',{'r','b','g','k'},@iscell);
 p.addParameter('splineKnots',15,@isnumeric);
 p.addParameter('splineOrder',4,@isnumeric);
 p.addParameter('coneDensityDataFileName', [], @(x)(isempty(x) | ischar(x)));
+
+% Optional display params
+p.addParameter('makePlots',false,@islogical);
 
 % parse
 p.parse(polarAngle,varargin{:})
@@ -48,6 +62,14 @@ p.parse(polarAngle,varargin{:})
 %% sanity check the input
 if p.Results.cardinalMeridianAngles ~= 0
     error('This routine assumes that the first meridian is polar angle = 0');
+end
+
+% Prepare a figure if requested
+if p.Results.makePlots
+    figHandle=figure;
+        subplot(1,2,1);
+else
+    figHandle=[];
 end
 
 % Loop across the cardinal meridians and combine the cone data. Use this
@@ -58,21 +80,26 @@ for mm=1:length(p.Results.cardinalMeridianAngles)
     % get the raw density measurements
     if isempty(p.Results.coneDensityDataFileName)
         % load the empirical cone density measured by Curcio
-        [coneDensitySqDegRetina, coneNativeSupportPosDegRetina] = ...
+        [coneDensitySqDegVisual, coneNativeSupportPosDegVisual] = ...
             loadRawConeDensityByEccen(p.Results.cardinalMeridianAngles(mm));
     else
         % or the passed cone density measurement
-        [coneDensitySqDegRetina, coneNativeSupportPosDegRetina] = ...
+        [coneDensitySqDegVisual, coneNativeSupportPosDegVisual] = ...
             loadRawConeDensityByEccen(p.Results.cardinalMeridianAngles(mm), ...
             'coneDensityDataFileName', p.Results.coneDensityDataFileName);
     end
     
     % remove nan values
-    isvalididx=find(~isnan(coneDensitySqDegRetina));
-    coneNativeSupportPosDegRetina = coneNativeSupportPosDegRetina(isvalididx);
-    coneDensitySqDegRetina = coneDensitySqDegRetina(isvalididx);
-    aggregatePosition = [aggregatePosition coneNativeSupportPosDegRetina];
-    aggregateDensity = [aggregateDensity coneDensitySqDegRetina];
+    isvalididx=find(~isnan(coneDensitySqDegVisual));
+    coneNativeSupportPosDegVisual = coneNativeSupportPosDegVisual(isvalididx);
+    coneDensitySqDegVisual = coneDensitySqDegVisual(isvalididx);
+    aggregatePosition = [aggregatePosition coneNativeSupportPosDegVisual];
+    aggregateDensity = [aggregateDensity coneDensitySqDegVisual];
+    % make a plot if requested
+    if p.Results.makePlots
+        loglog(coneNativeSupportPosDegVisual,coneDensitySqDegVisual,'x','Color',p.Results.cardinalMeridianPlotColors{mm});
+        hold on
+    end
 end
 
 % perform a least-squares spline fit with the specified knots and order
@@ -83,15 +110,20 @@ knots = BformSplineFit.knots;
 % with the specified knots
 for mm=1:length(p.Results.cardinalMeridianAngles)
     % load the empirical cone density measured by Curcio
-    [coneDensitySqDegRetina, coneNativeSupportPosDegRetina] = loadRawConeDensityByEccen(p.Results.cardinalMeridianAngles(mm));
+    [coneDensitySqDegVisual, coneNativeSupportPosDegVisual] = loadRawConeDensityByEccen(p.Results.cardinalMeridianAngles(mm));
     % remove nan values
-    isvalididx=find(~isnan(coneDensitySqDegRetina));
-    coneNativeSupportPosDegRetina = coneNativeSupportPosDegRetina(isvalididx);
-    coneDensitySqDegRetina = coneDensitySqDegRetina(isvalididx);
+    isvalididx=find(~isnan(coneDensitySqDegVisual));
+    coneNativeSupportPosDegVisual = coneNativeSupportPosDegVisual(isvalididx);
+    coneDensitySqDegVisual = coneDensitySqDegVisual(isvalididx);
     % Perform the spline fit
-    BformSplineFit=spap2(knots, p.Results.splineOrder, coneNativeSupportPosDegRetina', coneDensitySqDegRetina');
+    BformSplineFit=spap2(knots, p.Results.splineOrder, coneNativeSupportPosDegVisual', coneDensitySqDegVisual');
     % convert from B-form to piecewise polynomial form
     ppFormSplineFits{mm} = fn2fm(BformSplineFit,'pp');
+    % Add a fit line to the plot
+    if p.Results.makePlots
+        fitSupport=0:0.1:max(coneNativeSupportPosDegVisual);
+        loglog(fitSupport,fnval(ppFormSplineFits{mm},fitSupport),'-','Color',p.Results.cardinalMeridianPlotColors{mm});
+    end
 end
 
 % We will now assemble a new coefficient matrix for the spline fit that is
@@ -133,7 +165,28 @@ ppFormSplineInterp.coefs = interpCoefs;
 % The transpose operations are needed so that that the function returns a
 % row vector of density in response to a row vector of eccentricity
 % support.
-fitConeDensitySqDegRetina = @(supportPosDegRetina) fnval(ppFormSplineInterp,supportPosDegRetina')';
+fitConeDensitySqDegVisual = @(supportPosDegVisual) fnval(ppFormSplineInterp,supportPosDegVisual')';
+
+% Clean up the plot
+if p.Results.makePlots
+    xlabel('log10 Eccentricity [deg visual]');
+    ylabel('log10 Cone density [counts / deg visual^2]');
+    legend({p.Results.cardinalMeridianNames{:} 'fit'},'Location','southwest');
+    ylim([1e1 1e5]);
+    xlim([1e-1 1e2]);
+    drawnow
+end
+
+% Show the interpolated meridian
+if p.Results.makePlots
+    subplot(1,2,2)
+    fitSupport=0:0.1:max(coneNativeSupportPosDegVisual);
+    loglog(fitSupport,fitConeDensitySqDegVisual(fitSupport),'-.k');
+    xlabel('log10 Eccentricity [deg visual]');
+    ylabel('log10 cone density [counts / deg visual^2]');
+    ylim([1e1 1e5]);
+    xlim([1e-1 1e2]);
+end
 
 end % function
 

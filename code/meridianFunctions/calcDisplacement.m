@@ -1,25 +1,25 @@
-function displaceInDegRetina = calcDisplacement(regularSupportPosDegRetina, mRF_RingCumulative, mRGC_RingCumulative)
+function displaceInDegVisual = calcDisplacement(regularSupportPosDegVisual, mRF_RingCumulative, mRGC_RingCumulative)
 % Calculate RGC displacement using RF and RGC cumulative functions
 %
 % Description:
-%   This function identifies points along the regularSupportPosDegRetina at
+%   This function identifies points along the regularSupportPosDegVisual at
 %   which the midget RGC and midget receptive field (RF) cumulative
-%   functions have matching values. The distance (in retinal degrees)
+%   functions have matching values. The distance (in visual degrees)
 %   between these matching points is calculated and returned.
 %
 % Inputs:
-%   regularSupportPosDegRetina - A 1 x p vector that contains the
-%                           eccentricity in retinal degrees at which the
+%   regularSupportPosDegVisual - A 1 x p vector that contains the
+%                           eccentricity in visual degrees at which the
 %                           model was evaluated along each meridian
 %   mRF_RingCumulative    - A 1 x p vector that contains the cumulative
 %                           number of RFs at each regularSupportPos-
-%                           DegRetina position within an areal "ring".
+%                           DegVisual position within an areal "ring".
 %   mRGC_RingCumulative   - A 1 x p vector that contains the cumulative
 %                           number of RGC cells at each regularSupportPos-
-%                           DegRetina position within an areal "ring".
+%                           DegVisual position within an areal "ring".
 %
 % Outputs:
-%   displaceInDegRetina   - A 1 x p vector that contains, for each of the
+%   displaceInDegVisual   - A 1 x p vector that contains, for each of the
 %                           retinal positions defined in the support,
 %                           the distance (in retinal degrees) that RGC cell
 %                           bodies at that location would need to be
@@ -29,7 +29,7 @@ function displaceInDegRetina = calcDisplacement(regularSupportPosDegRetina, mRF_
 
 
 % Determine the sample resolution by a difference operation
-tmp = diff(regularSupportPosDegRetina);
+tmp = diff(regularSupportPosDegVisual);
 sampleResolutionDegreesRetina = tmp(1);
 
 % Measure the displacement (in degrees). First, for each cumulative RGC
@@ -51,9 +51,9 @@ displaceInSamples=cell2mat(displaceInSamples(cellfun(@(x) ~isempty(x), displaceI
 % RGC density measurement, minus the array index of the matching RF density
 % measurement. This difference is then multiplied by the sample resolution
 % to get the displacement in degrees.
-displaceInDegRetina = ((1:1:length(displaceInSamples))-displaceInSamples ) * sampleResolutionDegreesRetina;
+displaceInDegVisual = ((1:1:length(displaceInSamples))-displaceInSamples ) * sampleResolutionDegreesRetina;
 
 % Zero out negative values after the point of convergence
-displaceInDegRetina(find(displaceInDegRetina < 0,1):end)=0;
+displaceInDegVisual(find(displaceInDegVisual < 0,1):end)=0;
 
 end

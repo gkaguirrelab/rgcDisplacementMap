@@ -1,4 +1,4 @@
-function [coneDensitySqDegRetina, supportPosDegRetina] = loadRawConeDensityByEccen(polarAngle, varargin)
+function [coneDensitySqDegVisual, supportPosDegVisual] = loadRawConeDensityByEccen(polarAngle, varargin)
 % Load cone density data from a file in standardized format
 %
 % Description:
@@ -30,9 +30,9 @@ function [coneDensitySqDegRetina, supportPosDegRetina] = loadRawConeDensityByEcc
 %                           reported in Curcio 1990.
 %
 % Outputs:
-%   coneDensitySqDegRetina - The density (counts per square degree) of
+%   coneDensitySqDegVisual - The density (counts per square degree) of
 %                           cones at each of the positions
-%   supportPosDegRetina   - The positions (in degrees of visual angle) from
+%   supportPosDegVisual   - The positions (in degrees of visual angle) from
 %                           the fovea at which the cone density is defined
 %
 
@@ -45,7 +45,7 @@ p.addRequired('polarAngle',@isnumeric);
 
 % Optional anaysis params
 p.addParameter('coneDensityDataFileName', ...
-    fullfile([getpref('rgcDisplacementMap','LocalDataPath') , '/Curcio_1990_JCompNeurol_HumanPhotoreceptorTopography/curcioRawConeDensity_reportedAverage.mat']), ...
+    fullfile([getpref('rgcDisplacementMap','LocalDataPath') , '/Curcio_1990_JCompNeurol_HumanPhotoreceptorTopography/curcioRawConeDensity_computedAverage.mat']), ...
     @ischar);
 p.addParameter('cardinalMeridianAngles',[0 90 180 270],@isnumeric);
 p.addParameter('cardinalMeridianNames',{'nasal' 'superior' 'temporal' 'inferior'},@iscell);
@@ -74,16 +74,14 @@ if ~isfield(rawConeDensity.meta, 'densityUnits')
     error('The raw data file lacks the field .meta.densityUnits');
 end
 
+
 %% Select the requested meridian and perform unit conversion
 switch rawConeDensity.meta.supportUnits
     case {'mm','MM','Mm'}
-        % convert mmRetina to degRetina
-        supportPosDegRetina = convert_mmRetina_to_degRetina(rawConeDensity.support);
-    case {'retinalDegree'}
-        % no conversion needed
-        supportPosDegRetina = rawConeDensity.support;
+        supportPosDegVisual = convert_mmRetina_to_degVisual(rawConeDensity.support, polarAngle);
     case {'visualDegree'}
-        error('This case is not yet implemented');
+        % no conversion needed
+        supportPosDegVisual = rawConeDensity.support;
     otherwise
         error('The supportUnits of this raw file are not recognized');
 end
@@ -95,16 +93,14 @@ rawConeDensityForSelectedMeridian = rawConeDensity.(requestedMeridianName);
 % Perform denisty unit conversion
 switch rawConeDensity.meta.densityUnits
     case 'counts/mm2'
-        % convert counts/mmSqRetina to counts/degSqRetina
-        coneDensitySqDegRetina = rawConeDensityForSelectedMeridian ./ calc_degSqRetina_per_mmSqRetina();
-    case 'counts/retinalDeg2'
-        % no conversion needed
-        coneDensitySqDegRetina = rawConeDensityForSelectedMeridian;
+        degSqVisualPerMmSqRetinaRelativeToVisualAxis = calc_degSqVisual_per_mmSqRetina(rawConeDensity.support, polarAngle);
+        coneDensitySqDegVisual = rawConeDensityForSelectedMeridian ./ degSqVisualPerMmSqRetinaRelativeToVisualAxis;
     case 'counts/visualDeg2'
-        error('This case is not yet implemented');
+        coneDensitySqDegVisual = rawConeDensityForSelectedMeridian;
     otherwise
         error('The densityUnits of this raw file are not recognized');
 end
+
 
 
 end % function
