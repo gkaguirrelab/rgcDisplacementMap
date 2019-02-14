@@ -42,6 +42,14 @@ function [rgcDensitySqDegVisual, supportPosDegVisual] = loadRawRGCDensityByEccen
 %                           from the fovea at which the RGC density is
 %                           defined
 %
+% Examples:
+%{
+    [rgcDensitySqDegVisual, supportPosDegVisual] = loadRawRGCDensityByEccen(180);
+    plot(supportPosDegVisual, rgcDensitySqDegVisual,'*r')
+    xlabel('Eccentricty [visual degrees]')
+    ylabel('Total RGC density [counts / sq degree visual]');
+    legend('temporal');
+%}
 
 
 %% Parse input and define variables
