@@ -49,7 +49,7 @@ p.addRequired('polarAngle',@isnumeric);
 p.addParameter('cardinalMeridianAngles',[0, 90, 180, 270],@isnumeric);
 p.addParameter('cardinalMeridianNames',{'nasal','superior','temporal','inferior'},@iscell);
 p.addParameter('cardinalMeridianPlotColors',{'r','b','g','k'},@iscell);
-p.addParameter('splineKnots',20,@isnumeric);
+p.addParameter('splineKnots',15,@isnumeric);
 p.addParameter('splineOrder',5,@isnumeric);
 p.addParameter('rgcDensityDataFileName', [], @(x)(isempty(x) | ischar(x)));
 
@@ -181,8 +181,8 @@ if p.Results.makePlots
     subplot(1,2,2)
     fitSupport=0:0.1:max(rgcNativeSupportPosDegVisual.(mName));
     plot(fitSupport,fitRGCDensitySqDegVisual(fitSupport),'-.k');
-    xlabel('log10 Eccentricity [deg visual]');
-    ylabel('log10 RGC density [counts / deg visual^2]');
+    xlabel('Eccentricity [deg visual]');
+    ylabel('RGC density [counts / deg visual^2]');
     ylim([1 3000]);
     xlim([0 30]);
 end
