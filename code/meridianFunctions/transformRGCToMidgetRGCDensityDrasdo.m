@@ -68,7 +68,7 @@ p.parse(regularSupportPosDegVisual, rgcDensitySqDegVisual, varargin{:})
 recipFunc = fittype('(1./(a+(b.*x)))+c','independent','x','dependent','y');
 
 % Obtain the cumulative RGC function
-RGC_ringcount = calcCumulative(regularSupportPosDegVisual,rgcDensitySqDegVisual);
+RGC_ringcount = calcRingCumulative(regularSupportPosDegVisual,rgcDensitySqDegVisual);
 
 % Find the index position in the regularSupportPosDeg that is as close
 % as possible to the referenceEccen
