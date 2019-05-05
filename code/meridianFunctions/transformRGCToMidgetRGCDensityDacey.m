@@ -60,10 +60,10 @@ p.addRequired('regularSupportPosDegVisual',@isnumeric);
 p.addRequired('rgcDensitySqDegVisual',@isnumeric);
 
 % Optional anaysis params
-p.addParameter('referenceEccenDegVisual',10,@isnumeric);
+p.addParameter('totalRetinalRGCs',1.5e6,@isscalar);
 p.addParameter('minMidgetFractionRatio',0.41,@isnumeric);
 p.addParameter('maxMidgetFractionRatio',0.95,@isnumeric);
-p.addParameter('linkingFuncParams',[12 1.785],@isnumeric);
+p.addParameter('linkingFuncParams',[12.0290, 0.4320],@isnumeric);
 
 % parse
 p.parse(regularSupportPosDegVisual, rgcDensitySqDegVisual, varargin{:})
@@ -80,13 +80,9 @@ logisticFunc = fittype( @(slope,inflect,minMidgetFractionRatio,maxMidgetFraction
 % Obtain the cumulative RGC function
 RGC_ringcount = calcRingCumulative(regularSupportPosDegVisual,rgcDensitySqDegVisual);
 
-% Find the index position in the regularSupportPosDeg that is as close
-% as possible to the referenceEccenDegVisual
-[ ~, refPointIdx ] = min(abs(regularSupportPosDegVisual-p.Results.referenceEccenDegVisual));
-
 % Calculate a proportion of the cumulative RGC density counts, relative
-% to the reference point (which is assigned a value of unity)
-propRGC_ringcount=RGC_ringcount./RGC_ringcount(refPointIdx);
+% to the total number of RGCs in the retina
+propRGC_ringcount=RGC_ringcount./p.Results.totalRetinalRGCs;
 
 % Calculate the midgetFraction based upon the propRGC_ringcount
 midgetFraction = logisticFunc(p.Results.linkingFuncParams(1), p.Results.linkingFuncParams(2), p.Results.minMidgetFractionRatio, p.Results.maxMidgetFractionRatio, propRGC_ringcount);

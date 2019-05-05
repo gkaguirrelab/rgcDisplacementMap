@@ -11,12 +11,7 @@ function [ fitParams, figHandle ] = developDaceyMidgetRGCFractionModel( varargin
 %
 %   To solve this problem, we first take the cumulative of the RGC density
 %   function along a meridian. We then express this function as a
-%   proportion of the cumuluative density value at any point to the
-%   cumulative density value at a specific eccentricity location (e.g., at
-%   15 degrees). Thus, the proportional cumulative density of RGCs is equal
-%   to unity (1) at the reference eccentricity. The value of the reference
-%   eccentricity should be sufficiently large so that the RGC density
-%   function is in the monotonically decreasing phase.
+%   proportion relative to the total number of RGCs in the retina (1e6). 
 %
 %   Next, the proportional, cumulative RGC density function is related to
 %   the predicted midget fraction for that location, as derived by a fit to
@@ -82,6 +77,9 @@ function [ fitParams, figHandle ] = developDaceyMidgetRGCFractionModel( varargin
 %
 % Examples:
 %{
+    fitParams = developDaceyMidgetRGCFractionModel('makePlots',true)
+%}
+%{
     fitParams = developDaceyMidgetRGCFractionModel();
     fitRGCDensitySqDegVisual = getSplineFitToRGCDensitySqDegVisual(180);
     regularSupportPosDegVisual = 0:0.1:30;
@@ -94,7 +92,7 @@ function [ fitParams, figHandle ] = developDaceyMidgetRGCFractionModel( varargin
 p = inputParser;
 
 % Optional anaysis params
-p.addParameter('referenceEccenDegVisual',10,@isnumeric);
+p.addParameter('totalRetinalRGCs',1.5e6,@isscalar);
 p.addParameter('supportResolutionDegVisual',0.01,@isnumeric);
 p.addParameter('supportEccenMaxDegVisual',60,@isnumeric);
 p.addParameter('meridianNames',{'Nasal' 'Superior' 'Temporal' 'Inferior'},@iscell);
@@ -103,7 +101,7 @@ p.addParameter('meridianSymbols',{'.','x','o','^'},@cell);
 p.addParameter('meridiansIdxToUseForFitParams',[1 2 3 4],@isnumeric);
 p.addParameter('minMidgetFractionRatio',0.41,@isnumeric);
 p.addParameter('maxMidgetFractionRatio',0.95,@isnumeric);
-p.addParameter('logitFitStartPoint',[12 1],@isnumeric);
+p.addParameter('logitFitStartPoint',[5 0.5],@isnumeric);
 
 % Optional display params
 p.addParameter('makePlots',false,@islogical);
@@ -142,15 +140,9 @@ for mm = 1:length(p.Results.meridianAngles)
     % Obtain the ring cumulative RGC function
     RGC_ringcount = calcRingCumulative(regularSupportPosDegVisual,fitRGCDensitySqDegVisual(regularSupportPosDegVisual));
     
-    % Find the index position in the regularSupportPosDegVisual that is as close
-    % as possible to the referenceEccenDegVisual
-    refPointIdx= ...
-        find((regularSupportPosDegVisual-p.Results.referenceEccenDegVisual)== ...
-        min(abs(regularSupportPosDegVisual-p.Results.referenceEccenDegVisual)));
-    
     % Calculate a proportion of the cumulative RGC density counts, relative
     % to the reference point (which is assigned a value of unity)
-    propRGC_ringcount=RGC_ringcount./RGC_ringcount(refPointIdx);
+    propRGC_ringcount=RGC_ringcount./p.Results.totalRetinalRGCs;
     
     % Obtain the Dacey midget fraction as a function of eccentricity
     midgetFractionByEccenDegVisual = calcDaceyMidgetFractionByEccenDegVisual(regularSupportPosDegVisual)';
@@ -203,7 +195,7 @@ fitParams=median(fitParams(p.Results.meridiansIdxToUseForFitParams,:));
 
 % Add a fit line to the plot
 if p.Results.makePlots
-    xFit=0:.1:2;
+    xFit=0:.01:1;
     plot( xFit, ...
         logisticFunc(fitParams(1), fitParams(2), p.Results.minMidgetFractionRatio, p.Results.maxMidgetFractionRatio, xFit),'-.m')
     legend({p.Results.meridianNames{:} 'fit'},'Location','southwest');
