@@ -36,7 +36,7 @@ function [fitRGCDensitySqDegVisual, figHandle] = getSplineFitToRGCDensitySqDegVi
 %
 % Examples:
 %{
-    fitRGCDensitySqDegVisual = getSplineFitToRGCDensitySqDegVisual(180, 'makePlots', true);
+    fitRGCDensitySqDegVisual = getSplineFitToRGCDensitySqDegVisual(45, 'makePlots', true);    
 %}
 
 %% Parse input and define variables
@@ -49,8 +49,8 @@ p.addRequired('polarAngle',@isnumeric);
 p.addParameter('cardinalMeridianAngles',[0, 90, 180, 270],@isnumeric);
 p.addParameter('cardinalMeridianNames',{'nasal','superior','temporal','inferior'},@iscell);
 p.addParameter('cardinalMeridianPlotColors',{'r','b','g','k'},@iscell);
-p.addParameter('splineKnots',15,@isnumeric);
-p.addParameter('splineOrder',5,@isnumeric);
+p.addParameter('splineKnots',22,@isnumeric);
+p.addParameter('splineOrder',4,@isnumeric);
 p.addParameter('rgcDensityDataFileName', [], @(x)(isempty(x) | ischar(x)));
 
 % Optional display params
@@ -126,11 +126,12 @@ end
 
 %  Clean up the plot
 if p.Results.makePlots    
-    xlabel('log10 Eccentricity [deg visual]');
-    ylabel('log10 RGC density [counts / deg visual^2]');
+    title('Cardinal meridians');
+    xlabel('Eccentricity [deg visual]');
+    ylabel('RGC density [counts / deg visual^2]');
     ylim([1 3000]);
     xlim([0 30]);
-    legend({p.Results.cardinalMeridianNames{:} 'fit'},'Location','southwest');
+    legend({p.Results.cardinalMeridianNames{:} 'fit'},'Location','northeast');
     drawnow
 end
 
@@ -181,6 +182,7 @@ if p.Results.makePlots
     subplot(1,2,2)
     fitSupport=0:0.1:max(rgcNativeSupportPosDegVisual.(mName));
     plot(fitSupport,fitRGCDensitySqDegVisual(fitSupport),'-.k');
+    title('Superior-nasal oblique meridian');
     xlabel('Eccentricity [deg visual]');
     ylabel('RGC density [counts / deg visual^2]');
     ylim([1 3000]);

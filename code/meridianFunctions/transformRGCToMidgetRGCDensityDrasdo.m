@@ -53,9 +53,9 @@ p.addRequired('regularSupportPosDegVisual',@isnumeric);
 p.addRequired('rgcDensitySqDegVisual',@isnumeric);
 
 % Optional anaysis params
-p.addParameter('referenceEccenDegVisual',10,@isnumeric);
+p.addParameter('totalRetinalRGCs',1.5e6,@isscalar);
 p.addParameter('watsonEq8_f0',0.8928,@isnumeric);
-p.addParameter('linkingFuncParams',[2.4026 -8.0877 -0.0139],@isnumeric);
+p.addParameter('linkingFuncParams',[5.3136   -9.9397   -0.0111],@isnumeric);
 
 % parse
 p.parse(regularSupportPosDegVisual, rgcDensitySqDegVisual, varargin{:})
@@ -70,12 +70,9 @@ recipFunc = fittype('(1./(a+(b.*x)))+c','independent','x','dependent','y');
 % Obtain the cumulative RGC function
 RGC_ringcount = calcRingCumulative(regularSupportPosDegVisual,rgcDensitySqDegVisual);
 
-% Find the index position in the regularSupportPosDeg that is as close
-% as possible to the referenceEccen
-[ ~, refPointIdx ] = min(abs(regularSupportPosDegVisual-p.Results.referenceEccenDegVisual));
 % Calculate a proportion of the cumulative RGC density counts, relative
-% to the reference point (which is assigned a value of unity)
-propRGC_ringcount=RGC_ringcount./RGC_ringcount(refPointIdx);
+% to the total number of RGCs in the retina
+propRGC_ringcount=RGC_ringcount./p.Results.totalRetinalRGCs;
 
 % Because we are going to be working with a log transform, set any zero
 % proportion values to the minimum, non-zero proportion value

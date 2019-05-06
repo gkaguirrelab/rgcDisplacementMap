@@ -79,12 +79,25 @@ function [ fitParams, figHandle ] = developDrasdoMidgetRGCFractionModel( varargi
 %   figHandle             - Handle to a figure showing the fits. Empty if 
 %                           no plotting requested.
 %
+% Examples:
+%{
+    fitParams = developDrasdoMidgetRGCFractionModel('makePlots',true)
+%}
+%{
+    fitParams = developDrasdoMidgetRGCFractionModel();
+    fitRGCDensitySqDegVisual = getSplineFitToRGCDensitySqDegVisual(180);
+    regularSupportPosDegVisual = 0:0.1:60;
+    [ ~, midgetFraction ] = transformRGCToMidgetRGCDensityDrasdo( regularSupportPosDegVisual, fitRGCDensitySqDegVisual(regularSupportPosDegVisual), 'linkingFuncParams', fitParams );
+    figure
+    plot(regularSupportPosDegVisual,midgetFraction)
+%}
+
 
 %% Parse input and define variables
 p = inputParser;
 
 % Optional anaysis params
-p.addParameter('referenceEccenDegVisual',10,@isnumeric);
+p.addParameter('totalRetinalRGCs',1.5e6,@isscalar);
 p.addParameter('supportResolutionDegVisual',0.01,@isnumeric);
 p.addParameter('supportEccenMaxDegVisual',30,@isnumeric);
 p.addParameter('meridianNames',{'Nasal' 'Superior' 'Temporal' 'Inferior'},@iscell);
@@ -124,28 +137,15 @@ end
 
 for mm = 1:length(p.Results.meridianAngles)
     
-    % Load the RGC Density Data from Curcio and Allen 1990
-    [ RGCDensitySqDegVisual, nativeSupportPosDegVisual ] = loadRawRGCDensityByEccen( p.Results.meridianAngles(mm) );
+	% Get a spline to the Curcio RGC density data for this meridian 
+    fitRGCDensitySqDegVisual = getSplineFitToRGCDensitySqDegVisual(p.Results.meridianAngles(mm));
+
+    % Obtain the ring cumulative RGC function
+    RGC_ringcount = calcRingCumulative(regularSupportPosDegVisual,fitRGCDensitySqDegVisual(regularSupportPosDegVisual));
     
-    % remove nan values
-    isvalididx=find(~isnan(RGCDensitySqDegVisual)  );
-    nativeSupportPosDegVisual = nativeSupportPosDegVisual(isvalididx);
-    RGCDensitySqDegVisual = RGCDensitySqDegVisual(isvalididx);
-    
-    % Fit a spline to the RGC density data
-    RGCDensitySqDegVisualFit = fit(nativeSupportPosDegVisual',RGCDensitySqDegVisual','smoothingspline', 'Exclude',find(isnan(RGCDensitySqDegVisual)),'SmoothingParam', 1);
-    
-    % Obtain the cumulative RGC function
-    RGC_ringcount = calcRingCumulative(regularSupportPosDegVisual,RGCDensitySqDegVisualFit(regularSupportPosDegVisual)');
-    
-    % Find the index position in the regularSupportPosDegVisual that is as close
-    % as possible to the referenceEccenDegVisual
-    refPointIdx= ...
-        find((regularSupportPosDegVisual-p.Results.referenceEccenDegVisual)== ...
-        min(abs(regularSupportPosDegVisual-p.Results.referenceEccenDegVisual)));
     % Calculate a proportion of the cumulative RGC density counts, relative
     % to the reference point (which is assigned a value of unity)
-    propRGC_ringcount=RGC_ringcount./RGC_ringcount(refPointIdx);
+    propRGC_ringcount=RGC_ringcount./p.Results.totalRetinalRGCs;
     
     % Because we are going to be working with a log transform, set any zero
     % proportion values to the minimum, non-zero proportion value
