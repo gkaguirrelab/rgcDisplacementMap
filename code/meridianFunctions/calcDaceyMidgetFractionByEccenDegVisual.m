@@ -1,4 +1,4 @@
-function midgetFraction = calcDaceyMidgetFractionByEccenDegVisual(supportPosDegVisual, varargin)
+function [midgetFraction, daceyMidgetFraction, daceyDataSupportPosDegVisual] = calcDaceyMidgetFractionByEccenDegVisual(supportPosDegVisual, varargin)
 % Calculate the midget fraction as a function of eccentricity
 %
 % Description:
