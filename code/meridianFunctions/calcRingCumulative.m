@@ -30,6 +30,18 @@ function cumulativeCountsPerRing = calcRingCumulative(regularSupportPosDegVisual
 %                           (or RF) counts per areal ring at each of the
 %                           regular support positions
 %
+% Examples:
+%{
+    fitRGCDensitySqDegVisual = getSplineFitToRGCDensitySqDegVisual(180);
+    regularSupportPosDegVisual = 0:10:90;
+    densityFunction=fitRGCDensitySqDegVisual(regularSupportPosDegVisual);
+    cumulativeCountsPerRing=calcRingCumulative(regularSupportPosDegVisual,densityFunction);
+    figure
+    subplot(2,1,1)
+    plot(regularSupportPosDegVisual,densityFunction)
+    subplot(2,1,2)
+    plot(regularSupportPosDegVisual,cumulativeCountsPerRing)
+%}
 
 % We extend the location support by one element to allow us to conduct a
 % diff operation without shrinking our array.
@@ -43,7 +55,8 @@ ringArea = diff(extendedRegularSupportPosDegVisual.^2 * pi);
 
 % The number of cells / RFs in each ring is given by the product of the
 % density function and the ring area at each support position. We then
-% calculate and return the cumulative sum of this vector.
+% calculate and return an approximation to a continuous integral of this
+% veector.
 cumulativeCountsPerRing = cumsum(densityFunction.*ringArea);
 
 end
