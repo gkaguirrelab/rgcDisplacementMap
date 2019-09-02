@@ -4,6 +4,7 @@
 	"hook": "",
 	"importance": "",
 	"localHookTemplate": "config/rgcDisplacementMapLocalHookTemplate.m",
+	"printLocalHookOutput": "1",
 	"name": "rgcDisplacementMap",
 	"pathPlacement": "append",
 	"subfolder": "code",
