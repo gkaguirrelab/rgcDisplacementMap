@@ -1,4 +1,4 @@
-function OLFlickerSensitivityLocalHook
+function rgcDisplacementMapLocalHook
 % OLFlickerSensitivityLocalHook - Configure things for working on OneLight projects.
 %
 % For use with the ToolboxToolbox.  If you copy this into your
@@ -16,9 +16,6 @@ function OLFlickerSensitivityLocalHook
  
 %% Define project
 toolboxName = 'rgcDisplacementMap';
- 
-%% Say hello
-fprintf('Running % local hook\n',toolboxName);
  
 %% Clear out old preferences
 if (ispref(toolboxName))
