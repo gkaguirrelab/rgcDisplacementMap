@@ -80,11 +80,14 @@ function [ fitParams, figHandle ] = developDaceyMidgetRGCFractionModel( varargin
     fitParams = developDaceyMidgetRGCFractionModel('makePlots',true)
 %}
 %{
+    figure
+    regularSupportPosDegVisual = 0:0.1:30;
+    [~, daceyMidgetFraction, daceyDataSupportPosDegVisual] = calcDaceyMidgetFractionByEccenDegVisual(regularSupportPosDegVisual);
+    plot(daceyDataSupportPosDegVisual,daceyMidgetFraction,'or');
+    hold on
     fitParams = developDaceyMidgetRGCFractionModel();
     fitRGCDensitySqDegVisual = getSplineFitToRGCDensitySqDegVisual(180);
-    regularSupportPosDegVisual = 0:0.1:30;
     [ ~, midgetFraction ] = transformRGCToMidgetRGCDensityDacey( regularSupportPosDegVisual, fitRGCDensitySqDegVisual(regularSupportPosDegVisual), 'linkingFuncParams', fitParams );
-    figure
     plot(regularSupportPosDegVisual,midgetFraction)
 %}
 
