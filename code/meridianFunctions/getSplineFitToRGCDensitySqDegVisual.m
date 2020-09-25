@@ -12,7 +12,7 @@ function [fitRGCDensitySqDegVisual, figHandle] = getSplineFitToRGCDensitySqDegVi
 %   an arbitrary meridian angle.
 %
 % Inputs:
-%   polarAngle            - The desired angle of the density function on 
+%   polarAngle            - The desired angle of the density function on
 %                           the retinal field. (0=nasal;90=superior;
 %                           180=temporal;270=inferior)
 %
@@ -31,12 +31,12 @@ function [fitRGCDensitySqDegVisual, figHandle] = getSplineFitToRGCDensitySqDegVi
 %	fitRGCDensitySqDegVisual - handle of a fitting function that returns
 %                           rgc density values for the specified meridian
 %                           angle across retinal eccentricity in polarAngle
-%   figHandle             - Handle to a figure showing the fits. Empty if 
+%   figHandle             - Handle to a figure showing the fits. Empty if
 %                           no plotting requested.
 %
 % Examples:
 %{
-    fitRGCDensitySqDegVisual = getSplineFitToRGCDensitySqDegVisual(45, 'makePlots', true);    
+    fitRGCDensitySqDegVisual = getSplineFitToRGCDensitySqDegVisual(45, 'makePlots', true);
 %}
 
 %% Parse input and define variables
@@ -80,9 +80,9 @@ aggregateDensity=[];
 for mm=1:length(p.Results.cardinalMeridianAngles)
     mName = p.Results.cardinalMeridianNames{mm};
     % get the raw density measurements
-        [rgcDensitySqDegVisual.(mName), rgcNativeSupportPosDegVisual.(mName)] = ...
-            loadRawRGCDensityByEccen(p.Results.cardinalMeridianAngles(mm), ...
-            'rgcDensityDataFileName', p.Results.rgcDensityDataFileName);
+    [rgcDensitySqDegVisual.(mName), rgcNativeSupportPosDegVisual.(mName)] = ...
+        loadRawRGCDensityByEccen(p.Results.cardinalMeridianAngles(mm), ...
+        'rgcDensityDataFileName', p.Results.rgcDensityDataFileName);
     % handle leading zeros and trailing nans in the density vector
     rgcDensitySqDegVisual.(mName)=handleZerosAndNans(rgcDensitySqDegVisual.(mName));
     % handle nans around the optic disc in the density vector
@@ -125,7 +125,7 @@ for mm=1:length(p.Results.cardinalMeridianAngles)
 end
 
 %  Clean up the plot
-if p.Results.makePlots    
+if p.Results.makePlots
     title('Cardinal meridians');
     xlabel('Eccentricity [deg visual]');
     ylabel('RGC density [counts / deg visual^2]');
@@ -189,24 +189,24 @@ if p.Results.makePlots
     xlim([0 30]);
 end
 
-    
+
 
 end % function
 
 %%%% LOCAL FUNCTIONS
 
 function rgcDensityVector = handleZerosAndNans(rgcDensityVector)
-    zeroIdx = find(rgcDensityVector(1:10)==0);
-    if ~isempty(zeroIdx)
-        replacementVals = rgcDensityVector(zeroIdx(end)+1) ./ ((max(zeroIdx)-zeroIdx+1).^10.*10);
-        if length(replacementVals)==1
-            replacementVals = replacementVals./1e12;
-        end
-        rgcDensityVector(zeroIdx)=replacementVals;
+zeroIdx = find(rgcDensityVector(1:10)==0);
+if ~isempty(zeroIdx)
+    replacementVals = rgcDensityVector(zeroIdx(end)+1) ./ ((max(zeroIdx)-zeroIdx+1).^10.*10);
+    if length(replacementVals)==1
+        replacementVals = replacementVals./1e12;
     end
-    nanIdx = find(isnan(rgcDensityVector(end-10:end)));
-    if ~isempty(nanIdx)        
-        rgcDensityVector(nanIdx+end-11)=1./(10.^(nanIdx-min(nanIdx)));
-    end
+    rgcDensityVector(zeroIdx)=replacementVals;
+end
+nanIdx = find(isnan(rgcDensityVector(end-10:end)));
+if ~isempty(nanIdx)
+    rgcDensityVector(nanIdx+end-11)=1./(10.^(nanIdx-min(nanIdx)));
+end
 end
 
