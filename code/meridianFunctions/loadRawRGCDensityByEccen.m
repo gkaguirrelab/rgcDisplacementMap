@@ -95,26 +95,41 @@ if ~isfield(rawRGCDensity.meta, 'densityUnits')
     error('The raw data file lacks the field .meta.densityUnits');
 end
 
+% What is the meridian we are using?
+requestedMeridianName = p.Results.cardinalMeridianNames{find(p.Results.cardinalMeridianAngles == polarAngle)};
+
 
 %% Select the requested meridian and perform unit conversion
 switch rawRGCDensity.meta.supportUnits
     case {'mm','MM','Mm'}
-        supportPosDegVisual = convert_mmRetina_to_degVisual(rawRGCDensity.support, polarAngle);
+        if isstruct(rawRGCDensity.support)
+            supportPosDegVisual = convert_mmRetina_to_degVisual(rawRGCDensity.support.(requestedMeridianName), polarAngle);
+        else
+            supportPosDegVisual = convert_mmRetina_to_degVisual(rawRGCDensity.support, polarAngle);
+        end
     case {'visualDegree'}
         % no conversion needed
-        supportPosDegVisual = rawRGCDensity.support;
+        if isstruct(rawRGCDensity.support)
+            supportPosDegVisual = rawRGCDensity.support.(requestedMeridianName);
+        else
+            
+            supportPosDegVisual = rawRGCDensity.support;
+        end
     otherwise
         error('The supportUnits of this raw file are not recognized');
 end
 
 % Place the requested meridian in a temporary variable
-requestedMeridianName = p.Results.cardinalMeridianNames{find(p.Results.cardinalMeridianAngles == polarAngle)};
 rawRGCDensityForSelectedMeridian = rawRGCDensity.(requestedMeridianName);
 
 % Perform density unit conversion
 switch rawRGCDensity.meta.densityUnits
     case 'counts/mm2'
-        degSqVisualPerMmSqRetinaRelativeToVisualAxis = calc_degSqVisual_per_mmSqRetina(rawRGCDensity.support, polarAngle);
+        if isstruct(rawRGCDensity.support)
+            degSqVisualPerMmSqRetinaRelativeToVisualAxis = calc_degSqVisual_per_mmSqRetina(rawRGCDensity.support.(requestedMeridianName), polarAngle);
+        else
+            degSqVisualPerMmSqRetinaRelativeToVisualAxis = calc_degSqVisual_per_mmSqRetina(rawRGCDensity.support, polarAngle);
+        end
         rgcDensitySqDegVisual = rawRGCDensityForSelectedMeridian ./ degSqVisualPerMmSqRetinaRelativeToVisualAxis;
     case 'counts/visualDeg2'
         rgcDensitySqDegVisual = rawRGCDensityForSelectedMeridian;
