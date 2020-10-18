@@ -173,9 +173,15 @@ ppFormSplineInterp.coefs = interpCoefs;
 % will return rgc density as a function of eccentricity in degrees. The
 % transpose operations are needed so that that the function returns a row
 % vector of density in response to a row vector of eccentricity support.
-filterZeros = @(x) (x.*(x>1e-3))+(1e-3.*(x<=1e-3));
-fitRGCDensitySqDegVisual = @(supportPosDeg) 10.^fnval(ppFormSplineInterp,log10(filterZeros(supportPosDeg))')' .* ...
-    (supportPosDeg>0.15);
+
+% Move x axis values that are close to zero away from zero to avoid log
+% transform errors
+filterZerosX = @(x) (x.*(x>1e-3))+(1e-3.*(x<=1e-3));
+
+% Threshold y axis values below one to zero
+threhsoldY = @(y) y.*(y>1);
+fitRGCDensitySqDegVisual = @(supportPosDeg) threhsoldY(10.^fnval(ppFormSplineInterp,log10(filterZerosX(supportPosDeg))')' .* ...
+    (supportPosDeg>0.15));
 
 % Show the interpolated meridian
 if p.Results.makePlots
